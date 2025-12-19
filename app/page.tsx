@@ -28,9 +28,9 @@ export default function Home() {
     touchAction: "manipulation", // بهینه سازی برای تاچ موبایل
     WebkitTapHighlightColor: "transparent"
   }}
-  onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.92)"}
+  onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.99)"}
   onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
-  onTouchStart={(e) => e.currentTarget.style.transform = "scale(0.92)"} // برای موبایل
+  onTouchStart={(e) => e.currentTarget.style.transform = "scale(0.99)"} // برای موبایل
   onTouchEnd={(e) => e.currentTarget.style.transform = "scale(1)"}    // برای موبایل
 >
   <img 
