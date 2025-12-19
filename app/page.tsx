@@ -75,14 +75,30 @@ export default function Home() {
       </div>
 
       {/* 3. Middle Section: Energy & Ninja */}
-      <div style={{ flex: 1, display: "flex", alignItems: "center", position: "relative", justifyContent: "center" }}>
-        
-        {/* Energy Bar (Vertical) */}
-        <div style={{ position: "absolute", left: "0", display: "flex", flexDirection: "column", alignItems: "center", gap: "5px" }}>
-          <div style={{ fontSize: "20px" }}>🔋</div>
-          <div style={{ fontSize: "12px", fontWeight: "bold" }}>{energy} / 5000</div>
-        </div>
-
+<div style={{ flex: 1, display: "flex", alignItems: "center", position: "relative", justifyContent: "center" }}>
+  
+  {/* Energy Section - اصلاح شده برای قرارگیری در سمت چپ و بالاتر */}
+  <div style={{ 
+    position: "absolute", 
+    left: "0", 
+    top: "20%", // تنظیم ارتفاع (می‌توانی این عدد را کم و زیاد کنی)
+    display: "flex", 
+    alignItems: "center", 
+    gap: "8px",
+    backgroundColor: "rgba(0,0,0,0.3)", // یک پس‌زمینه بسیار شفاف برای خوانایی بهتر
+    padding: "5px 10px",
+    borderRadius: "20px"
+  }}>
+    <div style={{ fontSize: "24px" }}>🔋</div>
+    <div style={{ 
+      fontSize: "14px", 
+      fontWeight: "bold", 
+      color: "#ddd",
+      whiteSpace: "nowrap" // جلوگیری از شکستن خط
+    }}>
+      {energy} / 5000
+    </div>
+  </div>
         {/* Ninja Character */}
         <div 
           onClick={handleClick}
