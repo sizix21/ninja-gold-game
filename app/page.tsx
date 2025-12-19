@@ -30,7 +30,7 @@ export default function Home() {
     const timer = setInterval(() => {
       setEnergy((prev) => {
         if (prev < 5000) {
-          return prev + 1;
+          return prev + 100;
         }
         return prev;
       });
