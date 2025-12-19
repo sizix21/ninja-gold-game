@@ -18,28 +18,23 @@ export default function Home() {
 
   useEffect(() => {
     audioRef.current = new Audio("/click.mp3");
+
     const savedScore = localStorage.getItem("ninjaScore");
     if (savedScore) setScore(parseInt(savedScore));
 
-    // Get Telegram Name
-    if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
-      const user = (window as any).Telegram.WebApp.initDataUnsafe?.user;
-      if (user) setUserName(user.first_name);
-    }
+    const tgTimer = setTimeout(() => {
+      if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
+        const tg = (window as any).Telegram.WebApp;
+        tg.ready();  
+        const user = tg.initDataUnsafe?.user;
+        if (user) {
+          setUserName(user.first_name || "Ninja Player");
+        }
+      }
+    }, 500);
+
+    return () => clearTimeout(tgTimer);
   }, []);
-
-  useEffect(() => {
-    localStorage.setItem("ninjaScore", score.toString());
-  }, [score]);
-
-  // Energy Recovery Logic
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setEnergy((prev) => (prev < 5000 ? prev + 1 : 5000));
-    }, 1000);
-    return () => clearInterval(timer);
-  }, []);
-
   const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
     if (energy <= 0) return;
     setScore(prev => prev + 1);
