@@ -11,15 +11,12 @@ interface FloatingNumber {
 
 export default function Home() {
   const [score, setScore] = useState(0);
+  const [energy, setEnergy] = useState(5000);
   const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumber[]>([]);
-  
-  // استفاده از useRef برای نگه داشتن فایل صوتی در حافظه
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
-    // ایجاد شیء صوتی هنگام لود شدن صفحه
     audioRef.current = new Audio("/click.mp3");
-    
     const savedScore = localStorage.getItem("ninjaScore");
     if (savedScore) setScore(parseInt(savedScore));
   }, []);
@@ -28,101 +25,118 @@ export default function Home() {
     localStorage.setItem("ninjaScore", score.toString());
   }, [score]);
 
-  const handleClick = (e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>) => {
-    setScore(prevScore => prevScore + 1);
+  const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
+    if (energy <= 0) return;
 
-    // پخش صدا
+    setScore(prev => prev + 1);
+    setEnergy(prev => Math.max(0, prev - 1));
+
     if (audioRef.current) {
-      audioRef.current.currentTime = 0; // بازگشت به ابتدای صدا برای کلیک‌های سریع
-      audioRef.current.play().catch(err => console.log("Audio play error:", err));
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {});
     }
 
-    let clientX: number;
-    let clientY: number;
+    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
+    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
 
-    if ('touches' in e) {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else {
-      clientX = e.clientX;
-      clientY = e.clientY;
-    }
-
-    const newFloatingNumber: FloatingNumber = {
-      id: Date.now(),
-      x: clientX,
-      y: clientY,
-      value: 1,
-    };
-
-    setFloatingNumbers(prevNumbers => [...prevNumbers, newFloatingNumber]);
-
+    const newNum = { id: Date.now(), x: clientX, y: clientY, value: 1 };
+    setFloatingNumbers(prev => [...prev, newNum]);
     setTimeout(() => {
-      setFloatingNumbers(prevNumbers => prevNumbers.filter(num => num.id !== newFloatingNumber.id));
+      setFloatingNumbers(prev => prev.filter(n => n.id !== newNum.id));
     }, 1000);
   };
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", height: "100vh", backgroundColor: "#1a1a1a", color: "white", fontFamily: "sans-serif", overflow: "hidden", position: "relative" }}>
-      <h1>SCORE</h1>
-      <h2 style={{ fontSize: "3rem", margin: "0" }}>{score}</h2>
+    <div style={{ 
+      display: "flex", flexDirection: "column", height: "100vh", 
+      backgroundColor: "#1a1a1a", color: "white", fontFamily: "sans-serif",
+      padding: "20px", boxSizing: "border-box", overflow: "hidden", position: "relative" 
+    }}>
       
-      <div 
-        onClick={handleClick}
-        style={{ 
-          cursor: "pointer", 
-          marginTop: "20px", 
-          transition: "transform 0.1s ease-in-out", 
-          touchAction: "manipulation", 
-          WebkitTapHighlightColor: "transparent"
-        }}
-        onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.95)"}
-        onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
-        onTouchStart={(e) => e.currentTarget.style.transform = "scale(0.95)"} 
-        onTouchEnd={(e) => e.currentTarget.style.transform = "scale(1)"}    
-      >
-        <img 
-          src="/coin.png" 
-          alt="Ninja" 
-          style={{ 
-            width: "300px", 
-            height: "auto", 
-            borderRadius: "0", 
-            userSelect: "none",
-            pointerEvents: "none" 
-          }} 
-        />
-      </div>
-      
-      <p style={{ marginTop: "20px", color: "#888" }}>Ninja Potato Game</p>
-
-      {floatingNumbers.map(num => (
-        <div
-          key={num.id}
-          style={{
-            position: "fixed",
-            left: num.x,
-            top: num.y,
-            transform: "translate(-50%, -100%)",
-            fontSize: "2.5rem",
-            fontWeight: "bold",
-            color: "#FFD700",
-            textShadow: "0 0 8px rgba(255, 215, 0, 0.8)",
-            animation: "floatUpAndFade 1s forwards",
-            pointerEvents: "none",
-            zIndex: 100
-          }}
-        >
-          +{num.value}
+      {/* 1. Header: Profile & Level */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div style={{ width: "45px", height: "45px", backgroundColor: "#333", borderRadius: "10px", border: "1px solid #555" }}></div>
+          <div>
+            <div style={{ fontWeight: "bold", fontSize: "14px" }}>Name of Player</div>
+            <div style={{ color: "#ff4444", fontSize: "12px", fontWeight: "bold" }}>Lvl 1 / 10</div>
+          </div>
         </div>
+        <div style={{ textAlign: "right" }}>
+          <div style={{ fontSize: "20px" }}>🍎</div>
+          <div style={{ fontWeight: "bold", fontSize: "18px" }}>254</div>
+        </div>
+      </div>
+
+      {/* 2. Main Score */}
+      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px", marginTop: "40px" }}>
+        <span style={{ fontSize: "40px", color: "#ffd700" }}>$</span>
+        <span style={{ fontSize: "50px", fontWeight: "bold" }}>{score.toLocaleString()}</span>
+      </div>
+
+      {/* 3. Middle Section: Energy & Ninja */}
+      <div style={{ flex: 1, display: "flex", alignItems: "center", position: "relative", justifyContent: "center" }}>
+        
+        {/* Energy Bar (Vertical) */}
+        <div style={{ position: "absolute", left: "0", display: "flex", flexDirection: "column", alignItems: "center", gap: "5px" }}>
+          <div style={{ fontSize: "20px" }}>🔋</div>
+          <div style={{ fontSize: "12px", fontWeight: "bold" }}>{energy} / 5000</div>
+        </div>
+
+        {/* Ninja Character */}
+        <div 
+          onClick={handleClick}
+          onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.95)"}
+          onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
+          onTouchStart={(e) => e.currentTarget.style.transform = "scale(0.95)"}
+          onTouchEnd={(e) => e.currentTarget.style.transform = "scale(1)"}
+          style={{ transition: "transform 0.1s", cursor: "pointer", touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
+        >
+          <img src="/coin.png" alt="Ninja" style={{ width: "280px", height: "auto", userSelect: "none", pointerEvents: "none" }} />
+        </div>
+      </div>
+
+      {/* 4. Bottom Menu */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "10px" }}>
+        <div style={{ display: "flex", justifyContent: "space-between" }}>
+          <button style={btnSmallStyle}>QR</button>
+          <button style={{...btnSmallStyle, color: "#44cc44", borderColor: "#44cc44"}}>Boost</button>
+        </div>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: "5px" }}>
+          <button style={btnMainStyle}>Tap</button>
+          <button style={btnMainStyle}>Mine</button>
+          <button style={btnMainStyle}>Fight</button>
+          <button style={btnMainStyle}>Library</button>
+          <button style={btnMainStyle}>Cards</button>
+        </div>
+      </div>
+
+      {/* Floating Numbers */}
+      {floatingNumbers.map(num => (
+        <div key={num.id} style={{
+          position: "fixed", left: num.x, top: num.y, transform: "translate(-50%, -100%)",
+          fontSize: "2rem", fontWeight: "bold", color: "#FFD700", pointerEvents: "none",
+          animation: "floatUpAndFade 1s forwards", zIndex: 100
+        }}>+{num.value}</div>
       ))}
 
       <style>{`
         @keyframes floatUpAndFade {
           0% { opacity: 1; transform: translate(-50%, 0); }
-          100% { opacity: 0; transform: translate(-50%, -120px); }
+          100% { opacity: 0; transform: translate(-50%, -100px); }
         }
       `}</style>
     </div>
   );
 }
+
+// Styles for Buttons
+const btnSmallStyle = {
+  backgroundColor: "transparent", border: "2px solid #ff4444", color: "white",
+  borderRadius: "8px", padding: "5px 15px", fontWeight: "bold" as const, fontSize: "14px"
+};
+
+const btnMainStyle = {
+  flex: 1, backgroundColor: "#333", border: "1px solid #555", color: "#ccc",
+  borderRadius: "8px", padding: "10px 5px", fontSize: "12px", fontWeight: "bold" as const
+};
