@@ -35,6 +35,7 @@ export default function Home() {
             boxShadow: "none",
             userSelect: "none",
             WebkitTapHighlightColor: "transparent"
+            transition: "transform 0.1s"
           }} 
         />
       </div>
