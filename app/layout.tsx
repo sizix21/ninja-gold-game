@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import Script from "next/script"; // ۱. اضافه کردن کامپوننت اسکریپت
+import Script from "next/script"; 
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -26,7 +26,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        {/* ۲. اضافه کردن اسکریپت تلگرام در اینجا */}
+        {}
         <Script 
           src="https://telegram.org/js/telegram-web-app.js" 
           strategy="beforeInteractive" 
