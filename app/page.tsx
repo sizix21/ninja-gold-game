@@ -35,6 +35,18 @@ export default function Home() {
 
     return () => clearTimeout(tgTimer);
   }, []);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setEnergy((prev) => {
+        if (prev < 5000) {
+          return prev + 1;
+        }
+        return 5000;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
   const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
     if (energy <= 0) return;
     setScore(prev => prev + 1);
