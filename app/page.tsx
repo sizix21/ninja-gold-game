@@ -104,11 +104,34 @@ if (savedEnergy) setEnergy(parseInt(savedEnergy));
         </div>
 
         <div 
-          onClick={handleClick}
-          onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.95)"}
-          onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
-          style={{ transition: "transform 0.1s", cursor: "pointer", touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
-        >
+  onClick={handleClick}
+  
+  onTouchStart={(e) => e.currentTarget.style.transform = "scale(0.90)"}
+  onTouchEnd={(e) => e.currentTarget.style.transform = "scale(1)"}
+  
+  onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.90)"}
+  onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
+  style={{ 
+    transition: "transform 0.05s ease", 
+    cursor: "pointer", 
+    touchAction: "manipulation", 
+    WebkitTapHighlightColor: "transparent", 
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center"
+  }}
+>
+  <img 
+    src="/coin.png" 
+    alt="Ninja" 
+    style={{ 
+      width: "280px", 
+      height: "auto", 
+      userSelect: "none", 
+      pointerEvents: "none" 
+    }} 
+  />
+</div>
           <img src="/coin.png" alt="Ninja" style={{ width: "280px", height: "auto", userSelect: "none", pointerEvents: "none" }} />
         </div>
       </div>
