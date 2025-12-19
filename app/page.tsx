@@ -116,9 +116,9 @@ export default function Home() {
         {/* Ninja Image (Tap Area) */}
         <div 
           onClick={handleClick}
-          onTouchStart={(e) => e.currentTarget.style.transform = "scale(0.85)"}
+          onTouchStart={(e) => e.currentTarget.style.transform = "scale(0.92)"}
           onTouchEnd={(e) => e.currentTarget.style.transform = "scale(1)"}
-          onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.85)"}
+          onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.92)"}
           onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
           style={{ 
             transition: "transform 0.05s ease", 
