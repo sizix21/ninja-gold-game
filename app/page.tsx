@@ -86,7 +86,7 @@ export default function Home() {
 
       {/* Middle: Energy & Ninja */}
       <div style={{ flex: 1, display: "flex", alignItems: "center", position: "relative", justifyContent: "center" }}>
-        <div style={{ position: "absolute", left: "0", top: "15%", display: "flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(0,0,0,0.3)", padding: "5px 10px", borderRadius: "20px" }}>
+        <div style={{ position: "absolute", left: "0", top: "2%", display: "flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(0,0,0,0.3)", padding: "5px 10px", borderRadius: "20px" }}>
           <div style={{ fontSize: "24px" }}>🔋</div>
           <div style={{ fontSize: "14px", fontWeight: "bold" }}>{energy} / 5000</div>
         </div>
