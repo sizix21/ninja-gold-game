@@ -30,13 +30,13 @@ export default function Home() {
     const timer = setInterval(() => {
       setEnergy((prev) => {
         if (prev < 5000) {
-          return prev + 1; // در هر ثانیه ۱ واحد اضافه می‌شود
+          return prev + 1;
         }
         return prev;
       });
-    }, 1000); // 1000 میلی‌ثانیه یعنی هر ۱ ثانیه
+    }, 1000);
 
-    return () => clearInterval(timer); // برای جلوگیری از سنگین شدن برنامه
+    return () => clearInterval(timer);
   }, []);
   // ---------------------------------------
 
