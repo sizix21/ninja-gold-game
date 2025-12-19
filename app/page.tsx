@@ -81,7 +81,7 @@ export default function Home() {
   <div style={{ 
     position: "absolute", 
     left: "0", 
-    top: "5%", // تنظیم ارتفاع (می‌توانی این عدد را کم و زیاد کنی)
+    top: "2%", // تنظیم ارتفاع (می‌توانی این عدد را کم و زیاد کنی)
     display: "flex", 
     alignItems: "center", 
     gap: "8px",
