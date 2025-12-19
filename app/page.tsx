@@ -83,63 +83,61 @@ export default function Home() {
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", backgroundColor: "#1a1a1a", color: "white", fontFamily: "sans-serif", padding: "20px", boxSizing: "border-box", overflow: "hidden", position: "relative" }}>
       
       {/* Header: QR, Boost and Token */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", padding: "10px 15px", position: "absolute", top: 0, left: 0, boxSizing: "border-box" }}>
-        <div style={{ display: "flex", gap: "10px" }}>
-          <button style={{ background: "none", border: "none", cursor: "pointer" }}>
-            <img src="/qr-butt.png" alt="QR" style={{ width: "40px", height: "40px" }} />
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", padding: "10px 15px", position: "absolute", top: 0, left: 0, boxSizing: "border-box", zIndex: 10 }}>
+        <div style={{ display: "flex", gap: "12px", alignItems: "center" }}>
+          <button style={{ background: "none", border: "none", cursor: "pointer", padding: 0, width: "45px", height: "45px" }}>
+            <img src="/qr-butt.png" alt="QR" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
           </button>
-          <button style={{ background: "none", border: "none", cursor: "pointer" }}>
-            <img src="/boost-butt.png" alt="Boost" style={{ width: "40px", height: "40px" }} />
+          <button style={{ background: "none", border: "none", cursor: "pointer", padding: 0, width: "45px", height: "45px" }}>
+            <img src="/boost-butt.png" alt="Boost" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
           </button>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-          <img src="/salad-butt.png" alt="Salad" style={{ width: "35px", height: "35px" }} />
-          <span style={{ fontSize: "18px", fontWeight: "bold", color: "#fff" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(0,0,0,0.4)", padding: "5px 12px", borderRadius: "20px", height: "40px" }}>
+          <img src="/salad-butt.png" alt="Salad" style={{ width: "28px", height: "28px", objectFit: "contain" }} />
+          <span style={{ fontSize: "16px", fontWeight: "bold", color: "#fff", whiteSpace: "nowrap" }}>
             {score.toLocaleString()}
           </span>
         </div>
       </div>
 
       {/* Main Content Area */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "100%", marginTop: "60px" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", marginTop: "70px" }}>
         
         {/* Score Area */}
-        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
-          <img src="/salad-butt.png" alt="Salad" style={{ width: "45px", height: "45px" }} />
-          <span style={{ fontSize: "50px", fontWeight: "bold", color: "#fff" }}>
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "15px", marginBottom: "20px" }}>
+          <img src="/salad-butt.png" alt="Salad" style={{ width: "60px", height: "60px", objectFit: "contain" }} />
+          <span style={{ fontSize: "45px", fontWeight: "bold", color: "#fff" }}>
             {score.toLocaleString()}
           </span>
         </div>
 
-        {/* Energy & Ninja */}
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", position: "relative" }}>
-          {/* Energy Bar */}
-          <div style={{ position: "absolute", top: "-40px", display: "flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(0,0,0,0.3)", padding: "5px 15px", borderRadius: "20px" }}>
-            <span style={{ fontSize: "20px" }}>🔋</span>
-            <span style={{ fontSize: "16px", fontWeight: "bold" }}>{energy} / 5000</span>
-          </div>
-
-          {/* Ninja (Tap Area) */}
+        {/* Ninja Area */}
+        <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
           <div 
             onClick={handleClick}
+            style={{ transition: "transform 0.05s ease", cursor: "pointer", touchAction: "manipulation" }}
             onTouchStart={(e) => e.currentTarget.style.transform = "scale(0.92)"}
             onTouchEnd={(e) => e.currentTarget.style.transform = "scale(1)"}
-            onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.92)"}
-            onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
-            style={{ transition: "transform 0.05s ease", cursor: "pointer", touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
           >
-            <img 
-              src="/coin.png" 
-              alt="Ninja" 
-              style={{ width: "280px", height: "auto", userSelect: "none", pointerEvents: "none" }} 
-            />
+            <img src="/coin.png" alt="Ninja" style={{ width: "280px", height: "auto", objectFit: "contain" }} />
+          </div>
+        </div>
+
+        {/* Energy Bar - Left Aligned */}
+        <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "0 10px", marginBottom: "20px", alignSelf: "flex-start" }}>
+          <span style={{ fontSize: "24px" }}>🔋</span>
+          <div style={{ display: "flex", flexDirection: "column" }}>
+            <span style={{ fontSize: "14px", fontWeight: "bold" }}>{energy} / 5000</span>
+            <div style={{ width: "120px", height: "6px", backgroundColor: "#333", borderRadius: "3px", marginTop: "4px" }}>
+              <div style={{ width: `${(energy / 5000) * 100}%`, height: "100%", backgroundColor: "#4caf50", borderRadius: "3px", transition: "width 0.3s" }}></div>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Footer Navigation */}
-      <div style={{ display: "flex", justifyContent: "space-between", gap: "5px", alignItems: "flex-end", marginTop: "10px" }}>
+      <div style={{ display: "flex", justifyContent: "space-between", gap: "5px", alignItems: "flex-end" }}>
         {["Tap", "Mine", "Fight", "Library", "Cards"].map((label) => {
           const isActive = label === "Tap";
           const icons: { [key: string]: string } = {
@@ -152,7 +150,7 @@ export default function Home() {
 
           return (
             <button key={label} style={{ flex: 1, backgroundColor: "transparent", border: "none", outline: "none", color: isActive ? "#ffd700" : "#888", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", cursor: "pointer" }}>
-              <img src={icons[label] || "/tap-butt.png"} alt={label} style={{ width: "35px", height: "35px", filter: isActive ? "none" : "grayscale(100%)", opacity: isActive ? "1" : "0.6" }} />
+              <img src={icons[label] || "/tap-butt.png"} alt={label} style={{ width: "35px", height: "35px", objectFit: "contain", filter: isActive ? "none" : "grayscale(100%)", opacity: isActive ? "1" : "0.6" }} />
               <span style={{ fontSize: "10px", fontWeight: isActive ? "bold" : "normal" }}>{label}</span>
             </button>
           );
