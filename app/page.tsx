@@ -18,6 +18,8 @@ export default function Home() {
 
   useEffect(() => {
     audioRef.current = new Audio("/click.mp3");
+    const savedEnergy = localStorage.getItem("ninjaEnergy");
+if (savedEnergy) setEnergy(parseInt(savedEnergy));
 
     const savedScore = localStorage.getItem("ninjaScore");
     if (savedScore) setScore(parseInt(savedScore));
@@ -47,6 +49,9 @@ export default function Home() {
 
     return () => clearInterval(timer);
   }, []);
+  useEffect(() => {
+  localStorage.setItem("ninjaEnergy", energy.toString());
+}, [energy]);
   const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
     if (energy <= 0) return;
     setScore(prev => prev + 1);
