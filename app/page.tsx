@@ -31,8 +31,16 @@ export default function Home() {
       >
         <img 
           src="/coin.png" 
-          alt="Gold Coin" 
-          style={{ width: "200px", height: "200px", borderRadius: "50%", boxShadow: "0 0 20px rgba(255, 215, 0, 0.5)" }} 
+  alt="Ninja" 
+  style={{ 
+    width: "300px",       // ۱. اندازه را از ۲۰۰ به ۳۰۰ بزرگتر کردیم
+    height: "auto",       // ۲. ارتفاع خودکار باشد تا تصویر کشیده نشود
+    borderRadius: "0",    // ۳. این همان خطی است که دایره را حذف می‌کند (مقدار را ۰ کردیم)
+    boxShadow: "none",    // ۴. سایه طلایی دور سکه را هم حذف کردیم تا نینجا طبیعی باشد
+    userSelect: "none",   // جلوگیری از انتخاب شدن عکس موقع کلیک سریع
+    WebkitTapHighlightColor: "transparent" // حذف هاله آبی موقع لمس در گوشی
+    transition: "transform 0.1s"
+  }}
         />
       </div>
       
