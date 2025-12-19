@@ -20,25 +20,31 @@ export default function Home() {
       <h2 style={{ fontSize: "3rem", margin: "0" }}>{score}</h2>
       
       <div 
-        onClick={() => setScore(score + 1)}
-        style={{ cursor: "pointer", marginTop: "20px", transition: "transform 0.1s" }}
-        onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.95)"}
-        onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
-      >
-        <img 
-          src="/coin.png" 
-          alt="Ninja" 
-          style={{ 
-            width: "350px", 
-            height: "auto", 
-            borderRadius: "0", 
-            boxShadow: "none",
-            userSelect: "none",
-            WebkitTapHighlightColor: "transparent"
-            transition: "transform 0.1s"
-          }} 
-        />
-      </div>
+  onClick={() => setScore(score + 1)}
+  style={{ 
+    cursor: "pointer", 
+    marginTop: "20px", 
+    transition: "transform 0.1s ease-in-out", // اضافه کردن حالت نرم‌تر
+    touchAction: "manipulation", // بهینه سازی برای تاچ موبایل
+    WebkitTapHighlightColor: "transparent"
+  }}
+  onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.92)"}
+  onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
+  onTouchStart={(e) => e.currentTarget.style.transform = "scale(0.92)"} // برای موبایل
+  onTouchEnd={(e) => e.currentTarget.style.transform = "scale(1)"}    // برای موبایل
+>
+  <img 
+    src="/coin.png" 
+    alt="Ninja" 
+    style={{ 
+      width: "300px", 
+      height: "auto", 
+      borderRadius: "0", 
+      userSelect: "none",
+      pointerEvents: "none" // این خط کمک می‌کند تاچ مستقیم به div برسد
+    }} 
+  />
+</div>
       
       <p style={{ marginTop: "20px", color: "#888" }}>Ninja Potato Game</p>
     </div>
