@@ -28,11 +28,12 @@ export default function Home() {
   // --- کد جدید برای پر شدن خودکار انرژی ---
   useEffect(() => {
     const timer = setInterval(() => {
-      setEnergy((prev) => {
-        if (prev < 5000) {
-          return prev + 100;
+      setEnergy((currentEnergy) => {
+        if (currentEnergy < 5000) {
+          console.log("Energy increasing..."); // این برای تست است
+          return currentEnergy + 1;
         }
-        return prev;
+        return currentEnergy;
       });
     }, 1000);
 
