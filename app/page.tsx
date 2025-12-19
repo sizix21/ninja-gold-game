@@ -25,26 +25,20 @@ export default function Home() {
     localStorage.setItem("ninjaScore", score.toString());
   }, [score]);
 
-  const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
-    if (energy <= 0) return;
+  // --- کد جدید برای پر شدن خودکار انرژی ---
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setEnergy((prev) => {
+        if (prev < 5000) {
+          return prev + 1; // در هر ثانیه ۱ واحد اضافه می‌شود
+        }
+        return prev;
+      });
+    }, 1000); // 1000 میلی‌ثانیه یعنی هر ۱ ثانیه
 
-    setScore(prev => prev + 1);
-    setEnergy(prev => Math.max(0, prev - 1));
-
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(() => {});
-    }
-
-    const clientX = 'touches' in e ? e.touches[0].clientX : e.clientX;
-    const clientY = 'touches' in e ? e.touches[0].clientY : e.clientY;
-
-    const newNum = { id: Date.now(), x: clientX, y: clientY, value: 1 };
-    setFloatingNumbers(prev => [...prev, newNum]);
-    setTimeout(() => {
-      setFloatingNumbers(prev => prev.filter(n => n.id !== newNum.id));
-    }, 1000);
-  };
+    return () => clearInterval(timer); // برای جلوگیری از سنگین شدن برنامه
+  }, []);
+  // ---------------------------------------
 
   return (
     <div style={{ 
