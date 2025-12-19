@@ -57,7 +57,6 @@ export default function Home() {
   const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
     if (energy <= 0) return;
 
-    // لرزش گوشی برای حس بهتر (Vibrate)
     if (typeof window !== 'undefined' && navigator.vibrate) {
       navigator.vibrate(10); 
     }
@@ -83,77 +82,84 @@ export default function Home() {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", backgroundColor: "#1a1a1a", color: "white", fontFamily: "sans-serif", padding: "20px", boxSizing: "border-box", overflow: "hidden", position: "relative" }}>
       
-      {/* Header */}
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <div style={{ width: "45px", height: "45px", backgroundColor: "#333", borderRadius: "10px", border: "1px solid #555" }}></div>
-          <div>
-            <div style={{ fontWeight: "bold", fontSize: "14px" }}>{userName}</div>
-            <div style={{ color: "#ff4444", fontSize: "12px", fontWeight: "bold" }}>Lvl 1 / 10</div>
-          </div>
+      {/* Header: QR, Boost and Token */}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", padding: "10px 15px", position: "absolute", top: 0, left: 0, boxSizing: "border-box" }}>
+        <div style={{ display: "flex", gap: "10px" }}>
+          <button style={{ background: "none", border: "none", cursor: "pointer" }}>
+            <img src="/qr-butt.png" alt="QR" style={{ width: "40px", height: "40px" }} />
+          </button>
+          <button style={{ background: "none", border: "none", cursor: "pointer" }}>
+            <img src="/boost-butt.png" alt="Boost" style={{ width: "40px", height: "40px" }} />
+          </button>
         </div>
-        <div style={{ textAlign: "right" }}>
-          <div style={{ fontSize: "20px" }}>🍎</div>
-          <div style={{ fontWeight: "bold", fontSize: "18px" }}>254</div>
+
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+          <img src="/salad-butt.png" alt="Salad" style={{ width: "35px", height: "35px" }} />
+          <span style={{ fontSize: "18px", fontWeight: "bold", color: "#fff" }}>
+            {score.toLocaleString()}
+          </span>
         </div>
       </div>
 
-      {/* Score Area */}
-      <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px", marginTop: "40px" }}>
-        <span style={{ fontSize: "40px", color: "#ffd700" }}>$</span>
-        <span style={{ fontSize: "50px", fontWeight: "bold" }}>{score.toLocaleString()}</span>
-      </div>
-
-      {/* Center: Energy & Ninja */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", position: "relative" }}>
+      {/* Main Content Area */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", width: "100%", marginTop: "60px" }}>
         
-        {/* Energy Bar */}
-        <div style={{ position: "absolute", left: "0", top: "2%", display: "flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(0,0,0,0.3)", padding: "5px 15px", borderRadius: "20px" }}>
-          <span style={{ fontSize: "20px" }}>🔋</span>
-          <span style={{ fontSize: "16px", fontWeight: "bold" }}>{energy} / 5000</span>
+        {/* Score Area */}
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px", marginBottom: "20px" }}>
+          <img src="/salad-butt.png" alt="Salad" style={{ width: "45px", height: "45px" }} />
+          <span style={{ fontSize: "50px", fontWeight: "bold", color: "#fff" }}>
+            {score.toLocaleString()}
+          </span>
         </div>
 
-        {/* Ninja Image (Tap Area) */}
-        <div 
-          onClick={handleClick}
-          onTouchStart={(e) => e.currentTarget.style.transform = "scale(0.92)"}
-          onTouchEnd={(e) => e.currentTarget.style.transform = "scale(1)"}
-          onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.92)"}
-          onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
-          style={{ 
-            transition: "transform 0.05s ease", 
-            cursor: "pointer", 
-            touchAction: "manipulation", 
-            WebkitTapHighlightColor: "transparent",
-            display: "flex",
-            justifyContent: "center",
-            alignItems: "center"
-          }}
-        >
-          <img 
-            src="/coin.png" 
-            alt="Ninja" 
-            style={{ width: "280px", height: "auto", userSelect: "none", pointerEvents: "none" }} 
-          />
+        {/* Energy & Ninja */}
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", position: "relative" }}>
+          {/* Energy Bar */}
+          <div style={{ position: "absolute", top: "-40px", display: "flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(0,0,0,0.3)", padding: "5px 15px", borderRadius: "20px" }}>
+            <span style={{ fontSize: "20px" }}>🔋</span>
+            <span style={{ fontSize: "16px", fontWeight: "bold" }}>{energy} / 5000</span>
+          </div>
+
+          {/* Ninja (Tap Area) */}
+          <div 
+            onClick={handleClick}
+            onTouchStart={(e) => e.currentTarget.style.transform = "scale(0.92)"}
+            onTouchEnd={(e) => e.currentTarget.style.transform = "scale(1)"}
+            onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.92)"}
+            onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
+            style={{ transition: "transform 0.05s ease", cursor: "pointer", touchAction: "manipulation", WebkitTapHighlightColor: "transparent" }}
+          >
+            <img 
+              src="/coin.png" 
+              alt="Ninja" 
+              style={{ width: "280px", height: "auto", userSelect: "none", pointerEvents: "none" }} 
+            />
+          </div>
         </div>
       </div>
 
       {/* Footer Navigation */}
-      <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "10px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
-          <button style={{ backgroundColor: "transparent", border: "2px solid #ff4444", color: "white", borderRadius: "8px", padding: "5px 20px" }}>QR</button>
-          <button style={{ backgroundColor: "transparent", border: "2px solid #44cc44", color: "#44cc44", borderRadius: "8px", padding: "5px 20px" }}>Boost</button>
-        </div>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: "5px" }}>
-          {["Tap", "Mine", "Fight", "Library", "Cards"].map(label => (
-            <button key={label} style={{ flex: 1, backgroundColor: "#333", border: "1px solid #555", color: "#ccc", borderRadius: "8px", padding: "12px 5px", fontSize: "12px" }}>
-              {label}
+      <div style={{ display: "flex", justifyContent: "space-between", gap: "5px", alignItems: "flex-end", marginTop: "10px" }}>
+        {["Tap", "Mine", "Fight", "Library", "Cards"].map((label) => {
+          const isActive = label === "Tap";
+          const icons: { [key: string]: string } = {
+            "Tap": "/tap-butt.png",
+            "Mine": "/mine-butt.png",
+            "Fight": "/fight-butt.png",
+            "Library": "/closet-butt.png",
+            "Cards": "/cards-butt.png"
+          };
+
+          return (
+            <button key={label} style={{ flex: 1, backgroundColor: "transparent", border: "none", outline: "none", color: isActive ? "#ffd700" : "#888", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", cursor: "pointer" }}>
+              <img src={icons[label] || "/tap-butt.png"} alt={label} style={{ width: "35px", height: "35px", filter: isActive ? "none" : "grayscale(100%)", opacity: isActive ? "1" : "0.6" }} />
+              <span style={{ fontSize: "10px", fontWeight: isActive ? "bold" : "normal" }}>{label}</span>
             </button>
-          ))}
-        </div>
+          );
+        })}
       </div>
 
-      {/* Floating Numbers Animation */}
+      {/* Animations */}
       {floatingNumbers.map(num => (
         <div key={num.id} style={{ position: "fixed", left: num.x, top: num.y, transform: "translate(-50%, -100%)", fontSize: "2.5rem", fontWeight: "bold", color: "#FFD700", animation: "f 0.8s ease-out forwards", pointerEvents: "none", zIndex: 9999 }}>
           +1
@@ -166,7 +172,6 @@ export default function Home() {
           100% { opacity: 0; transform: translate(-50%, -120px); }
         }
       `}</style>
-
     </div>
   );
 }
