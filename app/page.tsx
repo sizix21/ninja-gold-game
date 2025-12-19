@@ -16,10 +16,12 @@ export default function Home() {
   const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumber[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  // لود کردن اطلاعات و تنظیمات تلگرام
   useEffect(() => {
     audioRef.current = new Audio("/click.mp3");
+    
     const savedEnergy = localStorage.getItem("ninjaEnergy");
-if (savedEnergy) setEnergy(parseInt(savedEnergy));
+    if (savedEnergy) setEnergy(parseInt(savedEnergy));
 
     const savedScore = localStorage.getItem("ninjaScore");
     if (savedScore) setScore(parseInt(savedScore));
@@ -37,23 +39,29 @@ if (savedEnergy) setEnergy(parseInt(savedEnergy));
 
     return () => clearTimeout(tgTimer);
   }, []);
+
+  // سیستم پر شدن انرژی
   useEffect(() => {
     const timer = setInterval(() => {
-      setEnergy((prev) => {
-        if (prev < 5000) {
-          return prev + 1;
-        }
-        return 5000;
-      });
+      setEnergy((prev) => (prev < 5000 ? prev + 1 : 5000));
     }, 1000);
-
     return () => clearInterval(timer);
   }, []);
+
+  // ذخیره سازی پیشرفت
   useEffect(() => {
-  localStorage.setItem("ninjaEnergy", energy.toString());
-}, [energy]);
+    localStorage.setItem("ninjaEnergy", energy.toString());
+    localStorage.setItem("ninjaScore", score.toString());
+  }, [energy, score]);
+
   const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
     if (energy <= 0) return;
+
+    // لرزش گوشی برای حس بهتر (Vibrate)
+    if (typeof window !== 'undefined' && navigator.vibrate) {
+      navigator.vibrate(10); 
+    }
+
     setScore(prev => prev + 1);
     setEnergy(prev => Math.max(0, prev - 1));
 
@@ -90,71 +98,75 @@ if (savedEnergy) setEnergy(parseInt(savedEnergy));
         </div>
       </div>
 
-      {/* Main Score */}
+      {/* Score Area */}
       <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "10px", marginTop: "40px" }}>
         <span style={{ fontSize: "40px", color: "#ffd700" }}>$</span>
         <span style={{ fontSize: "50px", fontWeight: "bold" }}>{score.toLocaleString()}</span>
       </div>
 
-      {/* Middle: Energy & Ninja */}
-      <div style={{ flex: 1, display: "flex", alignItems: "center", position: "relative", justifyContent: "center" }}>
-        <div style={{ position: "absolute", left: "0", top: "2%", display: "flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(0,0,0,0.3)", padding: "5px 10px", borderRadius: "20px" }}>
-          <div style={{ fontSize: "24px" }}>🔋</div>
-          <div style={{ fontSize: "14px", fontWeight: "bold" }}>{energy} / 5000</div>
+      {/* Center: Energy & Ninja */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", position: "relative" }}>
+        
+        {/* Energy Bar */}
+        <div style={{ position: "absolute", left: "0", top: "2%", display: "flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(0,0,0,0.3)", padding: "5px 15px", borderRadius: "20px" }}>
+          <span style={{ fontSize: "20px" }}>🔋</span>
+          <span style={{ fontSize: "16px", fontWeight: "bold" }}>{energy} / 5000</span>
         </div>
 
+        {/* Ninja Image (Tap Area) */}
         <div 
-  onClick={handleClick}
-  
-  onTouchStart={(e) => e.currentTarget.style.transform = "scale(0.90)"}
-  onTouchEnd={(e) => e.currentTarget.style.transform = "scale(1)"}
-  
-  onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.90)"}
-  onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
-  style={{ 
-    transition: "transform 0.05s ease", 
-    cursor: "pointer", 
-    touchAction: "manipulation", 
-    WebkitTapHighlightColor: "transparent", 
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center"
-  }}
->
-  <img 
-    src="/coin.png" 
-    alt="Ninja" 
-    style={{ 
-      width: "280px", 
-      height: "auto", 
-      userSelect: "none", 
-      pointerEvents: "none" 
-    }} 
-  />
-</div>
-          <img src="/coin.png" alt="Ninja" style={{ width: "280px", height: "auto", userSelect: "none", pointerEvents: "none" }} />
+          onClick={handleClick}
+          onTouchStart={(e) => e.currentTarget.style.transform = "scale(0.85)"}
+          onTouchEnd={(e) => e.currentTarget.style.transform = "scale(1)"}
+          onMouseDown={(e) => e.currentTarget.style.transform = "scale(0.85)"}
+          onMouseUp={(e) => e.currentTarget.style.transform = "scale(1)"}
+          style={{ 
+            transition: "transform 0.05s ease", 
+            cursor: "pointer", 
+            touchAction: "manipulation", 
+            WebkitTapHighlightColor: "transparent",
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center"
+          }}
+        >
+          <img 
+            src="/coin.png" 
+            alt="Ninja" 
+            style={{ width: "280px", height: "auto", userSelect: "none", pointerEvents: "none" }} 
+          />
         </div>
       </div>
 
-      {/* Footer Menu */}
+      {/* Footer Navigation */}
       <div style={{ display: "flex", flexDirection: "column", gap: "10px", marginBottom: "10px" }}>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <button style={{ backgroundColor: "transparent", border: "2px solid #ff4444", color: "white", borderRadius: "8px", padding: "5px 15px" }}>QR</button>
-          <button style={{ backgroundColor: "transparent", border: "2px solid #44cc44", color: "#44cc44", borderRadius: "8px", padding: "5px 15px" }}>Boost</button>
+        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "5px" }}>
+          <button style={{ backgroundColor: "transparent", border: "2px solid #ff4444", color: "white", borderRadius: "8px", padding: "5px 20px" }}>QR</button>
+          <button style={{ backgroundColor: "transparent", border: "2px solid #44cc44", color: "#44cc44", borderRadius: "8px", padding: "5px 20px" }}>Boost</button>
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", gap: "5px" }}>
           {["Tap", "Mine", "Fight", "Library", "Cards"].map(label => (
-            <button key={label} style={{ flex: 1, backgroundColor: "#333", border: "1px solid #555", color: "#ccc", borderRadius: "8px", padding: "10px 5px", fontSize: "12px" }}>{label}</button>
+            <button key={label} style={{ flex: 1, backgroundColor: "#333", border: "1px solid #555", color: "#ccc", borderRadius: "8px", padding: "12px 5px", fontSize: "12px" }}>
+              {label}
+            </button>
           ))}
         </div>
       </div>
 
-      {/* Floating Numbers */}
+      {/* Floating Numbers Animation */}
       {floatingNumbers.map(num => (
-        <div key={num.id} style={{ position: "fixed", left: num.x, top: num.y, transform: "translate(-50%, -100%)", fontSize: "2rem", fontWeight: "bold", color: "#FFD700", animation: "f 1s forwards", pointerEvents: "none" }}>+{num.value}</div>
+        <div key={num.id} style={{ position: "fixed", left: num.x, top: num.y, transform: "translate(-50%, -100%)", fontSize: "2.5rem", fontWeight: "bold", color: "#FFD700", animation: "f 0.8s ease-out forwards", pointerEvents: "none", zIndex: 9999 }}>
+          +1
+        </div>
       ))}
 
-      <style>{`@keyframes f { 0%{opacity:1;transform:translate(-50%,0)} 100%{opacity:0;transform:translate(-50%,-100px)} }`}</style>
+      <style>{`
+        @keyframes f {
+          0% { opacity: 1; transform: translate(-50%, 0); }
+          100% { opacity: 0; transform: translate(-50%, -120px); }
+        }
+      `}</style>
+
     </div>
   );
 }
