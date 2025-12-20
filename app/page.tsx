@@ -168,10 +168,10 @@ export default function Home() {
             {/* ۱. تصویر ربات به عنوان بک‌گراند بزرگ */}
             <div style={{
               position: "absolute",
-              top: "15%",
+              top: "10%",
               left: "50%",
               transform: "translateX(-50%)",
-              width: "120%", // بزرگتر از عرض صفحه برای جلوه بیشتر
+              width: "100%", // بزرگتر از عرض صفحه برای جلوه بیشتر
               opacity: 0.4,   // کمی کمرنگ که نوشته‌ها خوانا باشند
               zIndex: 0,      // رفتن به پشت همه المان‌ها
               pointerEvents: "none"
