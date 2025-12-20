@@ -164,7 +164,7 @@ export default function Home() {
                 </div>
                 <h3 style={{textAlign: "center", color: "#ffd700", margin: "10px 0"}}>Profit: {greenProfit + redProfit + orangeProfit}/s</h3>
             </div>
-            <div style={{flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", position: "relative"}}>
+            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", position: "relative", marginTop: "-60px" }}>
                 <img src="/chef-robot.png" style={{width: "90%", maxWidth: "320px"}} />
                 <div style={{display: "flex", gap: "10px", marginTop: "10px"}}>
                    <img src={isGreenOn ? "/cartridge-green-on.png" : "/cartridge-green-off.png"} style={{width: "55px"}} />
