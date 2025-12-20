@@ -44,22 +44,55 @@ export default function Home() {
 
   // ذخیره سازی و بازیابی انرژی
   useEffect(() => {
-  const timer = setInterval(() => {
-    setEnergy((prev) => {
-      if (prev < 2000) return prev + 1;
-      return 2000;
-    });
-  }, 1000); // هر ۱ ثانیه ۱ واحد
-  return () => clearInterval(timer);
-}, []);
+    audioRef.current = new Audio("/click.mp3");
+    
+    // ۱. لود کردن سکه‌ها و توکن‌ها
+    const savedGreen = localStorage.getItem("ninjaGreenCoins");
+    if (savedGreen) setGreenCoins(parseInt(savedGreen));
+    const savedSalad = localStorage.getItem("ninjaSalad");
+    if (savedSalad) setSaladToken(parseInt(savedSalad));
+
+    // ۲. منطق انرژی (آنلاین + آفلاین)
+    const savedEnergy = localStorage.getItem("ninjaEnergy");
+    const lastTime = localStorage.getItem("lastTime");
+    
+    if (savedEnergy && lastTime) {
+      const currentTime = Date.now();
+      const secondsPassed = Math.floor((currentTime - parseInt(lastTime)) / 1000);
+      const energyBefore = parseInt(savedEnergy);
+      
+      // محاسبه انرژی جدید (انرژی قبلی + زمان گذشته) با سقف ۲۰۰۰
+      const calculatedEnergy = Math.min(2000, energyBefore + secondsPassed);
+      setEnergy(calculatedEnergy);
+    } else if (savedEnergy) {
+      setEnergy(parseInt(savedEnergy));
+    }
+
+    // ۳. تنظیمات تلگرام
+    const tgTimer = setTimeout(() => {
+      if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
+        const tg = (window as any).Telegram.WebApp;
+        tg.ready();  
+        const user = tg.initDataUnsafe?.user;
+        if (user) setUserName(user.first_name || "Ninja Player");
+      }
+    }, 500);
+    return () => clearTimeout(tgTimer);
+  }, []);
 
   useEffect(() => {
-  localStorage.setItem("ninjaGreenCoins", greenCoins.toString());
-  localStorage.setItem("ninjaEnergy", energy.toString());
-  localStorage.setItem("ninjaSalad", saladToken.toString());
-  // ذخیره لحظه‌ای زمان برای محاسبه غیبت
-  localStorage.setItem("lastTime", Date.now().toString());
-}, [greenCoins, energy, saladToken]);
+    // ذخیره تمام مقادیر به همراه زمان فعلی
+    localStorage.setItem("ninjaGreenCoins", greenCoins.toString());
+    localStorage.setItem("ninjaEnergy", energy.toString());
+    localStorage.setItem("ninjaSalad", saladToken.toString());
+    localStorage.setItem("lastTime", Date.now().toString());
+  }, [greenCoins, energy, saladToken]);
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setEnergy((prev) => (prev < 2000 ? prev + 1 : 2000));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
 
   const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
     if (energy <= 0) return;
