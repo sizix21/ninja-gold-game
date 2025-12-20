@@ -84,7 +84,14 @@ export default function Home() {
           </div>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(0,0,0,0.4)", padding: "5px 12px", borderRadius: "20px", height: "35px" }}>
+       <div style={{ 
+  flex: 1, 
+  display: "flex", 
+  flexDirection: "column", 
+  width: "100%", 
+  marginTop: "40px", // این عدد را از 70 به 40 یا کمتر برسان تا کل محتوا بالا بیاید
+  justifyContent: "flex-start" // اطمینان از اینکه محتوا از بالا شروع می‌شود
+}}>
           <img src="/salad-butt.png" alt="Salad" style={{ width: "22px", height: "22px", objectFit: "contain" }} />
           <span style={{ fontSize: "14px", fontWeight: "bold", color: "#fff" }}>{score.toLocaleString()}</span>
         </div>
