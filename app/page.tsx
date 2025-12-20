@@ -155,25 +155,59 @@ export default function Home() {
             </div>
           </div>
         ) : activeTab === "Mine" ? (
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "10px" }}>
-            <div style={{ width: "100%", backgroundColor: "rgba(255,255,255,0.05)", borderRadius: "20px", padding: "15px" }}>
+          <div style={{ 
+            flex: 1, 
+            display: "flex", 
+            flexDirection: "column", 
+            alignItems: "center", 
+            padding: "10px", 
+            position: "relative", // برای اینکه ربات بتواند زیر بقیه قرار بگیرد
+            overflow: "hidden" 
+          }}>
+            
+            {/* ۱. تصویر ربات به عنوان بک‌گراند بزرگ */}
+            <div style={{
+              position: "absolute",
+              top: "15%",
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: "120%", // بزرگتر از عرض صفحه برای جلوه بیشتر
+              opacity: 0.4,   // کمی کمرنگ که نوشته‌ها خوانا باشند
+              zIndex: 0,      // رفتن به پشت همه المان‌ها
+              pointerEvents: "none"
+            }}>
+              <img src="/chef-robot.png" style={{ width: "100%", height: "auto", objectFit: "contain" }} />
+            </div>
+
+            {/* ۲. محتوای روی ربات (پنل آمار) */}
+            <div style={{ width: "100%", backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(5px)", borderRadius: "20px", padding: "15px", zIndex: 1 }}>
                 <div style={{ display: "flex", justifyContent: "space-around", textAlign: "center" }}>
-                   <div><img src="/currency-c.png" style={{width: "20px"}}/><p>{greenCoins}</p></div>
-                   <div><img src="/currency-r.png" style={{width: "20px"}}/><p>{redCoins}</p></div>
-                   <div><img src="/currency-t.png" style={{width: "20px"}}/><p>{orangeCoins}</p></div>
+                   <div><img src="/currency-c.png" style={{width: "20px"}}/><p style={{margin:0}}>{greenCoins}</p></div>
+                   <div><img src="/currency-r.png" style={{width: "20px"}}/><p style={{margin:0}}>{redCoins}</p></div>
+                   <div><img src="/currency-t.png" style={{width: "20px"}}/><p style={{margin:0}}>{orangeCoins}</p></div>
                 </div>
                 <h3 style={{textAlign: "center", color: "#ffd700", margin: "10px 0"}}>Profit: {greenProfit + redProfit + orangeProfit}/s</h3>
             </div>
-            <div style={{ flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", position: "relative", marginTop: "-60px" }}>
-                <img src="/chef-robot.png" style={{width: "90%", maxWidth: "320px"}} />
-                <div style={{display: "flex", gap: "10px", marginTop: "10px"}}>
-                   <img src={isGreenOn ? "/cartridge-green-on.png" : "/cartridge-green-off.png"} style={{width: "55px"}} />
-                   <img src={isRedOn ? "/cartridge-red-on.png" : "/cartridge-red-off.png"} style={{width: "55px", opacity: isRedOn ? 1 : 0.4}} />
+
+            {/* ۳. بخش میانی (کارتریج‌ها) */}
+            <div style={{ flex: 1, display: "flex", alignItems: "flex-end", justifyContent: "center", width: "100%", zIndex: 1, marginBottom: "20px" }}>
+                <div style={{ display: "flex", gap: "15px", backgroundColor: "rgba(0,0,0,0.5)", padding: "10px", borderRadius: "15px" }}>
+                   <img src={isGreenOn ? "/cartridge-green-on.png" : "/cartridge-green-off.png"} style={{ width: "60px" }} />
+                   <img src={isRedOn ? "/cartridge-red-on.png" : "/cartridge-red-off.png"} style={{ width: "60px", opacity: isRedOn ? 1 : 0.4 }} />
                 </div>
             </div>
-            <div style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", width: "100%", marginBottom: "80px"}}>
-               <button onClick={() => { if(greenCoins >= 100) { setGreenCoins(g=>g-100); setGreenProfit(p=>p+1); }}} style={{padding: "10px", backgroundColor: "#333", color: "white", borderRadius: "12px", border: "1px solid #444"}}>Upgrade Green<br/>💰 100</button>
-               <button onClick={() => { if(greenCoins >= 500 && !isRedOn) { setGreenCoins(g=>g-500); setIsRedOn(true); setRedProfit(1); }}} style={{padding: "10px", backgroundColor: "#333", color: "white", borderRadius: "12px", border: "1px solid #444"}}>Unlock Red<br/>💰 500</button>
+
+            {/* ۴. دکمه‌های ارتقا در پایین‌ترین قسمت */}
+            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", width: "100%", marginBottom: "80px", zIndex: 1 }}>
+               <button onClick={() => { if(greenCoins >= 100) { setGreenCoins(g=>g-100); setGreenProfit(p=>p+1); }}} style={{ padding: "15px", backgroundColor: "rgba(255,255,255,0.1)", color: "white", borderRadius: "15px", border: "1px solid rgba(255,255,255,0.2)", backdropFilter: "blur(10px)" }}>
+                 <span style={{fontSize: "12px", color: "#4caf50"}}>Upgrade Green</span><br/>
+                 <span style={{fontWeight: "bold"}}>💰 100</span>
+               </button>
+               
+               <button onClick={() => { if(greenCoins >= 500 && !isRedOn) { setGreenCoins(g=>g-500); setIsRedOn(true); setRedProfit(1); }}} style={{ padding: "15px", backgroundColor: "rgba(255,255,255,0.1)", color: "white", borderRadius: "15px", border: "1px solid rgba(255,255,255,0.2)", backdropFilter: "blur(10px)" }}>
+                 <span style={{fontSize: "12px", color: "#f44336"}}>Unlock Red</span><br/>
+                 <span style={{fontWeight: "bold"}}>💰 500</span>
+               </button>
             </div>
           </div>
         ) : (
