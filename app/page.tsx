@@ -10,69 +10,63 @@ interface FloatingNumber {
 }
 
 export default function Home() {
-  const [greenCoins, setGreenCoins] = useState(0); // سکه سبز (ارز کلیکی)
-  const [saladToken, setSaladToken] = useState(0); // توکن اصلی (سالاد)
-  const [energy, setEnergy] = useState(2000);
+  // --- States ---
+  const [activeTab, setActiveTab] = useState("Tap");
   const [userName, setUserName] = useState("Ninja Player");
+  const [greenCoins, setGreenCoins] = useState(0);
+  const [redCoins, setRedCoins] = useState(0);
+  const [orangeCoins, setOrangeCoins] = useState(0);
+  const [saladToken, setSaladToken] = useState(0);
+  const [energy, setEnergy] = useState(2000);
+
+  const [isGreenOn, setIsGreenOn] = useState(true);
+  const [isRedOn, setIsRedOn] = useState(false);
+  const [isOrangeOn, setIsOrangeOn] = useState(false);
+
+  const [greenProfit, setGreenProfit] = useState(1);
+  const [redProfit, setRedProfit] = useState(0);
+  const [orangeProfit, setOrangeProfit] = useState(0);
+
   const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumber[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [activeTab, setActiveTab] = useState("Tap");
 
-  // لود کردن اطلاعات
+  // ۱. بارگذاری اطلاعات (آنلاین + آفلاین)
   useEffect(() => {
     audioRef.current = new Audio("/click.mp3");
-    
+
     const savedGreen = localStorage.getItem("ninjaGreenCoins");
     if (savedGreen) setGreenCoins(parseInt(savedGreen));
+
+    const savedRed = localStorage.getItem("ninjaRedCoins");
+    if (savedRed) setRedCoins(parseInt(savedRed));
+
+    const savedOrange = localStorage.getItem("ninjaOrangeCoins");
+    if (savedOrange) setOrangeCoins(parseInt(savedOrange));
 
     const savedSalad = localStorage.getItem("ninjaSalad");
     if (savedSalad) setSaladToken(parseInt(savedSalad));
 
-    const savedEnergy = localStorage.getItem("ninjaEnergy");
-    if (savedEnergy) setEnergy(parseInt(savedEnergy));
-
-    const tgTimer = setTimeout(() => {
-      if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
-        const tg = (window as any).Telegram.WebApp;
-        tg.ready();  
-        const user = tg.initDataUnsafe?.user;
-        if (user) setUserName(user.first_name || "Ninja Player");
-      }
-    }, 500);
-    return () => clearTimeout(tgTimer);
-  }, []);
-
-  // ذخیره سازی و بازیابی انرژی
-  useEffect(() => {
-    audioRef.current = new Audio("/click.mp3");
-    
-    // ۱. لود کردن سکه‌ها و توکن‌ها
-    const savedGreen = localStorage.getItem("ninjaGreenCoins");
-    if (savedGreen) setGreenCoins(parseInt(savedGreen));
-    const savedSalad = localStorage.getItem("ninjaSalad");
-    if (savedSalad) setSaladToken(parseInt(savedSalad));
-
-    // ۲. منطق انرژی (آنلاین + آفلاین)
     const savedEnergy = localStorage.getItem("ninjaEnergy");
     const lastTime = localStorage.getItem("lastTime");
-    
+
     if (savedEnergy && lastTime) {
       const currentTime = Date.now();
       const secondsPassed = Math.floor((currentTime - parseInt(lastTime)) / 1000);
-      const energyBefore = parseInt(savedEnergy);
       
-      // محاسبه انرژی جدید (انرژی قبلی + زمان گذشته) با سقف ۲۰۰۰
-      const calculatedEnergy = Math.min(2000, energyBefore + secondsPassed);
-      setEnergy(calculatedEnergy);
+      // منطق ۵ دقیقه سود آفلاین (۳۰۰ ثانیه)
+      const offlineSeconds = Math.min(300, secondsPassed);
+      
+      setEnergy(Math.min(2000, parseInt(savedEnergy) + secondsPassed));
+      setGreenCoins(prev => prev + (offlineSeconds * greenProfit));
+      // اضافه کردن بقیه سکه‌ها اگر کارتریجشان باز بود
     } else if (savedEnergy) {
       setEnergy(parseInt(savedEnergy));
     }
 
-    // ۳. تنظیمات تلگرام
     const tgTimer = setTimeout(() => {
       if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
         const tg = (window as any).Telegram.WebApp;
-        tg.ready();  
+        tg.ready();
         const user = tg.initDataUnsafe?.user;
         if (user) setUserName(user.first_name || "Ninja Player");
       }
@@ -80,24 +74,30 @@ export default function Home() {
     return () => clearTimeout(tgTimer);
   }, []);
 
+  // ۲. ذخیره‌سازی خودکار
   useEffect(() => {
-    // ذخیره تمام مقادیر به همراه زمان فعلی
     localStorage.setItem("ninjaGreenCoins", greenCoins.toString());
+    localStorage.setItem("ninjaRedCoins", redCoins.toString());
+    localStorage.setItem("ninjaOrangeCoins", orangeCoins.toString());
     localStorage.setItem("ninjaEnergy", energy.toString());
     localStorage.setItem("ninjaSalad", saladToken.toString());
     localStorage.setItem("lastTime", Date.now().toString());
-  }, [greenCoins, energy, saladToken]);
+  }, [greenCoins, redCoins, orangeCoins, energy, saladToken]);
+
+  // ۳. تایمر تولید ثانیه‌ای سکه و پر شدن انرژی
   useEffect(() => {
     const timer = setInterval(() => {
       setEnergy((prev) => (prev < 2000 ? prev + 1 : 2000));
+      if (isGreenOn) setGreenCoins(prev => prev + greenProfit);
+      if (isRedOn) setRedCoins(prev => prev + redProfit);
+      if (isOrangeOn) setOrangeCoins(prev => prev + orangeProfit);
     }, 1000);
     return () => clearInterval(timer);
-  }, []);
+  }, [isGreenOn, isRedOn, isOrangeOn, greenProfit, redProfit, orangeProfit]);
 
+  // --- Handlers ---
   const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
     if (energy <= 0) return;
-    if (typeof window !== 'undefined' && navigator.vibrate) navigator.vibrate(10); 
-
     setGreenCoins(prev => prev + 1);
     setEnergy(prev => Math.max(0, prev - 1));
 
@@ -111,18 +111,15 @@ export default function Home() {
 
     const newNum = { id: Date.now(), x: clientX, y: clientY, value: 1 };
     setFloatingNumbers(prev => [...prev, newNum]);
-    setTimeout(() => {
-      setFloatingNumbers(prev => prev.filter(n => n.id !== newNum.id));
-    }, 1000);
+    setTimeout(() => setFloatingNumbers(prev => prev.filter(n => n.id !== newNum.id)), 1000);
   };
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", backgroundColor: "#1a1a1a", color: "white", fontFamily: "sans-serif", padding: "20px", boxSizing: "border-box", overflow: "hidden", position: "relative" }}>
       
-      {/* Header: Profile (Left) & Salad (Right) */}
+      {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", padding: "10px 15px", position: "absolute", top: 0, left: 0, boxSizing: "border-box", zIndex: 10 }}>
-        {/* پروفایل سمت چپ */}
-        <div style={{ display: "flex", alignItems: "center", gap: "10px", backgroundColor: "rgba(255,255,255,0.05)", padding: "5px 10px", borderRadius: "12px" }}>
+        <div onClick={() => setActiveTab("Level")} style={{ display: "flex", alignItems: "center", gap: "10px", backgroundColor: "rgba(255,255,255,0.05)", padding: "5px 10px", borderRadius: "12px", cursor: "pointer" }}>
           <div style={{ width: "35px", height: "35px", borderRadius: "50%", border: "2px solid #ffd700", overflow: "hidden", backgroundColor: "#333" }}>
             <img src="/coin.png" alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
@@ -132,77 +129,48 @@ export default function Home() {
           </div>
         </div>
 
-        {/* توکن اصلی سالاد سمت راست */}
         <div style={{ display: "flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(0,0,0,0.4)", padding: "5px 12px", borderRadius: "20px", height: "35px" }}>
           <img src="/salad-butt.png" alt="Salad" style={{ width: "22px", height: "22px", objectFit: "contain" }} />
-          <span style={{ fontSize: "14px", fontWeight: "bold", color: "#fff" }}>
-            {saladToken.toLocaleString()}
-          </span>
+          <span style={{ fontSize: "14px", fontWeight: "bold", color: "#fff" }}>{saladToken.toLocaleString()}</span>
         </div>
       </div>
 
-      {/* Main Container */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", marginTop: "20px" }}> 
+      {/* Main Content */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", marginTop: "40px" }}>
         {activeTab === "Tap" ? (
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", marginTop: "40px" }}>
-            
-            {/* Green Coin Score (وسط صفحه) */}
-            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "15px", marginBottom: "10px" }}>
-              <img src="/currency-c.png" alt="Green Coin" style={{ width: "50px", height: "50px", objectFit: "contain" }} />
-              <span style={{ fontSize: "40px", fontWeight: "bold", color: "#fff" }}>
-                {greenCoins.toLocaleString()}
-              </span>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "15px", marginTop: "20px" }}>
+              <img src="/currency-c.png" alt="Green Coin" style={{ width: "50px" }} />
+              <span style={{ fontSize: "40px", fontWeight: "bold" }}>{greenCoins.toLocaleString()}</span>
             </div>
-
-            {/* Energy Bar */}
-            <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "0 10px", marginBottom: "10px", alignSelf: "flex-start" }}>
-              <span style={{ fontSize: "20px" }}>🔋</span>
-              <div style={{ display: "flex", flexDirection: "column" }}>
-                <span style={{ fontSize: "12px", fontWeight: "bold" }}>{energy} / 2000</span>
-                <div style={{ width: "100px", height: "5px", backgroundColor: "#333", borderRadius: "3px", marginTop: "4px" }}>
-                  <div style={{ width: `${(energy / 2000) * 100}%`, height: "100%", backgroundColor: "#4caf50", borderRadius: "3px", transition: "width 0.3s" }}></div>
-                </div>
+            <div style={{ padding: "10px" }}>
+              <span style={{ fontSize: "12px" }}>🔋 {energy} / 2000</span>
+              <div style={{ width: "100px", height: "5px", backgroundColor: "#333", borderRadius: "3px" }}>
+                <div style={{ width: `${(energy / 2000) * 100}%`, height: "100%", backgroundColor: "#4caf50", borderRadius: "3px" }}></div>
               </div>
             </div>
-
-            {/* Ninja Area - حالا کل این بخش قابل کلیک است */}
-<div 
-  onClick={handleClick} // تابع کلیک از روی عکس به اینجا منتقل شد
-  style={{ 
-    flex: 1, 
-    display: "flex", 
-    justifyContent: "center", 
-    alignItems: "center", 
-    marginTop: "-60px",
-    width: "100%", // کل عرض صفحه را پوشش می‌دهد
-    cursor: "pointer",
-    touchAction: "manipulation" 
-  }}
-  onTouchStart={(e) => {
-    // افکت کوچک شدن برای کل ناحیه یا فقط عکس
-    const img = e.currentTarget.querySelector('img');
-    if (img) img.style.transform = "scale(0.92)";
-  }}
-  onTouchEnd={(e) => {
-    const img = e.currentTarget.querySelector('img');
-    if (img) img.style.transform = "scale(1)";
-  }}
->
-  <div style={{ transition: "transform 0.05s ease" }}>
-    <img 
-      src="/coin.png" 
-      alt="Ninja" 
-      style={{ width: "260px", height: "auto", objectFit: "contain", pointerEvents: "none" }} 
-    />
-  </div>
-</div>
+            <div onClick={handleClick} style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", cursor: "pointer" }}>
+              <img src="/coin.png" style={{ width: "260px" }} />
+            </div>
           </div>
         ) : activeTab === "Mine" ? (
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
-            <h2 style={{ color: "#ffd700" }}>Market</h2>
-            <div style={{ backgroundColor: "rgba(255,255,255,0.05)", padding: "20px", borderRadius: "15px", width: "85%", textAlign: "center" }}>
-               <p>کارت‌های ارتقا به زودی...</p>
-            </div>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "20px" }}>
+             <div style={{ width: "100%", backgroundColor: "rgba(255,255,255,0.05)", borderRadius: "20px", padding: "15px" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", textAlign: "center" }}>
+                   <div><img src="/currency-c.png" style={{width: "20px"}}/><p>{greenCoins}</p></div>
+                   <div><img src="/currency-r.png" style={{width: "20px"}}/><p>{redCoins}</p></div>
+                   <div><img src="/currency-t.png" style={{width: "20px"}}/><p>{orangeCoins}</p></div>
+                </div>
+                <h3 style={{textAlign: "center", color: "#ffd700"}}>Profit: {greenProfit + redProfit + orangeProfit}/s</h3>
+             </div>
+             <div style={{position: "relative", width: "100%", textAlign: "center"}}>
+                <img src="/chef-robot.png" style={{width: "80%"}} />
+                <div style={{display: "flex", gap: "10px", justifyContent: "center", marginTop: "10px"}}>
+                   <img src={isGreenOn ? "/cartridge-green-on.png" : "/cartridge-green-off.png"} style={{width: "50px"}} />
+                   <img src={isRedOn ? "/cartridge-red-on.png" : "/cartridge-red-off.png"} style={{width: "50px", opacity: isRedOn ? 1 : 0.5}} />
+                </div>
+             </div>
+             <button onClick={() => { if(greenCoins >= 100) { setGreenCoins(g=>g-100); setGreenProfit(p=>p+1); }}} style={{padding: "10px", borderRadius: "10px", backgroundColor: "#333", color: "white"}}>Upgrade Green (100 💰)</button>
           </div>
         ) : (
           <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -211,44 +179,33 @@ export default function Home() {
         )}
       </div>
 
-      {/* Footer Navigation */}
-      <div style={{ display: "flex", justifyContent: "space-between", gap: "5px", alignItems: "flex-end", zIndex: 30 }}>
-        {["Tap", "Mine", "Fight", "Library", "Cards"].map((label) => {
-          const isActive = activeTab === label;
-          const icons: { [key: string]: string } = {
-            "Tap": "/tap-butt.png", "Mine": "/mine-butt.png", "Fight": "/fight-butt.png", "Library": "/closet-butt.png", "Cards": "/cards-butt.png"
-          };
-          return (
-            <button key={label} onClick={() => setActiveTab(label)} style={{ flex: 1, backgroundColor: "transparent", border: "none", outline: "none", color: isActive ? "#ffd700" : "#888", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", cursor: "pointer" }}>
-              <img src={icons[label] || "/tap-butt.png"} alt={label} style={{ width: "35px", height: "35px", objectFit: "contain", filter: isActive ? "none" : "grayscale(100%)", opacity: isActive ? "1" : "0.6" }} />
-              <span style={{ fontSize: "10px", fontWeight: isActive ? "bold" : "normal" }}>{label}</span>
-            </button>
-          );
-        })}
+      {/* Footer */}
+      <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderTop: "1px solid #333" }}>
+        {["Tap", "Mine", "Fight", "Library", "Cards"].map((label) => (
+          <button key={label} onClick={() => setActiveTab(label)} style={{ flex: 1, background: "none", border: "none", color: activeTab === label ? "#ffd700" : "#888", cursor: "pointer" }}>
+            <span style={{ fontSize: "10px" }}>{label}</span>
+          </button>
+        ))}
       </div>
 
-      {/* QR & Boost Buttons */}
+      {/* QR & Boost */}
       {activeTab === "Tap" && (
         <>
-          <button style={{ position: "absolute", bottom: "100px", left: "12%", transform: "translateX(-50%)", background: "none", border: "none", width: "35px", height: "35px", zIndex: 20 }}>
-            <img src="/qr-butt.png" alt="QR" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+          <button onClick={() => setActiveTab("QR")} style={{ position: "absolute", bottom: "100px", left: "12%", background: "none", border: "none" }}>
+            <img src="/qr-butt.png" style={{ width: "35px" }} />
           </button>
-          <button style={{ position: "absolute", bottom: "100px", right: "12%", transform: "translateX(50%)", background: "none", border: "none", width: "35px", height: "35px", zIndex: 20 }}>
-            <img src="/boost-butt.png" alt="Boost" style={{ width: "100%", height: "100%", objectFit: "contain" }} />
+          <button onClick={() => setActiveTab("Boost")} style={{ position: "absolute", bottom: "100px", right: "12%", background: "none", border: "none" }}>
+            <img src="/boost-butt.png" style={{ width: "35px" }} />
           </button>
         </>
       )}
 
-      {/* Animations */}
+      {/* Floating Numbers */}
       {floatingNumbers.map(num => (
-        <div key={num.id} style={{ position: "fixed", left: num.x, top: num.y, transform: "translate(-50%, -100%)", fontSize: "2.5rem", fontWeight: "bold", color: "#FFD700", animation: "f 0.8s ease-out forwards", pointerEvents: "none", zIndex: 9999 }}>
-          +1
-        </div>
+        <div key={num.id} style={{ position: "fixed", left: num.x, top: num.y, color: "#ffd700", animation: "f 0.8s forwards", pointerEvents: "none" }}>+1</div>
       ))}
 
-      <style>{`
-        @keyframes f { 0% { opacity: 1; transform: translate(-50%, 0); } 100% { opacity: 0; transform: translate(-50%, -120px); } }
-      `}</style>
+      <style>{`@keyframes f { 0%{opacity:1; transform:translateY(0)} 100%{opacity:0; transform:translateY(-100px)} }`}</style>
     </div>
   );
 }
