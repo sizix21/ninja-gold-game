@@ -191,47 +191,25 @@ export default function Home() {
                 </h2>
             </div>
 
-            {/* ۳. بخش کارتریج‌ها - چسبیده به پایین و هم‌راستا */}
-            <div style={{ 
-              flex: 1, 
-              display: "flex", 
-              alignItems: "flex-end", // هم‌راستا کردن از پایین
-              justifyContent: "center", 
-              width: "100%", 
-              zIndex: 1,
-              paddingBottom: "100px" // فاصله از فوتر (این عدد را می‌توانید کم و زیاد کنید)
-            }}>
-                <div style={{ 
-                  display: "flex", 
-                  gap: "12px", 
-                  alignItems: "flex-end", // اطمینان از هم‌راستایی تصاویر در کانتینر داخلی
-                  backgroundColor: "rgba(0,0,0,0.3)", 
-                  padding: "10px", 
-                  borderRadius: "20px" 
-                }}>
-                   {/* سمت چپ: سبز */}
-                   <img 
-                     src={isGreenOn ? "/cartridge-green-on.png" : "/cartridge-green-off.png"} 
-                     style={{ width: "75px", height: "auto", objectFit: "contain" }} 
-                   />
-                   
-                   {/* وسط: اسلات خالی قرمز */}
-                   <img 
-                     src="/cartridge-red-free.png" 
-                     style={{ width: "75px", height: "auto", objectFit: "contain" }} 
-                   />
-                   
-                   {/* سمت راست: اسلات خالی نارنجی */}
-                   <img 
-                     src="/cartridge-orange-free.png" 
-                     style={{ width: "75px", height: "auto", objectFit: "contain" }} 
-                   />
-                </div>
-            </div>
+            {/* ۳. فضای خالی منعطف (این بخش کارتریج‌ها را به پایین هل می‌دهد) */}
+            <div style={{ flex: 1 }} /> 
 
-            {/* ۴. حذف کارت‌های خرید قبلی (فضای خالی برای طراحی کارت‌های جدید شما) */}
-            <div style={{ width: "100%", height: "100px", marginBottom: "80px", zIndex: 1 }}>
-               {/* اینجا فعلاً خالی است تا کارت‌های مدنظر شما را طراحی کنیم */}
+            {/* ۴. بخش کارتریج‌ها - حالا کاملاً پایین قرار می‌گیرد */}
+            <div style={{ 
+              width: "100%", 
+              display: "flex", 
+              justifyContent: "center", 
+              alignItems: "flex-end", // هم‌راستایی از پایین تصاویر
+              gap: "12px", 
+              zIndex: 2,
+              marginBottom: "90px", // فاصله از لبه فوتر
+              padding: "15px",
+              backgroundColor: "rgba(0,0,0,0.2)",
+              borderRadius: "25px"
+            }}>
+               <img src={isGreenOn ? "/cartridge-green-on.png" : "/cartridge-green-off.png"} style={{ width: "75px", height: "auto" }} />
+               <img src="/cartridge-red-free.png" style={{ width: "75px", height: "auto" }} />
+               <img src="/cartridge-orange-free.png" style={{ width: "75px", height: "auto" }} />
             </div>
 
           </div>
