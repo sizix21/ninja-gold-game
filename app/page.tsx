@@ -10,19 +10,26 @@ interface FloatingNumber {
 }
 
 export default function Home() {
-  const [score, setScore] = useState(0);
-  const [energy, setEnergy] = useState(5000);
+  const [greenCoins, setGreenCoins] = useState(0); // سکه سبز (ارز کلیکی)
+  const [saladToken, setSaladToken] = useState(0); // توکن اصلی (سالاد)
+  const [energy, setEnergy] = useState(2000);
   const [userName, setUserName] = useState("Ninja Player");
   const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumber[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [activeTab, setActiveTab] = useState("Tap");
 
+  // لود کردن اطلاعات
   useEffect(() => {
     audioRef.current = new Audio("/click.mp3");
+    
+    const savedGreen = localStorage.getItem("ninjaGreenCoins");
+    if (savedGreen) setGreenCoins(parseInt(savedGreen));
+
+    const savedSalad = localStorage.getItem("ninjaSalad");
+    if (savedSalad) setSaladToken(parseInt(savedSalad));
+
     const savedEnergy = localStorage.getItem("ninjaEnergy");
     if (savedEnergy) setEnergy(parseInt(savedEnergy));
-    const savedScore = localStorage.getItem("ninjaScore");
-    if (savedScore) setScore(parseInt(savedScore));
 
     const tgTimer = setTimeout(() => {
       if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
@@ -35,23 +42,25 @@ export default function Home() {
     return () => clearTimeout(tgTimer);
   }, []);
 
+  // ذخیره سازی و بازیابی انرژی
   useEffect(() => {
     const timer = setInterval(() => {
-      setEnergy((prev) => (prev < 5000 ? prev + 1 : 5000));
+      setEnergy((prev) => (prev < 2000 ? prev + 1 : 2000));
     }, 1000);
     return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
+    localStorage.setItem("ninjaGreenCoins", greenCoins.toString());
     localStorage.setItem("ninjaEnergy", energy.toString());
-    localStorage.setItem("ninjaScore", score.toString());
-  }, [energy, score]);
+    localStorage.setItem("ninjaSalad", saladToken.toString());
+  }, [greenCoins, energy, saladToken]);
 
   const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
     if (energy <= 0) return;
     if (typeof window !== 'undefined' && navigator.vibrate) navigator.vibrate(10); 
 
-    setScore(prev => prev + 1);
+    setGreenCoins(prev => prev + 1);
     setEnergy(prev => Math.max(0, prev - 1));
 
     if (audioRef.current) {
@@ -72,67 +81,72 @@ export default function Home() {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", backgroundColor: "#1a1a1a", color: "white", fontFamily: "sans-serif", padding: "20px", boxSizing: "border-box", overflow: "hidden", position: "relative" }}>
       
-      {/* Header */}
+      {/* Header: Profile (Left) & Salad (Right) */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", padding: "10px 15px", position: "absolute", top: 0, left: 0, boxSizing: "border-box", zIndex: 10 }}>
+        {/* پروفایل سمت چپ */}
         <div style={{ display: "flex", alignItems: "center", gap: "10px", backgroundColor: "rgba(255,255,255,0.05)", padding: "5px 10px", borderRadius: "12px" }}>
           <div style={{ width: "35px", height: "35px", borderRadius: "50%", border: "2px solid #ffd700", overflow: "hidden", backgroundColor: "#333" }}>
             <img src="/coin.png" alt="Profile" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
           <div style={{ display: "flex", flexDirection: "column" }}>
             <span style={{ fontSize: "12px", color: "#ccc" }}>{userName}</span>
-            <span style={{ fontSize: "11px", fontWeight: "bold", color: "#ffd700" }}>Lv. 1 (Warrior)</span>
+            <span style={{ fontSize: "11px", fontWeight: "bold", color: "#ffd700" }}>Lv. 1</span>
           </div>
         </div>
 
-       <div style={{ 
-  flex: 1, 
-  display: "flex", 
-  flexDirection: "column", 
-  width: "100%", 
-  marginTop: "40px", // این عدد را از 70 به 40 یا کمتر برسان تا کل محتوا بالا بیاید
-  justifyContent: "flex-start" // اطمینان از اینکه محتوا از بالا شروع می‌شود
-}}>
+        {/* توکن اصلی سالاد سمت راست */}
+        <div style={{ display: "flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(0,0,0,0.4)", padding: "5px 12px", borderRadius: "20px", height: "35px" }}>
           <img src="/salad-butt.png" alt="Salad" style={{ width: "22px", height: "22px", objectFit: "contain" }} />
-          <span style={{ fontSize: "14px", fontWeight: "bold", color: "#fff" }}>{score.toLocaleString()}</span>
+          <span style={{ fontSize: "14px", fontWeight: "bold", color: "#fff" }}>
+            {saladToken.toLocaleString()}
+          </span>
         </div>
       </div>
 
-      {/* Conditional Content */}
-      {activeTab === "Tap" ? (
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", marginTop: "70px" }}>
-          <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "15px", marginBottom: "20px" }}>
-            <img src="/salad-butt.png" alt="Salad" style={{ width: "60px", height: "60px", objectFit: "contain" }} />
-            <span style={{ fontSize: "45px", fontWeight: "bold", color: "#fff" }}>{score.toLocaleString()}</span>
-          </div>
+      {/* Main Container */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", marginTop: "20px" }}> 
+        {activeTab === "Tap" ? (
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", marginTop: "40px" }}>
+            
+            {/* Green Coin Score (وسط صفحه) */}
+            <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "15px", marginBottom: "10px" }}>
+              <img src="/currency-c.png" alt="Green Coin" style={{ width: "50px", height: "50px", objectFit: "contain" }} />
+              <span style={{ fontSize: "40px", fontWeight: "bold", color: "#fff" }}>
+                {greenCoins.toLocaleString()}
+              </span>
+            </div>
 
-          <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "0 10px", marginBottom: "20px", alignSelf: "flex-start" }}>
-            <span style={{ fontSize: "24px" }}>🔋</span>
-            <div style={{ display: "flex", flexDirection: "column" }}>
-              <span style={{ fontSize: "14px", fontWeight: "bold" }}>{energy} / 5000</span>
-              <div style={{ width: "120px", height: "6px", backgroundColor: "#333", borderRadius: "3px", marginTop: "4px" }}>
-                <div style={{ width: `${(energy / 5000) * 100}%`, height: "100%", backgroundColor: "#4caf50", borderRadius: "3px", transition: "width 0.3s" }}></div>
+            {/* Energy Bar */}
+            <div style={{ display: "flex", alignItems: "center", gap: "10px", padding: "0 10px", marginBottom: "10px", alignSelf: "flex-start" }}>
+              <span style={{ fontSize: "20px" }}>🔋</span>
+              <div style={{ display: "flex", flexDirection: "column" }}>
+                <span style={{ fontSize: "12px", fontWeight: "bold" }}>{energy} / 2000</span>
+                <div style={{ width: "100px", height: "5px", backgroundColor: "#333", borderRadius: "3px", marginTop: "4px" }}>
+                  <div style={{ width: `${(energy / 2000) * 100}%`, height: "100%", backgroundColor: "#4caf50", borderRadius: "3px", transition: "width 0.3s" }}></div>
+                </div>
+              </div>
+            </div>
+
+            {/* Ninja Area */}
+            <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", marginTop: "-60px" }}>
+              <div onClick={handleClick} style={{ transition: "transform 0.05s ease", cursor: "pointer", touchAction: "manipulation" }} onTouchStart={(e) => e.currentTarget.style.transform = "scale(0.92)"} onTouchEnd={(e) => e.currentTarget.style.transform = "scale(1)"}>
+                <img src="/coin.png" alt="Ninja" style={{ width: "260px", height: "auto", objectFit: "contain" }} />
               </div>
             </div>
           </div>
-
-          <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
-            <div onClick={handleClick} style={{ transition: "transform 0.05s ease", cursor: "pointer", touchAction: "manipulation" }} onTouchStart={(e) => e.currentTarget.style.transform = "scale(0.92)"} onTouchEnd={(e) => e.currentTarget.style.transform = "scale(1)"}>
-              <img src="/coin.png" alt="Ninja" style={{ width: "280px", height: "auto", objectFit: "contain" }} />
+        ) : activeTab === "Mine" ? (
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
+            <h2 style={{ color: "#ffd700" }}>Market</h2>
+            <div style={{ backgroundColor: "rgba(255,255,255,0.05)", padding: "20px", borderRadius: "15px", width: "85%", textAlign: "center" }}>
+               <p>کارت‌های ارتقا به زودی...</p>
             </div>
           </div>
-        </div>
-      ) : activeTab === "Mine" ? (
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", marginTop: "70px" }}>
-          <h2 style={{ color: "#ffd700" }}>Market</h2>
-          <div style={{ backgroundColor: "rgba(255,255,255,0.05)", padding: "20px", borderRadius: "15px", width: "80%", textAlign: "center" }}>
-             <p>کارت‌های ارتقا به زودی...</p>
+        ) : (
+          <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
+            <h2>صفحه {activeTab}</h2>
           </div>
-        </div>
-      ) : (
-        <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", marginTop: "70px" }}>
-          <h2>صفحه {activeTab}</h2>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Footer Navigation */}
       <div style={{ display: "flex", justifyContent: "space-between", gap: "5px", alignItems: "flex-end", zIndex: 30 }}>
@@ -150,7 +164,7 @@ export default function Home() {
         })}
       </div>
 
-      {/* QR & Boost Buttons (فقط در صفحه Tap) */}
+      {/* QR & Boost Buttons */}
       {activeTab === "Tap" && (
         <>
           <button style={{ position: "absolute", bottom: "100px", left: "12%", transform: "translateX(-50%)", background: "none", border: "none", width: "35px", height: "35px", zIndex: 20 }}>
