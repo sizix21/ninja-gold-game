@@ -30,7 +30,7 @@ export default function Home() {
   const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumber[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // ۱. بارگذاری اطلاعات (آنلاین + آفلاین)
+  // ۱. بارگذاری اطلاعات و محاسبه غیبت (Offline System)
   useEffect(() => {
     audioRef.current = new Audio("/click.mp3");
 
@@ -58,7 +58,7 @@ export default function Home() {
       
       setEnergy(Math.min(2000, parseInt(savedEnergy) + secondsPassed));
       setGreenCoins(prev => prev + (offlineSeconds * greenProfit));
-      // اضافه کردن بقیه سکه‌ها اگر کارتریجشان باز بود
+      if (isRedOn) setRedCoins(prev => prev + (offlineSeconds * redProfit));
     } else if (savedEnergy) {
       setEnergy(parseInt(savedEnergy));
     }
@@ -74,7 +74,7 @@ export default function Home() {
     return () => clearTimeout(tgTimer);
   }, []);
 
-  // ۲. ذخیره‌سازی خودکار
+  // ۲. ذخیره‌سازی خودکار در localStorage
   useEffect(() => {
     localStorage.setItem("ninjaGreenCoins", greenCoins.toString());
     localStorage.setItem("ninjaRedCoins", redCoins.toString());
@@ -84,7 +84,7 @@ export default function Home() {
     localStorage.setItem("lastTime", Date.now().toString());
   }, [greenCoins, redCoins, orangeCoins, energy, saladToken]);
 
-  // ۳. تایمر تولید ثانیه‌ای سکه و پر شدن انرژی
+  // ۳. تایمر تولید ثانیه‌ای (آنلاین)
   useEffect(() => {
     const timer = setInterval(() => {
       setEnergy((prev) => (prev < 2000 ? prev + 1 : 2000));
@@ -135,8 +135,9 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Main Content */}
+      {/* Main Container */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", marginTop: "40px" }}>
+        
         {activeTab === "Tap" ? (
           <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "15px", marginTop: "20px" }}>
@@ -154,23 +155,26 @@ export default function Home() {
             </div>
           </div>
         ) : activeTab === "Mine" ? (
-          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", gap: "20px" }}>
-             <div style={{ width: "100%", backgroundColor: "rgba(255,255,255,0.05)", borderRadius: "20px", padding: "15px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", textAlign: "center" }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "10px" }}>
+            <div style={{ width: "100%", backgroundColor: "rgba(255,255,255,0.05)", borderRadius: "20px", padding: "15px" }}>
+                <div style={{ display: "flex", justifyContent: "space-around", textAlign: "center" }}>
                    <div><img src="/currency-c.png" style={{width: "20px"}}/><p>{greenCoins}</p></div>
                    <div><img src="/currency-r.png" style={{width: "20px"}}/><p>{redCoins}</p></div>
                    <div><img src="/currency-t.png" style={{width: "20px"}}/><p>{orangeCoins}</p></div>
                 </div>
-                <h3 style={{textAlign: "center", color: "#ffd700"}}>Profit: {greenProfit + redProfit + orangeProfit}/s</h3>
-             </div>
-             <div style={{position: "relative", width: "100%", textAlign: "center"}}>
-                <img src="/chef-robot.png" style={{width: "80%"}} />
-                <div style={{display: "flex", gap: "10px", justifyContent: "center", marginTop: "10px"}}>
-                   <img src={isGreenOn ? "/cartridge-green-on.png" : "/cartridge-green-off.png"} style={{width: "50px"}} />
-                   <img src={isRedOn ? "/cartridge-red-on.png" : "/cartridge-red-off.png"} style={{width: "50px", opacity: isRedOn ? 1 : 0.5}} />
+                <h3 style={{textAlign: "center", color: "#ffd700", margin: "10px 0"}}>Profit: {greenProfit + redProfit + orangeProfit}/s</h3>
+            </div>
+            <div style={{flex: 1, display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center", position: "relative"}}>
+                <img src="/chef-robot.png" style={{width: "90%", maxWidth: "320px"}} />
+                <div style={{display: "flex", gap: "10px", marginTop: "10px"}}>
+                   <img src={isGreenOn ? "/cartridge-green-on.png" : "/cartridge-green-off.png"} style={{width: "55px"}} />
+                   <img src={isRedOn ? "/cartridge-red-on.png" : "/cartridge-red-off.png"} style={{width: "55px", opacity: isRedOn ? 1 : 0.4}} />
                 </div>
-             </div>
-             <button onClick={() => { if(greenCoins >= 100) { setGreenCoins(g=>g-100); setGreenProfit(p=>p+1); }}} style={{padding: "10px", borderRadius: "10px", backgroundColor: "#333", color: "white"}}>Upgrade Green (100 💰)</button>
+            </div>
+            <div style={{display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", width: "100%", marginBottom: "80px"}}>
+               <button onClick={() => { if(greenCoins >= 100) { setGreenCoins(g=>g-100); setGreenProfit(p=>p+1); }}} style={{padding: "10px", backgroundColor: "#333", color: "white", borderRadius: "12px", border: "1px solid #444"}}>Upgrade Green<br/>💰 100</button>
+               <button onClick={() => { if(greenCoins >= 500 && !isRedOn) { setGreenCoins(g=>g-500); setIsRedOn(true); setRedProfit(1); }}} style={{padding: "10px", backgroundColor: "#333", color: "white", borderRadius: "12px", border: "1px solid #444"}}>Unlock Red<br/>💰 500</button>
+            </div>
           </div>
         ) : (
           <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -179,16 +183,23 @@ export default function Home() {
         )}
       </div>
 
-      {/* Footer */}
-      <div style={{ display: "flex", justifyContent: "space-between", padding: "10px 0", borderTop: "1px solid #333" }}>
-        {["Tap", "Mine", "Fight", "Library", "Cards"].map((label) => (
-          <button key={label} onClick={() => setActiveTab(label)} style={{ flex: 1, background: "none", border: "none", color: activeTab === label ? "#ffd700" : "#888", cursor: "pointer" }}>
-            <span style={{ fontSize: "10px" }}>{label}</span>
-          </button>
-        ))}
+      {/* Footer Navigation */}
+      <div style={{ display: "flex", justifyContent: "space-between", gap: "5px", alignItems: "flex-end", zIndex: 30, paddingBottom: "10px" }}>
+        {["Tap", "Mine", "Fight", "Library", "Cards"].map((label) => {
+          const isActive = activeTab === label;
+          const footerIcons: { [key: string]: string } = {
+            "Tap": "/tap-butt.png", "Mine": "/mine-butt.png", "Fight": "/fight-butt.png", "Library": "/closet-butt.png", "Cards": "/cards-butt.png"
+          };
+          return (
+            <button key={label} onClick={() => setActiveTab(label)} style={{ flex: 1, background: "none", border: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", cursor: "pointer" }}>
+              <img src={footerIcons[label]} alt={label} style={{ width: "35px", height: "35px", filter: isActive ? "none" : "grayscale(100%)", opacity: isActive ? "1" : "0.6" }} />
+              <span style={{ fontSize: "10px", color: isActive ? "#ffd700" : "#888" }}>{label}</span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* QR & Boost */}
+      {/* QR & Boost Buttons */}
       {activeTab === "Tap" && (
         <>
           <button onClick={() => setActiveTab("QR")} style={{ position: "absolute", bottom: "100px", left: "12%", background: "none", border: "none" }}>
@@ -200,9 +211,9 @@ export default function Home() {
         </>
       )}
 
-      {/* Floating Numbers */}
+      {/* Floating Numbers Animation */}
       {floatingNumbers.map(num => (
-        <div key={num.id} style={{ position: "fixed", left: num.x, top: num.y, color: "#ffd700", animation: "f 0.8s forwards", pointerEvents: "none" }}>+1</div>
+        <div key={num.id} style={{ position: "fixed", left: num.x, top: num.y, color: "#ffd700", animation: "f 0.8s forwards", pointerEvents: "none", zIndex: 1000 }}>+1</div>
       ))}
 
       <style>{`@keyframes f { 0%{opacity:1; transform:translateY(0)} 100%{opacity:0; transform:translateY(-100px)} }`}</style>
