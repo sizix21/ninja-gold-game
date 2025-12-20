@@ -172,43 +172,68 @@ export default function Home() {
               left: "50%",
               transform: "translateX(-50%)",
               width: "100%", // بزرگتر از عرض صفحه برای جلوه بیشتر
-              opacity: 0.4,   // کمی کمرنگ که نوشته‌ها خوانا باشند
+              opacity: 0.7,   // کمی کمرنگ که نوشته‌ها خوانا باشند
               zIndex: 0,      // رفتن به پشت همه المان‌ها
               pointerEvents: "none"
             }}>
               <img src="/chef-robot.png" style={{ width: "100%", height: "auto", objectFit: "contain" }} />
             </div>
 
-            {/* ۲. محتوای روی ربات (پنل آمار) */}
-            <div style={{ width: "100%", backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(5px)", borderRadius: "20px", padding: "15px", zIndex: 1 }}>
+            {/* ۲. پنل آمار بالای صفحه */}
+            <div style={{ width: "100%", backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", borderRadius: "20px", padding: "15px", zIndex: 1 }}>
                 <div style={{ display: "flex", justifyContent: "space-around", textAlign: "center" }}>
-                   <div><img src="/currency-c.png" style={{width: "20px"}}/><p style={{margin:0}}>{greenCoins}</p></div>
-                   <div><img src="/currency-r.png" style={{width: "20px"}}/><p style={{margin:0}}>{redCoins}</p></div>
-                   <div><img src="/currency-t.png" style={{width: "20px"}}/><p style={{margin:0}}>{orangeCoins}</p></div>
+                   <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}><img src="/currency-c.png" style={{width: "22px"}}/><span style={{fontSize: "14px", marginTop: "4px"}}>{greenCoins.toLocaleString()}</span></div>
+                   <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}><img src="/currency-r.png" style={{width: "22px"}}/><span style={{fontSize: "14px", marginTop: "4px"}}>{redCoins.toLocaleString()}</span></div>
+                   <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}><img src="/currency-t.png" style={{width: "22px"}}/><span style={{fontSize: "14px", marginTop: "4px"}}>{orangeCoins.toLocaleString()}</span></div>
                 </div>
-                <h3 style={{textAlign: "center", color: "#ffd700", margin: "10px 0"}}>Profit: {greenProfit + redProfit + orangeProfit}/s</h3>
+                <h2 style={{textAlign: "center", color: "#ffd700", margin: "15px 0 0 0", fontSize: "22px"}}>
+                  Profit: {(greenProfit + redProfit + orangeProfit).toLocaleString()} / s
+                </h2>
             </div>
 
-            {/* ۳. بخش میانی (کارتریج‌ها) */}
-            <div style={{ flex: 1, display: "flex", alignItems: "flex-end", justifyContent: "center", width: "100%", zIndex: 1, marginBottom: "20px" }}>
-                <div style={{ display: "flex", gap: "15px", backgroundColor: "rgba(0,0,0,0.5)", padding: "10px", borderRadius: "15px" }}>
-                   <img src={isGreenOn ? "/cartridge-green-on.png" : "/cartridge-green-off.png"} style={{ width: "60px" }} />
-                   <img src={isRedOn ? "/cartridge-red-on.png" : "/cartridge-red-off.png"} style={{ width: "60px", opacity: isRedOn ? 1 : 0.4 }} />
+            {/* ۳. بخش کارتریج‌ها - چسبیده به پایین و هم‌راستا */}
+            <div style={{ 
+              flex: 1, 
+              display: "flex", 
+              alignItems: "flex-end", // هم‌راستا کردن از پایین
+              justifyContent: "center", 
+              width: "100%", 
+              zIndex: 1,
+              paddingBottom: "100px" // فاصله از فوتر (این عدد را می‌توانید کم و زیاد کنید)
+            }}>
+                <div style={{ 
+                  display: "flex", 
+                  gap: "12px", 
+                  alignItems: "flex-end", // اطمینان از هم‌راستایی تصاویر در کانتینر داخلی
+                  backgroundColor: "rgba(0,0,0,0.3)", 
+                  padding: "10px", 
+                  borderRadius: "20px" 
+                }}>
+                   {/* سمت چپ: سبز */}
+                   <img 
+                     src={isGreenOn ? "/cartridge-green-on.png" : "/cartridge-green-off.png"} 
+                     style={{ width: "75px", height: "auto", objectFit: "contain" }} 
+                   />
+                   
+                   {/* وسط: اسلات خالی قرمز */}
+                   <img 
+                     src="/cartridge-red-free.png" 
+                     style={{ width: "75px", height: "auto", objectFit: "contain" }} 
+                   />
+                   
+                   {/* سمت راست: اسلات خالی نارنجی */}
+                   <img 
+                     src="/cartridge-orange-free.png" 
+                     style={{ width: "75px", height: "auto", objectFit: "contain" }} 
+                   />
                 </div>
             </div>
 
-            {/* ۴. دکمه‌های ارتقا در پایین‌ترین قسمت */}
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "10px", width: "100%", marginBottom: "80px", zIndex: 1 }}>
-               <button onClick={() => { if(greenCoins >= 100) { setGreenCoins(g=>g-100); setGreenProfit(p=>p+1); }}} style={{ padding: "15px", backgroundColor: "rgba(255,255,255,0.1)", color: "white", borderRadius: "15px", border: "1px solid rgba(255,255,255,0.2)", backdropFilter: "blur(10px)" }}>
-                 <span style={{fontSize: "12px", color: "#4caf50"}}>Upgrade Green</span><br/>
-                 <span style={{fontWeight: "bold"}}>💰 100</span>
-               </button>
-               
-               <button onClick={() => { if(greenCoins >= 500 && !isRedOn) { setGreenCoins(g=>g-500); setIsRedOn(true); setRedProfit(1); }}} style={{ padding: "15px", backgroundColor: "rgba(255,255,255,0.1)", color: "white", borderRadius: "15px", border: "1px solid rgba(255,255,255,0.2)", backdropFilter: "blur(10px)" }}>
-                 <span style={{fontSize: "12px", color: "#f44336"}}>Unlock Red</span><br/>
-                 <span style={{fontWeight: "bold"}}>💰 500</span>
-               </button>
+            {/* ۴. حذف کارت‌های خرید قبلی (فضای خالی برای طراحی کارت‌های جدید شما) */}
+            <div style={{ width: "100%", height: "100px", marginBottom: "80px", zIndex: 1 }}>
+               {/* اینجا فعلاً خالی است تا کارت‌های مدنظر شما را طراحی کنیم */}
             </div>
+
           </div>
         ) : (
           <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
