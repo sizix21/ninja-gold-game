@@ -44,47 +44,20 @@ export default function Home() {
 
   // ذخیره سازی و بازیابی انرژی
   useEffect(() => {
-  audioRef.current = new Audio("/click.mp3");
-  
-  const savedGreen = localStorage.getItem("ninjaGreenCoins");
-  if (savedGreen) setGreenCoins(parseInt(savedGreen));
-
-  const savedSalad = localStorage.getItem("ninjaSalad");
-  if (savedSalad) setSaladToken(parseInt(savedSalad));
-
-  // --- منطق جدید برای انرژی آفلاین ---
-  const savedEnergy = localStorage.getItem("ninjaEnergy");
-  const lastTime = localStorage.getItem("lastTime");
-  
-  if (savedEnergy && lastTime) {
-    const currentTime = Date.now();
-    const timeDiff = Math.floor((currentTime - parseInt(lastTime)) / 1000); // اختلاف زمان به ثانیه
-    const currentEnergy = parseInt(savedEnergy);
-    
-    // انرژی جدید = انرژی قبلی + ثانیه‌های غیبت (تا سقف ۲۰۰۰)
-    const newEnergy = Math.min(2000, currentEnergy + timeDiff);
-    setEnergy(newEnergy);
-  } else if (savedEnergy) {
-    setEnergy(parseInt(savedEnergy));
-  }
-  // --------------------------------
-
-  const tgTimer = setTimeout(() => {
-    if (typeof window !== 'undefined' && (window as any).Telegram?.WebApp) {
-      const tg = (window as any).Telegram.WebApp;
-      tg.ready();  
-      const user = tg.initDataUnsafe?.user;
-      if (user) setUserName(user.first_name || "Ninja Player");
-    }
-  }, 500);
-  return () => clearTimeout(tgTimer);
+  const timer = setInterval(() => {
+    setEnergy((prev) => {
+      if (prev < 2000) return prev + 1;
+      return 2000;
+    });
+  }, 1000); // هر ۱ ثانیه ۱ واحد
+  return () => clearInterval(timer);
 }, []);
 
   useEffect(() => {
   localStorage.setItem("ninjaGreenCoins", greenCoins.toString());
   localStorage.setItem("ninjaEnergy", energy.toString());
   localStorage.setItem("ninjaSalad", saladToken.toString());
-  // ذخیره زمان فعلی به عنوان آخرین لحظه حضور
+  // ذخیره لحظه‌ای زمان برای محاسبه غیبت
   localStorage.setItem("lastTime", Date.now().toString());
 }, [greenCoins, energy, saladToken]);
 
