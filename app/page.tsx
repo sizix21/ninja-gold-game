@@ -165,12 +165,37 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Ninja Area */}
-            <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", marginTop: "-60px" }}>
-              <div onClick={handleClick} style={{ transition: "transform 0.05s ease", cursor: "pointer", touchAction: "manipulation" }} onTouchStart={(e) => e.currentTarget.style.transform = "scale(0.92)"} onTouchEnd={(e) => e.currentTarget.style.transform = "scale(1)"}>
-                <img src="/coin.png" alt="Ninja" style={{ width: "260px", height: "auto", objectFit: "contain" }} />
-              </div>
-            </div>
+            {/* Ninja Area - حالا کل این بخش قابل کلیک است */}
+<div 
+  onClick={handleClick} // تابع کلیک از روی عکس به اینجا منتقل شد
+  style={{ 
+    flex: 1, 
+    display: "flex", 
+    justifyContent: "center", 
+    alignItems: "center", 
+    marginTop: "-60px",
+    width: "100%", // کل عرض صفحه را پوشش می‌دهد
+    cursor: "pointer",
+    touchAction: "manipulation" 
+  }}
+  onTouchStart={(e) => {
+    // افکت کوچک شدن برای کل ناحیه یا فقط عکس
+    const img = e.currentTarget.querySelector('img');
+    if (img) img.style.transform = "scale(0.92)";
+  }}
+  onTouchEnd={(e) => {
+    const img = e.currentTarget.querySelector('img');
+    if (img) img.style.transform = "scale(1)";
+  }}
+>
+  <div style={{ transition: "transform 0.05s ease" }}>
+    <img 
+      src="/coin.png" 
+      alt="Ninja" 
+      style={{ width: "260px", height: "auto", objectFit: "contain", pointerEvents: "none" }} 
+    />
+  </div>
+</div>
           </div>
         ) : activeTab === "Mine" ? (
           <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" }}>
