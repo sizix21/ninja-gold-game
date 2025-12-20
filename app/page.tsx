@@ -117,7 +117,14 @@ export default function Home() {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", backgroundColor: "#1a1a1a", color: "white", fontFamily: "sans-serif", padding: "20px", boxSizing: "border-box", overflow: "hidden", position: "relative" }}>
       
-      {/* Header */}
+      
+
+      {/* Main Container */}
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", marginTop: "40px" }}>
+        
+        {activeTab === "Tap" ? (
+          <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+            {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", padding: "10px 15px", position: "absolute", top: 0, left: 0, boxSizing: "border-box", zIndex: 10 }}>
         <div onClick={() => setActiveTab("Level")} style={{ display: "flex", alignItems: "center", gap: "10px", backgroundColor: "rgba(255,255,255,0.05)", padding: "5px 10px", borderRadius: "12px", cursor: "pointer" }}>
           <div style={{ width: "35px", height: "35px", borderRadius: "50%", border: "2px solid #ffd700", overflow: "hidden", backgroundColor: "#333" }}>
@@ -134,12 +141,6 @@ export default function Home() {
           <span style={{ fontSize: "14px", fontWeight: "bold", color: "#fff" }}>{saladToken.toLocaleString()}</span>
         </div>
       </div>
-
-      {/* Main Container */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", marginTop: "40px" }}>
-        
-        {activeTab === "Tap" ? (
-          <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "15px", marginTop: "20px" }}>
               <img src="/currency-c.png" alt="Green Coin" style={{ width: "50px" }} />
               <span style={{ fontSize: "40px", fontWeight: "bold" }}>{greenCoins.toLocaleString()}</span>
@@ -202,7 +203,7 @@ export default function Home() {
               alignItems: "flex-end", // هم‌راستایی از پایین تصاویر
               gap: "12px", 
               zIndex: 2,
-              marginBottom: "90px", // فاصله از لبه فوتر
+              marginBottom: "10px", // فاصله از لبه فوتر
               padding: "15px",
               backgroundColor: "rgba(0,0,0,0.2)",
               borderRadius: "25px"
