@@ -99,15 +99,12 @@ export default function Home() {
   useEffect(() => {
     const interval = setInterval(() => {
       
-      // ۱. همیشه انرژی پر شود (چه کارتریج روشن باشد چه نباشد)
       setEnergy((prev) => Math.min(prev + 1, 2000));
-
-      // ۲. تولید سکه فقط در صورت روشن بودن کارتریج مربوطه
+      
       if (isGreenActive) setGreenCoins(prev => prev + greenProfit);
       if (isRedActive) setRedCoins(prev => prev + redProfit);
       if (isOrangeActive) setOrangeCoins(prev => prev + orangeProfit);
-      
-      // ۳. تمدید زمان آفلاین فقط اگر فعالیتی باشد
+            
       if (isGreenActive || isRedActive || isOrangeActive) {
         setTimeLeft(300);
       }
