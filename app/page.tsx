@@ -8,7 +8,35 @@ interface FloatingNumber {
   y: number;
   value: number;
 }
-
+const CARDS_DATA = [
+  {
+    id: 1,
+    name: "Industrial Blender",
+    description: "افزایش سرعت تولید سکه سبز",
+    cost: 500, // قیمت به سکه سبز
+    target: "greenProfit", // متغیری که تغییر می‌کند
+    boost: 2, // چقدر به سود اضافه شود
+    icon: "🌪️"
+  },
+  {
+    id: 2,
+    name: "Red Cooling System",
+    description: "افزایش سرعت تولید سکه قرمز",
+    cost: 2000,
+    target: "redProfit",
+    boost: 5,
+    icon: "❄️"
+  },
+  {
+    id: 3,
+    name: "Turbo Toaster",
+    description: "افزایش سرعت تولید سکه نارنجی",
+    cost: 5000,
+    target: "orangeProfit",
+    boost: 10,
+    icon: "🔥"
+  }
+];
 export default function Home() {
   // --- States ---
   const [activeTab, setActiveTab] = useState("Tap");
@@ -32,9 +60,29 @@ export default function Home() {
   const switchAudioRef = useRef<HTMLAudioElement | null>(null);
   const [totalProfit, setTotalProfit] = useState(0);
   const [isSaladPage, setIsSaladPage] = useState(false);
-
   const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumber[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  const handleBuyCard = (card: typeof CARDS_DATA[0]) => {
+  // ۱. چک کردن موجودی (فعلاً همه با سکه سبز هستند طبق خواسته شما)
+  if (greenCoins < card.cost) {
+    alert("سکه سبز کافی نداری!");
+    return;
+  }
+
+  // ۲. کسر هزینه
+  setGreenCoins(prev => prev - card.cost);
+
+  // ۳. اعمال تغییرات بر اساس هدف کارت
+  if (card.target === "greenProfit") setGreenProfit(prev => prev + card.boost);
+  if (card.target === "redProfit") setRedProfit(prev => prev + card.boost);
+  if (card.target === "orangeProfit") setOrangeProfit(prev => prev + card.boost);
+
+  // ۴. افزایش پروفیت کل (اعتبار اکانت)
+  setTotalProfit(prev => prev + (card.boost * 10));
+  
+  alert(`${card.name} با موفقیت خریداری و ارتقا اعمال شد!`);
+};
 
   
   useEffect(() => {
@@ -179,7 +227,42 @@ const playSwitchSound = () => {
 
       {/* Main Container */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", marginTop: "0px" }}>
-        
+        {activeTab === "Cards" && (
+  <div style={{ flex: 1, padding: "20px", overflowY: "auto", paddingBottom: "100px" }}>
+    <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Upgrades</h2>
+    
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
+      {CARDS_DATA.map((card) => (
+        <div key={card.id} style={{ 
+          background: "#222", 
+          padding: "15px", 
+          borderRadius: "20px", 
+          border: "1px solid #333", 
+          textAlign: "center" 
+        }}>
+          <div style={{ fontSize: "35px" }}>{card.icon}</div>
+          <div style={{ fontWeight: "bold", margin: "10px 0" }}>{card.name}</div>
+          <div style={{ color: "#4CAF50", fontSize: "12px" }}>+{card.boost * 60}/m</div>
+          
+          <button 
+            onClick={() => handleBuyCard(card)}
+            style={{ 
+              marginTop: "10px", 
+              width: "100%", 
+              padding: "8px", 
+              borderRadius: "12px", 
+              backgroundColor: greenCoins >= card.cost ? "#ffd700" : "#444", 
+              border: "none", 
+              fontWeight: "bold" 
+            }}
+          >
+            {card.cost} 🟢
+          </button>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
         {activeTab === "Tap" ? (
           <div style={{ flex: 1, display: "flex", flexDirection: "column", paddingTop: "40px" }}>
             {/* Header */}
