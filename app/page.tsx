@@ -124,7 +124,7 @@ export default function Home() {
       
 
       {/* Main Container */}
-      <div style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", marginTop: "40px" }}>
+      <div style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", marginTop: "0px" }}>
         
         {activeTab === "Tap" ? (
           <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
@@ -175,7 +175,8 @@ export default function Home() {
     padding: "0px", // پدینگ بالا را صفر کردیم (0 اول)
     position: "relative", 
     height: "100%", 
-    overflow: "hidden" 
+    overflow: "hidden",
+    backgroundColor: "#1a1a1a" // رنگ پس‌زمینه رزرو 
           }}>
             {/* ۱. پنل آمار بالا - کاملاً چسبیده به سقف */}
     <div style={{ 
@@ -184,8 +185,9 @@ export default function Home() {
       backdropFilter: "blur(10px)", 
       borderRadius: "0 0 25px 25px", // لبه‌های پایین گرد، لبه‌های بالا صاف
       padding: "20px 15px", 
-      zIndex: 2,
-      borderBottom: "1px solid rgba(255,215,0,0.3)" // یک خط طلایی ظریف زیر باکس
+      zIndex: 10,
+      borderBottom: "1px solid rgba(255,215,0,0.3)", // یک خط طلایی ظریف زیر باکس
+      marginTop: "0px" // اطمینان از حذف مارجین
     }}>
         <div style={{ display: "flex", justifyContent: "space-around", marginBottom: "10px" }}>
            <div style={{textAlign: "center"}}><img src="/currency-c.png" style={{width: "22px"}}/><p style={{margin:0, fontSize: "14px"}}>{greenCoins.toLocaleString()}</p></div>
@@ -205,10 +207,10 @@ export default function Home() {
             {/* ۱. تصویر ربات به عنوان بک‌گراند بزرگ */}
             <div style={{
               position: "absolute",
-              top: "10%",
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: "100%", // بزرگتر از عرض صفحه برای جلوه بیشتر
+              top: "0%",
+              left: "0%",
+              width: "100%",
+              height: "100%",
               opacity: 0.7,   // کمی کمرنگ که نوشته‌ها خوانا باشند
               zIndex: 0,      // رفتن به پشت همه المان‌ها
               pointerEvents: "none"
@@ -221,16 +223,16 @@ export default function Home() {
 
             {/* ۴. بخش کارتریج‌ها - حالا کاملاً پایین قرار می‌گیرد */}
             <div style={{ 
-              width: "100%", 
+              width: "90%", 
               display: "flex", 
               justifyContent: "center", 
               alignItems: "flex-end", // هم‌راستایی از پایین تصاویر
-              gap: "12px", 
-              zIndex: 2,
-              marginBottom: "10px", // فاصله از لبه فوتر
+              gap: "15px", 
+              zIndex: 5,
+              marginBottom: "20px", // فاصله از لبه فوتر
               padding: "15px",
-              backgroundColor: "rgba(0,0,0,0.2)",
-              borderRadius: "25px"
+              borderRadius: "20px"
+              
             }}>
                <img src={isGreenOn ? "/cartridge-green-on.png" : "/cartridge-green-off.png"} style={{ width: "75px", height: "auto" }} />
                <img src="/cartridge-red-free.png" style={{ width: "75px", height: "auto" }} />
