@@ -18,7 +18,7 @@ export default function Home() {
   const [orangeCoins, setOrangeCoins] = useState(0);
   const [saladToken, setSaladToken] = useState(0);
   const [energy, setEnergy] = useState(2000);
-
+  const [isTapping, setIsTapping] = useState(false);
   const [isGreenOn, setIsGreenOn] = useState(true);
   const [isRedOn, setIsRedOn] = useState(false);
   const [isOrangeOn, setIsOrangeOn] = useState(false);
@@ -98,17 +98,21 @@ export default function Home() {
   // --- Handlers ---
   const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
     if (energy <= 0) return;
+    
+    // فعال کردن حالت تپ برای انیمیشن
+    setIsTapping(true);
+    setTimeout(() => setIsTapping(false), 100); // بعد از 100 میلی‌ثانیه به حالت اول برگرد
+
     setGreenCoins(prev => prev + 1);
     setEnergy(prev => Math.max(0, prev - 1));
 
+    // بقیه کدهای قبلی (صدا و اعداد شناور)...
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
       audioRef.current.play().catch(() => {});
     }
-
     const clientX = 'touches' in e ? (e as React.TouchEvent).touches[0].clientX : (e as React.MouseEvent).clientX;
     const clientY = 'touches' in e ? (e as React.TouchEvent).touches[0].clientY : (e as React.MouseEvent).clientY;
-
     const newNum = { id: Date.now(), x: clientX, y: clientY, value: 1 };
     setFloatingNumbers(prev => [...prev, newNum]);
     setTimeout(() => setFloatingNumbers(prev => prev.filter(n => n.id !== newNum.id)), 1000);
@@ -152,18 +156,26 @@ export default function Home() {
               </div>
             </div>
             <div onClick={handleClick} style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", cursor: "pointer", marginTop: "-100px" }}>
-              <img src="/coin.png" style={{ width: "260px" }} />
+              <img 
+  src="/coin.png" 
+  style={{ 
+    width: "260px", 
+    transition: "transform 0.05s", 
+    transform: isTapping ? "scale(0.92)" : "scale(1)" // افکت کوچک شدن
+  }} 
+/>
             </div>
           </div>
         ) : activeTab === "Mine" ? (
           <div style={{ 
-            flex: 1, 
-            display: "flex", 
-            flexDirection: "column", 
-            alignItems: "center", 
-            padding: "10px", 
-            position: "relative", // برای اینکه ربات بتواند زیر بقیه قرار بگیرد
-            overflow: "hidden" 
+    flex: 1, 
+    display: "flex", 
+    flexDirection: "column", 
+    alignItems: "center", 
+    padding: "0 10px 10px 10px", // پدینگ بالا را صفر کردیم (0 اول)
+    position: "relative", 
+    height: "100%", 
+    overflow: "hidden" 
           }}>
             
             {/* ۱. تصویر ربات به عنوان بک‌گراند بزرگ */}
@@ -180,17 +192,31 @@ export default function Home() {
               <img src="/chef-robot.png" style={{ width: "100%", height: "auto", objectFit: "contain" }} />
             </div>
 
-            {/* ۲. پنل آمار بالای صفحه */}
-            <div style={{ width: "100%", backgroundColor: "rgba(0,0,0,0.6)", backdropFilter: "blur(8px)", borderRadius: "20px", padding: "15px", zIndex: 1 }}>
-                <div style={{ display: "flex", justifyContent: "space-around", textAlign: "center" }}>
-                   <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}><img src="/currency-c.png" style={{width: "22px"}}/><span style={{fontSize: "14px", marginTop: "4px"}}>{greenCoins.toLocaleString()}</span></div>
-                   <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}><img src="/currency-r.png" style={{width: "22px"}}/><span style={{fontSize: "14px", marginTop: "4px"}}>{redCoins.toLocaleString()}</span></div>
-                   <div style={{display: "flex", flexDirection: "column", alignItems: "center"}}><img src="/currency-t.png" style={{width: "22px"}}/><span style={{fontSize: "14px", marginTop: "4px"}}>{orangeCoins.toLocaleString()}</span></div>
-                </div>
-                <h2 style={{textAlign: "center", color: "#ffd700", margin: "15px 0 0 0", fontSize: "22px"}}>
-                  Profit: {(greenProfit + redProfit + orangeProfit).toLocaleString()} / s
-                </h2>
-            </div>
+            {/* ۱. پنل آمار بالا - کاملاً چسبیده به سقف */}
+    <div style={{ 
+      width: "100%", 
+      backgroundColor: "rgba(0,0,0,0.7)", // کمی تیره‌تر برای تضاد بهتر
+      backdropFilter: "blur(10px)", 
+      borderRadius: "0 0 25px 25px", // لبه‌های پایین گرد، لبه‌های بالا صاف
+      padding: "20px 15px", 
+      zIndex: 2,
+      borderBottom: "1px solid rgba(255,215,0,0.3)" // یک خط طلایی ظریف زیر باکس
+    }}>
+        <div style={{ display: "flex", justifyContent: "space-around", marginBottom: "10px" }}>
+           <div style={{textAlign: "center"}}><img src="/currency-c.png" style={{width: "22px"}}/><p style={{margin:0, fontSize: "14px"}}>{greenCoins.toLocaleString()}</p></div>
+           <div style={{textAlign: "center"}}><img src="/currency-r.png" style={{width: "22px"}}/><p style={{margin:0, fontSize: "14px"}}>{redCoins.toLocaleString()}</p></div>
+           <div style={{textAlign: "center"}}><img src="/currency-t.png" style={{width: "22px"}}/><p style={{margin:0, fontSize: "14px"}}>{orangeCoins.toLocaleString()}</p></div>
+        </div>
+        <div style={{ 
+          textAlign: "center", 
+          color: "#ffd700", 
+          fontWeight: "bold", 
+          fontSize: "20px",
+          textShadow: "0 0 10px rgba(255,215,0,0.2)" 
+        }}>
+          Profit: {(greenProfit + redProfit + orangeProfit).toLocaleString()} / s
+        </div>
+    </div>
 
             {/* ۳. فضای خالی منعطف (این بخش کارتریج‌ها را به پایین هل می‌دهد) */}
             <div style={{ flex: 1 }} /> 
@@ -249,10 +275,25 @@ export default function Home() {
         </>
       )}
 
-      {/* Floating Numbers Animation */}
       {floatingNumbers.map(num => (
-        <div key={num.id} style={{ position: "fixed", left: num.x, top: num.y, color: "#ffd700", animation: "f 0.8s forwards", pointerEvents: "none", zIndex: 1000 }}>+1</div>
-      ))}
+  <div 
+    key={num.id} 
+    style={{ 
+      position: "fixed", 
+      left: num.x, 
+      top: num.y, 
+      color: "#ffd700", 
+      fontSize: "32px",      // اندازه را از اینجا بزرگتر کردیم
+      fontWeight: "bold", 
+      textShadow: "0px 4px 10px rgba(0,0,0,0.8)", // سایه غلیظ‌تر برای دیده شدن روی نینجا
+      animation: "f 0.8s forwards", 
+      pointerEvents: "none", 
+      zIndex: 1000 
+    }}
+  >
+    +1
+  </div>
+))}
 
       <style>{`@keyframes f { 0%{opacity:1; transform:translateY(0)} 100%{opacity:0; transform:translateY(-100px)} }`}</style>
     </div>
