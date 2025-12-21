@@ -22,10 +22,10 @@ export default function Home() {
   const [isGreenOn, setIsGreenOn] = useState(true);
   const [isRedOn, setIsRedOn] = useState(false);
   const [isOrangeOn, setIsOrangeOn] = useState(false);
-  const [isGreenActive, setIsGreenActive] = useState(false); // وضعیت فعالیت ماینر
-  const [isRedActive, setIsRedActive] = useState(false); // اضافه شد
-  const [isOrangeActive, setIsOrangeActive] = useState(false); // اضافه شد
-  const [timeLeft, setTimeLeft] = useState(300); // ۵ دقیقه به ثانیه (5 * 60)
+  const [isGreenActive, setIsGreenActive] = useState(false); // vaziate miner
+  const [isRedActive, setIsRedActive] = useState(false); 
+  const [isOrangeActive, setIsOrangeActive] = useState(false);
+  const [timeLeft, setTimeLeft] = useState(300); // tabdil be sanie
   const [greenProfit, setGreenProfit] = useState(1);
   const [redProfit, setRedProfit] = useState(0);
   const [orangeProfit, setOrangeProfit] = useState(0);
@@ -35,14 +35,12 @@ export default function Home() {
   const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumber[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
-  // ۱. بارگذاری اطلاعات و محاسبه غیبت (Offline System)
-  useEffect(() => {
-    // لود کردن صدای سوئیچ کارتریج
-  // صدای تپ کردن روی نینجا
-  audioRef.current = new Audio("/click.mp3");
   
-  // صدای سوییچ کردن کارتریج (فایل جدید شما)
-  switchAudioRef.current = new Audio("/switch.mp3"); 
+  useEffect(() => {
+   
+    audioRef.current = new Audio("/click.mp3");// sedaye tap kardan
+  
+    switchAudioRef.current = new Audio("/switch.mp3"); // sedaye kartrij
   switchAudioRef.current.volume = 0.5;
 
     const savedGreen = localStorage.getItem("ninjaGreenCoins");
@@ -64,7 +62,7 @@ export default function Home() {
       const currentTime = Date.now();
       const secondsPassed = Math.floor((currentTime - parseInt(lastTime)) / 1000);
       
-      // منطق ۵ دقیقه سود آفلاین (۳۰۰ ثانیه)
+      // 5 min mine
       const offlineSeconds = Math.min(300, secondsPassed);
       
       setEnergy(Math.min(2000, parseInt(savedEnergy) + secondsPassed));
@@ -85,10 +83,10 @@ export default function Home() {
     return () => clearTimeout(tgTimer);
   }, []);
 
-  // ۲. ذخیره‌سازی خودکار در localStorage
+  // zakhire sazi
   useEffect(() => {
     localStorage.setItem("ninjaGreenCoins", greenCoins.toString());
-    localStorage.setItem("ninjaGreenActive", isGreenActive.toString()); // ذخیره وضعیت روشن/خاموش
+    localStorage.setItem("ninjaGreenActive", isGreenActive.toString());
     localStorage.setItem("lastExitTime", Date.now().toString());
     localStorage.setItem("ninjaRedCoins", redCoins.toString());
     localStorage.setItem("ninjaOrangeCoins", orangeCoins.toString());
@@ -97,25 +95,25 @@ export default function Home() {
     localStorage.setItem("lastTime", Date.now().toString());
   }, [greenCoins, redCoins, orangeCoins, energy, saladToken]);
 
-  // ۳. تایمر تولید ثانیه‌ای (آنلاین)
+  // timer tolid sanieii
   useEffect(() => {
   let interval: NodeJS.Timeout | undefined;
 
-  // اگر حتی یکی از کارتریج‌ها روشن باشد، اینتروال شروع می‌شود
+  // agar yeki az kartrij ha roshan bashad
   if (isGreenActive || isRedActive || isOrangeActive) {
     interval = setInterval(() => {
       if (isGreenActive) setGreenCoins(prev => prev + greenProfit);
       if (isRedActive) setRedCoins(prev => prev + redProfit);
       if (isOrangeActive) setOrangeCoins(prev => prev + orangeProfit);
       
-      setTimeLeft(300); // تمدید زمان آفلاین
+      setTimeLeft(300); // tamdid zaman offline
     }, 1000);
   }
 
   return () => {
     if (interval) clearInterval(interval);
   };
-}, [isGreenActive, isRedActive, isOrangeActive, greenProfit, redProfit, orangeProfit]); // timeLeft را از دیپندنسی‌ها خارج کردیم
+}, [isGreenActive, isRedActive, isOrangeActive, greenProfit, redProfit, orangeProfit]);
 const handleGreenCartridgeClick = () => {
   setIsGreenActive(prev => {
     const newState = !prev;
@@ -143,7 +141,7 @@ const handleOrangeCartridgeClick = () => {
   playSwitchSound();
 };
 
-// یک تابع کمکی برای صدا (برای تمیزی کد)
+// tebe komaki seda
 const playSwitchSound = () => {
   if (switchAudioRef.current) {
     switchAudioRef.current.currentTime = 0;
@@ -155,14 +153,13 @@ const playSwitchSound = () => {
   const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
     if (energy <= 0) return;
     
-    // فعال کردن حالت تپ برای انیمیشن
+    // tap baraye animation
     setIsTapping(true);
-    setTimeout(() => setIsTapping(false), 100); // بعد از 100 میلی‌ثانیه به حالت اول برگرد
+    setTimeout(() => setIsTapping(false), 100); // bargasht be halate aval
 
     setGreenCoins(prev => prev + 1);
     setEnergy(prev => Math.max(0, prev - 1));
 
-    // بقیه کدهای قبلی (صدا و اعداد شناور)...
     if (audioRef.current) {
       audioRef.current.currentTime = 0;
       audioRef.current.play().catch(() => {});
@@ -217,7 +214,7 @@ const playSwitchSound = () => {
   style={{ 
     width: "260px", 
     transition: "transform 0.05s", 
-    transform: isTapping ? "scale(0.92)" : "scale(1)" // افکت کوچک شدن
+    transform: isTapping ? "scale(0.92)" : "scale(1)" // kochak shodan
   }} 
 />
             </div>
@@ -228,13 +225,13 @@ const playSwitchSound = () => {
     display: "flex", 
     flexDirection: "column", 
     alignItems: "center", 
-    padding: "0px", // پدینگ بالا را صفر کردیم (0 اول)
+    padding: "0px",
     position: "relative", 
     height: "100%", 
     overflow: "hidden",
-    backgroundColor: "#1a1a1a" // رنگ پس‌زمینه رزرو 
+    backgroundColor: "#1a1a1a"
           }}>
-            {/* ۱. پنل آمار بالا - کاملاً چسبیده به سقف */}
+            {/* panel amar balaye safhe*/}
     <div style={{ 
     width: "100%", 
     backgroundColor: "rgba(0,0,0,0.8)", 
@@ -248,10 +245,10 @@ const playSwitchSound = () => {
     flexDirection: "column",
     alignItems: "center"
 }}>
-    {/* ۱. ردیف سکه‌ها (آیکون و عدد در یک خط) */}
+    {/* radife seke ha*/}
     <div style={{ display: "flex", justifyContent: "space-around", width: "100%", marginBottom: "2px", alignItems: "flex-start" }}>
     
-    {/* ستون سکه سبز */}
+    {/* sotoone seke haye sabz*/}
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
             <img src="/currency-c.png" style={{width: "18px"}}/>
@@ -264,7 +261,7 @@ const playSwitchSound = () => {
         </div>
     </div>
 
-    {/* ستون سکه قرمز */}
+    {/* sotone seke haye ghermez*/}
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
             <img src="/currency-r.png" style={{width: "18px"}}/>
@@ -273,11 +270,11 @@ const playSwitchSound = () => {
         <div style={{ fontSize: "11px", color: "#aaa", marginTop: "2px" }}>
             {redProfit * 60}/m
         </div>
-        {/* اگر برای بقیه هم زمان آفلاین داری اینجا اضافه کن، وگرنه فضای خالی بذار */}
+        {/* tanzime zamane offline baraye baghie seke ha*/}
         <div style={{ height: "12px" }}></div> 
     </div>
 
-    {/* ستون سکه نارنجی */}
+    {/* sotone seke narenji*/}
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
             <img src="/currency-t.png" style={{width: "18px"}}/>
@@ -290,7 +287,7 @@ const playSwitchSound = () => {
     </div>
 </div>
 
-    {/* ۲. ردیف هم‌راستای پروفیت و زمان */}
+    {/* radife profit va zaman*/}
     <div style={{ 
         width: "90%", 
         display: "flex", 
@@ -308,7 +305,7 @@ const playSwitchSound = () => {
         </div>
     </div>
 
-    {/* ۳. نمایشگر بزرگ هوشمند */}
+    {/* namayeshgare bozorge hoshmand*/}
 <div style={{ 
     display: "flex", 
     alignItems: "center", 
@@ -319,43 +316,43 @@ const playSwitchSound = () => {
     border: `1px solid ${isRedActive ? "#f44336" : isOrangeActive ? "#ff9800" : "#4CAF50"}`, // تغییر رنگ مرز بر اساس فعالیت
     width: "fit-content"
 }}>
-    {/* تغییر خودکار آیکون */}
+    {/* taghiire khodkare icon*/}
     <img 
         src={isRedActive ? "/currency-r.png" : isOrangeActive ? "/currency-t.png" : "/currency-c.png"} 
         style={{ width: "30px", height: "30px" }} 
     />
-    {/* تغییر خودکار عدد */}
+    {/* taghiire khodkare adad*/}
     <span style={{ fontSize: "28px", fontWeight: "900", color: "#fff" }}>
         {isRedActive ? redCoins.toLocaleString() : isOrangeActive ? orangeCoins.toLocaleString() : greenCoins.toLocaleString()}
     </span>
 </div>
 </div>
-            {/* ۱. تصویر ربات به عنوان بک‌گراند بزرگ */}
+            {/* tasvire robor*/}
             <div style={{
               position: "absolute",
               top: "0%",
               left: "0%",
               width: "100%",
               height: "100%",
-              opacity: 0.8,   // کمی کمرنگ که نوشته‌ها خوانا باشند
-              zIndex: 0,      // رفتن به پشت همه المان‌ها
+              opacity: 0.8,
+              zIndex: 0,      // raftan poshte elemanha
               pointerEvents: "none"
             }}>
               <img src="/chef-robot.png" style={{ width: "100%", height: "auto", objectFit: "contain" }} />
             </div>
 
-            {/* ۳. فضای خالی منعطف (این بخش کارتریج‌ها را به پایین هل می‌دهد) */}
+            {/* hol dadne kartrij ha be paiin*/}
             <div style={{ flex: 1 }} /> 
 
-            {/* ۴. بخش کارتریج‌ها - حالا کاملاً پایین قرار می‌گیرد */}
+            {/* kartrij ha*/}
             <div style={{ 
               width: "90%", 
               display: "flex", 
               justifyContent: "center", 
-              alignItems: "flex-end", // هم‌راستایی از پایین تصاویر
+              alignItems: "flex-end",
               gap: "15px", 
               zIndex: 5,
-              marginBottom: "20px", // فاصله از لبه فوتر
+              marginBottom: "20px",
               padding: "15px",
               borderRadius: "20px"
               
@@ -375,7 +372,7 @@ const playSwitchSound = () => {
   
 </div>
 
-{/* کارتریج قرمز */}
+{/* kartrij ghermez*/}
 <div onClick={handleRedCartridgeClick} style={{ cursor: "pointer", transition: "all 0.3s" }}>
   <img 
     src={isRedActive ? "/cartridge-red-on.png" : "/cartridge-red-off.png"} 
@@ -387,7 +384,7 @@ const playSwitchSound = () => {
   />
 </div>
 
-{/* کارتریج نارنجی */}
+{/* kartrij narenji*/}
 <div onClick={handleOrangeCartridgeClick} style={{ cursor: "pointer", transition: "all 0.3s" }}>
   <img 
     src={isOrangeActive ? "/cartridge-orange-on.png" : "/cartridge-orange-off.png"} 
@@ -427,8 +424,8 @@ const playSwitchSound = () => {
       alignItems: "center", 
       justifyContent: "center",
       padding: "10px 0",
-      transition: "none", // حذف هرگونه انیمیشن تغییر سایز
-      transform: "none"   // اطمینان از عدم تغییر اسکیل
+      transition: "none",
+      transform: "none"
     }}
   >
     <img 
@@ -436,11 +433,11 @@ const playSwitchSound = () => {
       alt={label} 
       style={{ 
         width: "40px", 
-        height: "40px", // مقدار ثابت برای جلوگیری از دفرمه شدن
+        height: "40px",
         objectFit: "contain",
         filter: isActive ? "none" : "grayscale(100%)",
         opacity: isActive ? 1 : 0.6,
-        transition: "opacity 0.2s" // فقط کمرنگ و پررنگ شدن نرم
+        transition: "opacity 0.2s"
       }} 
     />
   </button>
@@ -468,9 +465,9 @@ const playSwitchSound = () => {
       left: num.x, 
       top: num.y, 
       color: "#ffd700", 
-      fontSize: "32px",      // اندازه را از اینجا بزرگتر کردیم
+      fontSize: "32px",
       fontWeight: "bold", 
-      textShadow: "0px 4px 10px rgba(0,0,0,0.8)", // سایه غلیظ‌تر برای دیده شدن روی نینجا
+      textShadow: "0px 4px 10px rgba(0,0,0,0.8)",
       animation: "f 0.8s forwards", 
       pointerEvents: "none", 
       zIndex: 1000 
