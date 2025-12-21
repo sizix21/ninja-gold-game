@@ -23,17 +23,27 @@ export default function Home() {
   const [isRedOn, setIsRedOn] = useState(false);
   const [isOrangeOn, setIsOrangeOn] = useState(false);
   const [isGreenActive, setIsGreenActive] = useState(false); // وضعیت فعالیت ماینر
+  const [isRedActive, setIsRedActive] = useState(false); // اضافه شد
+  const [isOrangeActive, setIsOrangeActive] = useState(false); // اضافه شد
   const [timeLeft, setTimeLeft] = useState(300); // ۵ دقیقه به ثانیه (5 * 60)
   const [greenProfit, setGreenProfit] = useState(1);
   const [redProfit, setRedProfit] = useState(0);
   const [orangeProfit, setOrangeProfit] = useState(0);
+  const switchAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [totalProfit, setTotalProfit] = useState(0);
 
   const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumber[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   // ۱. بارگذاری اطلاعات و محاسبه غیبت (Offline System)
   useEffect(() => {
-    audioRef.current = new Audio("/click.mp3");
+    // لود کردن صدای سوئیچ کارتریج
+  // صدای تپ کردن روی نینجا
+  audioRef.current = new Audio("/click.mp3");
+  
+  // صدای سوییچ کردن کارتریج (فایل جدید شما)
+  switchAudioRef.current = new Audio("/switch.mp3"); 
+  switchAudioRef.current.volume = 0.5;
 
     const savedGreen = localStorage.getItem("ninjaGreenCoins");
     if (savedGreen) setGreenCoins(parseInt(savedGreen));
@@ -91,23 +101,56 @@ export default function Home() {
   useEffect(() => {
   let interval: NodeJS.Timeout | undefined;
 
-  if (isGreenActive) {
+  // اگر حتی یکی از کارتریج‌ها روشن باشد، اینتروال شروع می‌شود
+  if (isGreenActive || isRedActive || isOrangeActive) {
     interval = setInterval(() => {
-      // اضافه کردن سکه سبز (مادامی که یوزر در بازی است ادامه دارد)
-      setGreenCoins((prev) => prev + greenProfit);
+      if (isGreenActive) setGreenCoins(prev => prev + greenProfit);
+      if (isRedActive) setRedCoins(prev => prev + redProfit);
+      if (isOrangeActive) setOrangeCoins(prev => prev + orangeProfit);
       
-      // در زمان حضور در بازی، timeLeft را همیشه روی ۳۰۰ ثانیه نگه می‌داریم
-      setTimeLeft(300); 
+      setTimeLeft(300); // تمدید زمان آفلاین
     }, 1000);
   }
 
   return () => {
     if (interval) clearInterval(interval);
   };
-}, [isGreenActive, greenProfit]); // timeLeft را از دیپندنسی‌ها خارج کردیم
+}, [isGreenActive, isRedActive, isOrangeActive, greenProfit, redProfit, orangeProfit]); // timeLeft را از دیپندنسی‌ها خارج کردیم
 const handleGreenCartridgeClick = () => {
-  setIsGreenActive(prev => !prev);
-  };
+  setIsGreenActive(prev => {
+    const newState = !prev;
+    if (newState) { { setIsRedActive(false); setIsOrangeActive(false); } }
+    return newState;
+  });
+  playSwitchSound();
+};
+
+const handleRedCartridgeClick = () => {
+  setIsRedActive(prev => {
+    const newState = !prev;
+    if (newState) { { setIsGreenActive(false); setIsOrangeActive(false); } }
+    return newState;
+  });
+  playSwitchSound();
+};
+
+const handleOrangeCartridgeClick = () => {
+  setIsOrangeActive(prev => {
+    const newState = !prev;
+    if (newState) { { setIsGreenActive(false); setIsRedActive(false); } }
+    return newState;
+  });
+  playSwitchSound();
+};
+
+// یک تابع کمکی برای صدا (برای تمیزی کد)
+const playSwitchSound = () => {
+  if (switchAudioRef.current) {
+    switchAudioRef.current.currentTime = 0;
+    switchAudioRef.current.play().catch(() => {});
+  }
+};
+
   // --- Handlers ---
   const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
     if (energy <= 0) return;
@@ -197,7 +240,8 @@ const handleGreenCartridgeClick = () => {
     backgroundColor: "rgba(0,0,0,0.8)", 
     backdropFilter: "blur(12px)", 
     borderRadius: "0 0 30px 30px", 
-    padding: "20px 15px", 
+    padding: "20px 15px",
+    opacity: 0.8, 
     zIndex: 10,
     borderBottom: "2px solid rgba(255,215,0,0.3)",
     display: "flex",
@@ -205,23 +249,46 @@ const handleGreenCartridgeClick = () => {
     alignItems: "center"
 }}>
     {/* ۱. ردیف سکه‌ها (آیکون و عدد در یک خط) */}
-    <div style={{ display: "flex", justifyContent: "space-between", width: "100%", padding: "0 10px" }}>
-        {/* سکه سبز */}
+    <div style={{ display: "flex", justifyContent: "space-around", width: "100%", marginBottom: "2px", alignItems: "flex-start" }}>
+    
+    {/* ستون سکه سبز */}
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-            <img src="/currency-c.png" style={{width: "20px"}}/>
-            <span style={{fontSize: "14px", fontWeight: "bold"}}>{greenCoins.toLocaleString()}</span>
+            <img src="/currency-c.png" style={{width: "18px"}}/>
+            <span style={{fontSize: "13px", fontWeight: "bold"}}>{greenCoins.toLocaleString()}</span>
         </div>
-        {/* سکه قرمز */}
-        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-            <img src="/currency-r.png" style={{width: "20px"}}/>
-            <span style={{fontSize: "14px", fontWeight: "bold"}}>{redCoins.toLocaleString()}</span>
+        <div style={{ fontSize: "11px", color: "#aaa", marginTop: "2px" }}>
+            {greenProfit * 60}/m
         </div>
-        {/* سکه نارنجی */}
-        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
-            <img src="/currency-t.png" style={{width: "20px"}}/>
-            <span style={{fontSize: "14px", fontWeight: "bold"}}>{orangeCoins.toLocaleString()}</span>
+        <div style={{ fontSize: "10px", color: "#fff", opacity: 0.6, marginTop: "2px" }}>
         </div>
     </div>
+
+    {/* ستون سکه قرمز */}
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+            <img src="/currency-r.png" style={{width: "18px"}}/>
+            <span style={{fontSize: "13px", fontWeight: "bold"}}>{redCoins.toLocaleString()}</span>
+        </div>
+        <div style={{ fontSize: "11px", color: "#aaa", marginTop: "2px" }}>
+            {redProfit * 60}/m
+        </div>
+        {/* اگر برای بقیه هم زمان آفلاین داری اینجا اضافه کن، وگرنه فضای خالی بذار */}
+        <div style={{ height: "12px" }}></div> 
+    </div>
+
+    {/* ستون سکه نارنجی */}
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+            <img src="/currency-t.png" style={{width: "18px"}}/>
+            <span style={{fontSize: "13px", fontWeight: "bold"}}>{orangeCoins.toLocaleString()}</span>
+        </div>
+        <div style={{ fontSize: "11px", color: "#aaa", marginTop: "2px" }}>
+            {orangeProfit * 60}/m
+        </div>
+        <div style={{ height: "12px" }}></div>
+    </div>
+</div>
 
     {/* ۲. ردیف هم‌راستای پروفیت و زمان */}
     <div style={{ 
@@ -233,30 +300,35 @@ const handleGreenCartridgeClick = () => {
         paddingTop: "10px"
     }}>
         <div style={{ color: "#ffd700", fontSize: "15px", fontWeight: "bold" }}>
-            Profit: {greenProfit.toLocaleString()}
-        </div>
+    Profit: {totalProfit.toLocaleString()}
+</div>
         <div style={{ color: "#fff", fontSize: "14px", fontWeight: "500", display: "flex", alignItems: "center", gap: "4px" }}>
             <span>🕒</span>
             <span>5min</span>
         </div>
     </div>
 
-    {/* ۳. نمایش بزرگ موجودی سکه سبز */}
-    <div style={{ 
-        display: "flex", 
-        alignItems: "center", 
-        gap: "12px",
-        backgroundColor: "rgba(255,215,0,0.1)",
-        padding: "10px 30px",
-        borderRadius: "20px",
-        border: "1px solid rgba(255,215,0,0.2)",
-        width: "fit-content"
-    }}>
-        <img src="/currency-c.png" style={{ width: "30px", height: "30px" }} />
-        <span style={{ fontSize: "28px", fontWeight: "900", color: "#fff" }}>
-            {greenCoins.toLocaleString()}
-        </span>
-    </div>
+    {/* ۳. نمایشگر بزرگ هوشمند */}
+<div style={{ 
+    display: "flex", 
+    alignItems: "center", 
+    gap: "12px",
+    backgroundColor: "rgba(255,215,0,0.1)",
+    padding: "5px 30px",
+    borderRadius: "20px",
+    border: `1px solid ${isRedActive ? "#f44336" : isOrangeActive ? "#ff9800" : "#4CAF50"}`, // تغییر رنگ مرز بر اساس فعالیت
+    width: "fit-content"
+}}>
+    {/* تغییر خودکار آیکون */}
+    <img 
+        src={isRedActive ? "/currency-r.png" : isOrangeActive ? "/currency-t.png" : "/currency-c.png"} 
+        style={{ width: "30px", height: "30px" }} 
+    />
+    {/* تغییر خودکار عدد */}
+    <span style={{ fontSize: "28px", fontWeight: "900", color: "#fff" }}>
+        {isRedActive ? redCoins.toLocaleString() : isOrangeActive ? orangeCoins.toLocaleString() : greenCoins.toLocaleString()}
+    </span>
+</div>
 </div>
             {/* ۱. تصویر ربات به عنوان بک‌گراند بزرگ */}
             <div style={{
@@ -265,7 +337,7 @@ const handleGreenCartridgeClick = () => {
               left: "0%",
               width: "100%",
               height: "100%",
-              opacity: 0.7,   // کمی کمرنگ که نوشته‌ها خوانا باشند
+              opacity: 0.8,   // کمی کمرنگ که نوشته‌ها خوانا باشند
               zIndex: 0,      // رفتن به پشت همه المان‌ها
               pointerEvents: "none"
             }}>
@@ -300,12 +372,32 @@ const handleGreenCartridgeClick = () => {
       transition: "all 0.3s"
     }} 
   />
-  {/* اینجا قبلاً تایمر بود که طبق خواسته شما حذف شد */}
+  
 </div>
 
-{/* سایر کارتریج‌ها که فعلاً غیرفعال هستند */}
-<img src="/cartridge-red-free.png" style={{ width: "75px", height: "auto", opacity: 0.4 }} />
-<img src="/cartridge-orange-free.png" style={{ width: "75px", height: "auto", opacity: 0.4 }} />
+{/* کارتریج قرمز */}
+<div onClick={handleRedCartridgeClick} style={{ cursor: "pointer", transition: "all 0.3s" }}>
+  <img 
+    src={isRedActive ? "/cartridge-red-on.png" : "/cartridge-red-off.png"} 
+    style={{ 
+      width: "75px", 
+      filter: isRedActive ? "drop-shadow(0 0 10px #f44336)" : "none",
+      transition: "all 0.3s"
+    }} 
+  />
+</div>
+
+{/* کارتریج نارنجی */}
+<div onClick={handleOrangeCartridgeClick} style={{ cursor: "pointer", transition: "all 0.3s" }}>
+  <img 
+    src={isOrangeActive ? "/cartridge-orange-on.png" : "/cartridge-orange-off.png"} 
+    style={{ 
+      width: "75px", 
+      filter: isOrangeActive ? "drop-shadow(0 0 10px #ff9800)" : "none",
+      transition: "all 0.3s"
+    }} 
+  />
+</div>
             </div>
 
           </div>
