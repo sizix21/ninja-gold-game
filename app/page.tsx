@@ -22,7 +22,8 @@ export default function Home() {
   const [isGreenOn, setIsGreenOn] = useState(true);
   const [isRedOn, setIsRedOn] = useState(false);
   const [isOrangeOn, setIsOrangeOn] = useState(false);
-
+  const [isGreenActive, setIsGreenActive] = useState(false); // وضعیت فعالیت ماینر
+  const [timeLeft, setTimeLeft] = useState(300); // ۵ دقیقه به ثانیه (5 * 60)
   const [greenProfit, setGreenProfit] = useState(1);
   const [redProfit, setRedProfit] = useState(0);
   const [orangeProfit, setOrangeProfit] = useState(0);
@@ -77,6 +78,8 @@ export default function Home() {
   // ۲. ذخیره‌سازی خودکار در localStorage
   useEffect(() => {
     localStorage.setItem("ninjaGreenCoins", greenCoins.toString());
+    localStorage.setItem("ninjaGreenActive", isGreenActive.toString()); // ذخیره وضعیت روشن/خاموش
+    localStorage.setItem("lastExitTime", Date.now().toString());
     localStorage.setItem("ninjaRedCoins", redCoins.toString());
     localStorage.setItem("ninjaOrangeCoins", orangeCoins.toString());
     localStorage.setItem("ninjaEnergy", energy.toString());
@@ -86,15 +89,25 @@ export default function Home() {
 
   // ۳. تایمر تولید ثانیه‌ای (آنلاین)
   useEffect(() => {
-    const timer = setInterval(() => {
-      setEnergy((prev) => (prev < 2000 ? prev + 1 : 2000));
-      if (isGreenOn) setGreenCoins(prev => prev + greenProfit);
-      if (isRedOn) setRedCoins(prev => prev + redProfit);
-      if (isOrangeOn) setOrangeCoins(prev => prev + orangeProfit);
-    }, 1000);
-    return () => clearInterval(timer);
-  }, [isGreenOn, isRedOn, isOrangeOn, greenProfit, redProfit, orangeProfit]);
+  let interval: NodeJS.Timeout | undefined;
 
+  if (isGreenActive) {
+    interval = setInterval(() => {
+      // اضافه کردن سکه سبز (مادامی که یوزر در بازی است ادامه دارد)
+      setGreenCoins((prev) => prev + greenProfit);
+      
+      // در زمان حضور در بازی، timeLeft را همیشه روی ۳۰۰ ثانیه نگه می‌داریم
+      setTimeLeft(300); 
+    }, 1000);
+  }
+
+  return () => {
+    if (interval) clearInterval(interval);
+  };
+}, [isGreenActive, greenProfit]); // timeLeft را از دیپندنسی‌ها خارج کردیم
+const handleGreenCartridgeClick = () => {
+  setIsGreenActive(prev => !prev);
+  };
   // --- Handlers ---
   const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
     if (energy <= 0) return;
@@ -127,7 +140,7 @@ export default function Home() {
       <div style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", marginTop: "0px" }}>
         
         {activeTab === "Tap" ? (
-          <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
+          <div style={{ flex: 1, display: "flex", flexDirection: "column", paddingTop: "40px" }}>
             {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", padding: "10px 15px", position: "absolute", top: 0, left: 0, boxSizing: "border-box", zIndex: 10 }}>
         <div onClick={() => setActiveTab("Level")} style={{ display: "flex", alignItems: "center", gap: "10px", backgroundColor: "rgba(255,255,255,0.05)", padding: "5px 10px", borderRadius: "12px", cursor: "pointer" }}>
@@ -180,30 +193,71 @@ export default function Home() {
           }}>
             {/* ۱. پنل آمار بالا - کاملاً چسبیده به سقف */}
     <div style={{ 
-      width: "100%", 
-      backgroundColor: "rgba(0,0,0,0.7)", // کمی تیره‌تر برای تضاد بهتر
-      backdropFilter: "blur(10px)", 
-      borderRadius: "0 0 25px 25px", // لبه‌های پایین گرد، لبه‌های بالا صاف
-      padding: "20px 15px", 
-      zIndex: 10,
-      borderBottom: "1px solid rgba(255,215,0,0.3)", // یک خط طلایی ظریف زیر باکس
-      marginTop: "0px" // اطمینان از حذف مارجین
-    }}>
-        <div style={{ display: "flex", justifyContent: "space-around", marginBottom: "10px" }}>
-           <div style={{textAlign: "center"}}><img src="/currency-c.png" style={{width: "22px"}}/><p style={{margin:0, fontSize: "14px"}}>{greenCoins.toLocaleString()}</p></div>
-           <div style={{textAlign: "center"}}><img src="/currency-r.png" style={{width: "22px"}}/><p style={{margin:0, fontSize: "14px"}}>{redCoins.toLocaleString()}</p></div>
-           <div style={{textAlign: "center"}}><img src="/currency-t.png" style={{width: "22px"}}/><p style={{margin:0, fontSize: "14px"}}>{orangeCoins.toLocaleString()}</p></div>
+    width: "100%", 
+    backgroundColor: "rgba(0,0,0,0.8)", 
+    backdropFilter: "blur(12px)", 
+    borderRadius: "0 0 30px 30px", 
+    padding: "20px 15px", 
+    zIndex: 10,
+    borderBottom: "2px solid rgba(255,215,0,0.3)",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center"
+}}>
+    {/* ۱. ردیف سکه‌ها (آیکون و عدد در یک خط) */}
+    <div style={{ display: "flex", justifyContent: "space-between", width: "100%", padding: "0 10px" }}>
+        {/* سکه سبز */}
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+            <img src="/currency-c.png" style={{width: "20px"}}/>
+            <span style={{fontSize: "14px", fontWeight: "bold"}}>{greenCoins.toLocaleString()}</span>
         </div>
-        <div style={{ 
-          textAlign: "center", 
-          color: "#ffd700", 
-          fontWeight: "bold", 
-          fontSize: "20px",
-          textShadow: "0 0 10px rgba(255,215,0,0.2)" 
-        }}>
-          Profit: {(greenProfit + redProfit + orangeProfit).toLocaleString()} / s
+        {/* سکه قرمز */}
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+            <img src="/currency-r.png" style={{width: "20px"}}/>
+            <span style={{fontSize: "14px", fontWeight: "bold"}}>{redCoins.toLocaleString()}</span>
+        </div>
+        {/* سکه نارنجی */}
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+            <img src="/currency-t.png" style={{width: "20px"}}/>
+            <span style={{fontSize: "14px", fontWeight: "bold"}}>{orangeCoins.toLocaleString()}</span>
         </div>
     </div>
+
+    {/* ۲. ردیف هم‌راستای پروفیت و زمان */}
+    <div style={{ 
+        width: "90%", 
+        display: "flex", 
+        justifyContent: "space-between", 
+        alignItems: "center",
+        borderTop: "1px solid rgba(255,255,255,0.1)",
+        paddingTop: "10px"
+    }}>
+        <div style={{ color: "#ffd700", fontSize: "15px", fontWeight: "bold" }}>
+            Profit: {greenProfit.toLocaleString()}
+        </div>
+        <div style={{ color: "#fff", fontSize: "14px", fontWeight: "500", display: "flex", alignItems: "center", gap: "4px" }}>
+            <span>🕒</span>
+            <span>5min</span>
+        </div>
+    </div>
+
+    {/* ۳. نمایش بزرگ موجودی سکه سبز */}
+    <div style={{ 
+        display: "flex", 
+        alignItems: "center", 
+        gap: "12px",
+        backgroundColor: "rgba(255,215,0,0.1)",
+        padding: "10px 30px",
+        borderRadius: "20px",
+        border: "1px solid rgba(255,215,0,0.2)",
+        width: "fit-content"
+    }}>
+        <img src="/currency-c.png" style={{ width: "30px", height: "30px" }} />
+        <span style={{ fontSize: "28px", fontWeight: "900", color: "#fff" }}>
+            {greenCoins.toLocaleString()}
+        </span>
+    </div>
+</div>
             {/* ۱. تصویر ربات به عنوان بک‌گراند بزرگ */}
             <div style={{
               position: "absolute",
@@ -234,9 +288,24 @@ export default function Home() {
               borderRadius: "20px"
               
             }}>
-               <img src={isGreenOn ? "/cartridge-green-on.png" : "/cartridge-green-off.png"} style={{ width: "75px", height: "auto" }} />
-               <img src="/cartridge-red-free.png" style={{ width: "75px", height: "auto" }} />
-               <img src="/cartridge-orange-free.png" style={{ width: "75px", height: "auto" }} />
+               <div 
+  onClick={handleGreenCartridgeClick} 
+  style={{ cursor: "pointer", textAlign: "center", display: "flex", flexDirection: "column", alignItems: "center" }}
+>
+  <img 
+    src={isGreenActive ? "/cartridge-green-on.png" : "/cartridge-green-off.png"} 
+    style={{ 
+      width: "75px", 
+      filter: isGreenActive ? "drop-shadow(0 0 10px #4CAF50)" : "none",
+      transition: "all 0.3s"
+    }} 
+  />
+  {/* اینجا قبلاً تایمر بود که طبق خواسته شما حذف شد */}
+</div>
+
+{/* سایر کارتریج‌ها که فعلاً غیرفعال هستند */}
+<img src="/cartridge-red-free.png" style={{ width: "75px", height: "auto", opacity: 0.4 }} />
+<img src="/cartridge-orange-free.png" style={{ width: "75px", height: "auto", opacity: 0.4 }} />
             </div>
 
           </div>
@@ -255,11 +324,35 @@ export default function Home() {
             "Tap": "/tap-butt.png", "Mine": "/mine-butt.png", "Fight": "/fight-butt.png", "Library": "/closet-butt.png", "Cards": "/cards-butt.png"
           };
           return (
-            <button key={label} onClick={() => setActiveTab(label)} style={{ flex: 1, background: "none", border: "none", display: "flex", flexDirection: "column", alignItems: "center", gap: "4px", cursor: "pointer" }}>
-              <img src={footerIcons[label]} alt={label} style={{ width: "35px", height: "35px", filter: isActive ? "none" : "grayscale(100%)", opacity: isActive ? "1" : "0.6" }} />
-              <span style={{ fontSize: "10px", color: isActive ? "#ffd700" : "#888" }}>{label}</span>
-            </button>
-          );
+  <button 
+    key={label} 
+    onClick={() => setActiveTab(label)} 
+    style={{ 
+      flex: 1, 
+      background: "none", 
+      border: "none", 
+      display: "flex", 
+      alignItems: "center", 
+      justifyContent: "center",
+      padding: "10px 0",
+      transition: "none", // حذف هرگونه انیمیشن تغییر سایز
+      transform: "none"   // اطمینان از عدم تغییر اسکیل
+    }}
+  >
+    <img 
+      src={footerIcons[label]} 
+      alt={label} 
+      style={{ 
+        width: "40px", 
+        height: "40px", // مقدار ثابت برای جلوگیری از دفرمه شدن
+        objectFit: "contain",
+        filter: isActive ? "none" : "grayscale(100%)",
+        opacity: isActive ? 1 : 0.6,
+        transition: "opacity 0.2s" // فقط کمرنگ و پررنگ شدن نرم
+      }} 
+    />
+  </button>
+)
         })}
       </div>
 
