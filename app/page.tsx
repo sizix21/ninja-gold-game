@@ -95,25 +95,27 @@ export default function Home() {
     localStorage.setItem("lastTime", Date.now().toString());
   }, [greenCoins, redCoins, orangeCoins, energy, saladToken]);
 
-  // timer tolid sanieii
+  // timer tolid sanieii (Mining & Energy Regen)
   useEffect(() => {
-  let interval: NodeJS.Timeout | undefined;
+    const interval = setInterval(() => {
+      
+      // ۱. همیشه انرژی پر شود (چه کارتریج روشن باشد چه نباشد)
+      setEnergy((prev) => Math.min(prev + 1, 2000));
 
-  // agar yeki az kartrij ha roshan bashad
-  if (isGreenActive || isRedActive || isOrangeActive) {
-    interval = setInterval(() => {
+      // ۲. تولید سکه فقط در صورت روشن بودن کارتریج مربوطه
       if (isGreenActive) setGreenCoins(prev => prev + greenProfit);
       if (isRedActive) setRedCoins(prev => prev + redProfit);
       if (isOrangeActive) setOrangeCoins(prev => prev + orangeProfit);
       
-      setTimeLeft(300); // tamdid zaman offline
-    }, 1000);
-  }
+      // ۳. تمدید زمان آفلاین فقط اگر فعالیتی باشد
+      if (isGreenActive || isRedActive || isOrangeActive) {
+        setTimeLeft(300);
+      }
 
-  return () => {
-    if (interval) clearInterval(interval);
-  };
-}, [isGreenActive, isRedActive, isOrangeActive, greenProfit, redProfit, orangeProfit]);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [isGreenActive, isRedActive, isOrangeActive, greenProfit, redProfit, orangeProfit]);
 const handleGreenCartridgeClick = () => {
   setIsGreenActive(prev => {
     const newState = !prev;
