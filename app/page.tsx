@@ -31,6 +31,7 @@ export default function Home() {
   const [orangeProfit, setOrangeProfit] = useState(0);
   const switchAudioRef = useRef<HTMLAudioElement | null>(null);
   const [totalProfit, setTotalProfit] = useState(0);
+  const [isSaladPage, setIsSaladPage] = useState(false);
 
   const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumber[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -173,7 +174,8 @@ const playSwitchSound = () => {
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", backgroundColor: "#1a1a1a", color: "white", fontFamily: "sans-serif", padding: "20px", boxSizing: "border-box", overflow: "hidden", position: "relative" }}>
       
-      
+      {!isSaladPage ? (
+        <>
 
       {/* Main Container */}
       <div style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%", marginTop: "0px" }}>
@@ -192,10 +194,42 @@ const playSwitchSound = () => {
           </div>
         </div>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(0,0,0,0.4)", padding: "5px 12px", borderRadius: "20px", height: "35px" }}>
-          <img src="/salad-butt.png" alt="Salad" style={{ width: "22px", height: "22px", objectFit: "contain" }} />
-          <span style={{ fontSize: "14px", fontWeight: "bold", color: "#fff" }}>{saladToken.toLocaleString()}</span>
-        </div>
+        {/* دکمه سالاد در صفحه اصلی (Tab) */}
+<div 
+  onClick={() => setIsSaladPage(true)} 
+  style={{ 
+    cursor: "pointer", 
+    zIndex: 40,
+    display: "flex",
+    alignItems: "center",
+    gap: "8px",
+    backgroundColor: "rgba(73, 73, 73, 0.5)", 
+    padding: "5px 12px",
+    borderRadius: "15px",
+    border: "1px solid rgba(255, 255, 255, 0.1)",
+    backdropFilter: "blur(5px)",
+    flexDirection: "row" // اطمینان از چیدمان افقی
+  }}
+>
+  {/* ابتدا عدد (سمت چپ) */}
+  <span style={{ 
+    fontSize: "14px", 
+    fontWeight: "bold", 
+    color: "#fff"
+  }}>
+    {saladToken.toLocaleString()}
+  </span>
+
+  {/* سپس آیکون (سمت راست) */}
+  <img 
+    src="/salad-token.png" 
+    alt="Salad"
+    style={{ 
+      width: "35px", 
+      height: "28px"
+    }} 
+  />
+</div>
       </div>
             <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "15px", marginTop: "20px" }}>
               <img src="/currency-c.png" alt="Green Coin" style={{ width: "50px" }} />
@@ -443,7 +477,34 @@ const playSwitchSound = () => {
 )
         })}
       </div>
-
+</>
+) : (
+  /* --- محتوای صفحه سالاد --- */
+  <div style={{ 
+    flex: 1, 
+    display: "flex", 
+    flexDirection: "column", 
+    alignItems: "center", 
+    justifyContent: "center",
+    background: "#000" 
+  }}>
+    <button 
+      onClick={() => setIsSaladPage(false)}
+      style={{
+        padding: "10px 20px",
+        backgroundColor: "#ffd700",
+        borderRadius: "10px",
+        color: "black",
+        fontWeight: "bold",
+        border: "none",
+        cursor: "pointer"
+      }}
+    >
+      🔙 Back
+    </button>
+    <h2 style={{ marginTop: "20px" }}>Salad Shop</h2>
+  </div>
+)}
       {/* QR & Boost Buttons */}
       {activeTab === "Tap" && (
         <>
