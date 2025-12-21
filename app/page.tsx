@@ -172,26 +172,11 @@ export default function Home() {
     display: "flex", 
     flexDirection: "column", 
     alignItems: "center", 
-    padding: "0 10px 10px 10px", // پدینگ بالا را صفر کردیم (0 اول)
+    padding: "0px", // پدینگ بالا را صفر کردیم (0 اول)
     position: "relative", 
     height: "100%", 
     overflow: "hidden" 
           }}>
-            
-            {/* ۱. تصویر ربات به عنوان بک‌گراند بزرگ */}
-            <div style={{
-              position: "absolute",
-              top: "10%",
-              left: "50%",
-              transform: "translateX(-50%)",
-              width: "100%", // بزرگتر از عرض صفحه برای جلوه بیشتر
-              opacity: 0.7,   // کمی کمرنگ که نوشته‌ها خوانا باشند
-              zIndex: 0,      // رفتن به پشت همه المان‌ها
-              pointerEvents: "none"
-            }}>
-              <img src="/chef-robot.png" style={{ width: "100%", height: "auto", objectFit: "contain" }} />
-            </div>
-
             {/* ۱. پنل آمار بالا - کاملاً چسبیده به سقف */}
     <div style={{ 
       width: "100%", 
@@ -217,6 +202,19 @@ export default function Home() {
           Profit: {(greenProfit + redProfit + orangeProfit).toLocaleString()} / s
         </div>
     </div>
+            {/* ۱. تصویر ربات به عنوان بک‌گراند بزرگ */}
+            <div style={{
+              position: "absolute",
+              top: "10%",
+              left: "50%",
+              transform: "translateX(-50%)",
+              width: "100%", // بزرگتر از عرض صفحه برای جلوه بیشتر
+              opacity: 0.7,   // کمی کمرنگ که نوشته‌ها خوانا باشند
+              zIndex: 0,      // رفتن به پشت همه المان‌ها
+              pointerEvents: "none"
+            }}>
+              <img src="/chef-robot.png" style={{ width: "100%", height: "auto", objectFit: "contain" }} />
+            </div>
 
             {/* ۳. فضای خالی منعطف (این بخش کارتریج‌ها را به پایین هل می‌دهد) */}
             <div style={{ flex: 1 }} /> 
