@@ -150,6 +150,7 @@ export default function Home() {
   drag="x"
   dragConstraints={{ left: 0, right: 0 }}
   dragElastic={0.1}
+  dragMomentum={false} // در موبایل مانع از پرش ناگهانی می‌شود
   onDragEnd={(e, info) => {
     const threshold = 40; // حساسیت حرکت
     if (info.offset.x < -threshold) handleSwipe("left");
@@ -160,7 +161,9 @@ export default function Home() {
     display: "flex", 
     flexDirection: "column", 
     width: "100%",
-    touchAction: "pan-y" // این خط کلید حل مشکل است! اجازه می‌دهد اسکرول عمودی کار کند ولی افقی را به Swipe می‌سپارد
+    touchAction: "none", // تغییر از pan-y به none برای تست نهایی در موبایل
+    userSelect: "none",
+    WebkitUserSelect: "none"
   }}
 
           >
