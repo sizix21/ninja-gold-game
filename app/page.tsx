@@ -13,33 +13,10 @@ interface FloatingNumber {
 const TABS = ["Tap", "Mine", "Fight", "Library", "Cards"];
 
 const CARDS_DATA = [
-  {
-    id: 1,
-    name: "Industrial Blender",
-    description: "افزایش سرعت تولید سکه سبز",
-    cost: 500,
-    target: "greenProfit",
-    boost: 2,
-    icon: "🌪️"
-  },
-  {
-    id: 2,
-    name: "Red Cooling System",
-    description: "افزایش سرعت تولید سکه قرمز",
-    cost: 2000,
-    target: "redProfit",
-    boost: 5,
-    icon: "❄️"
-  },
-  {
-    id: 3,
-    name: "Turbo Toaster",
-    description: "افزایش سرعت تولید سکه نارنجی",
-    cost: 5000,
-    target: "orangeProfit",
-    boost: 10,
-    icon: "🔥"
-  }
+  { id: "arch-1", family: "archimedes", name: "Archimedes I", image: "/card-archimedes.png", cost: 500, profitBoost: 10, visibleAfter: null, requireToBuy: null },
+  { id: "arch-2", family: "archimedes", name: "Archimedes II", image: "/card-archimedes.png", cost: 1200, profitBoost: 25, visibleAfter: "arch-1", requireToBuy: "arch-1" },
+  { id: "eucl-1", family: "euclid", name: "Euclid I", image: "/card-euclid.png", cost: 2000, profitBoost: 50, visibleAfter: "arch-5", requireToBuy: "arch-5" },
+  // می‌توانید بقیه ۲۰ کارت اقلیدس و ۱۰ کارت وایل را اینجا اضافه کنید
 ];
 
 export default function Home() {
@@ -61,7 +38,7 @@ export default function Home() {
   const [totalProfit, setTotalProfit] = useState(0);
   const [isSaladPage, setIsSaladPage] = useState(false);
   const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumber[]>([]);
-  
+  const [purchasedCards, setPurchasedCards] = useState<string[]>([]); // آی‌دی کارت‌های خریده شده
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const switchAudioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -75,17 +52,23 @@ export default function Home() {
     }
   };
 
-  const handleBuyCard = (card: typeof CARDS_DATA[0]) => {
+  const handleBuyCard = (card: any) => {
+    // ۱. بررسی موجودی
     if (greenCoins < card.cost) {
       alert("سکه سبز کافی نداری!");
       return;
     }
+    
+    // ۲. بررسی پیش‌شرط خرید
+    if (card.requireToBuy && !purchasedCards.includes(card.requireToBuy)) {
+      alert("ابتدا باید کارت قبلی را بخرید!");
+      return;
+    }
+
+    // ۳. اعمال خرید
     setGreenCoins(prev => prev - card.cost);
-    if (card.target === "greenProfit") setGreenProfit(prev => prev + card.boost);
-    if (card.target === "redProfit") setRedProfit(prev => prev + card.boost);
-    if (card.target === "orangeProfit") setOrangeProfit(prev => prev + card.boost);
-    setTotalProfit(prev => prev + (card.boost * 10));
-    alert(`${card.name} با موفقیت خریداری شد!`);
+    setPurchasedCards(prev => [...prev, card.id]);
+    setTotalProfit(prev => prev + card.profitBoost);
   };
 
   useEffect(() => {
@@ -167,37 +150,46 @@ export default function Home() {
           >
             {/* Cards Tab */}
             {activeTab === "Cards" && (
-  <div style={{ 
-    flex: 1, 
-    padding: "20px", 
-    overflowY: "auto", // اسکرول عمودی
-    paddingBottom: "100px",
-    touchAction: "pan-y" // بسیار مهم: اجازه می‌دهد اسکرول عمودی انجام شود اما اسکرول افقی را آزاد می‌گذارد برای Swipe
-  }}>
-    <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Upgrades</h2>
-    
-    <div style={{ 
-      display: "grid", 
-      gridTemplateColumns: "1fr 1fr", 
-      gap: "15px",
-      pointerEvents: "auto" // اطمینان از اینکه کلیک‌ها روی دکمه‌ها کار می‌کند
-    }}>
-                  {CARDS_DATA.map((card) => (
-                    <div key={card.id} style={{ background: "#222", padding: "15px", borderRadius: "20px", border: "1px solid #333", textAlign: "center" }}>
-                      <div style={{ fontSize: "35px" }}>{card.icon}</div>
-                      <div style={{ fontWeight: "bold", margin: "10px 0" }}>{card.name}</div>
-                      <div style={{ color: "#4CAF50", fontSize: "12px" }}>+{card.boost * 60}/m</div>
-                      <button 
-                        onClick={() => handleBuyCard(card)}
-                        style={{ marginTop: "10px", width: "100%", padding: "8px", borderRadius: "12px", backgroundColor: greenCoins >= card.cost ? "#ffd700" : "#444", border: "none", fontWeight: "bold" }}
-                      >
-                        {card.cost} 🟢
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+  <div style={{ flex: 1, overflowY: "auto", padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
+    {CARDS_DATA.filter(card => 
+      card.visibleAfter === null || purchasedCards.includes(card.visibleAfter)
+    ).map(card => {
+      const alreadyBought = purchasedCards.includes(card.id);
+      const isLocked = card.requireToBuy && !purchasedCards.includes(card.requireToBuy);
+
+      return (
+        <div key={card.id} style={{ 
+          background: "#222", 
+          borderRadius: "15px", 
+          padding: "10px", 
+          opacity: alreadyBought ? 0.6 : 1,
+          filter: isLocked ? "grayscale(1)" : "none",
+          textAlign: "center"
+        }}>
+          <img src={card.image} style={{ width: "100%", borderRadius: "10px" }} alt={card.name} />
+          <h4>{card.name}</h4>
+          <p style={{ fontSize: "12px", color: "#4CAF50" }}>+{card.profitBoost} P/h</p>
+          
+          <button 
+            disabled={alreadyBought || isLocked}
+            onClick={() => handleBuyCard(card)}
+            style={{
+              width: "100%",
+              padding: "8px",
+              backgroundColor: alreadyBought ? "#444" : isLocked ? "#666" : "#ffd700",
+              color: "#000",
+              borderRadius: "10px",
+              border: "none",
+              fontWeight: "bold"
+            }}
+          >
+            {alreadyBought ? "Owned" : isLocked ? "Locked 🔒" : `${card.cost} 🟢`}
+          </button>
+        </div>
+      );
+    })}
+  </div>
+)}
 
             {/* Tap Tab */}
             {activeTab === "Tap" && (
