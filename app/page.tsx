@@ -15,8 +15,8 @@ const TABS = ["Tap", "Mine", "Fight", "Library", "Cards"];
 const CARDS_DATA = [
   { id: "arch-1", family: "archimedes", name: "Archimedes I", image: "/card-archimedes.png", cost: 500, profitBoost: 10, visibleAfter: null, requireToBuy: null },
   { id: "arch-2", family: "archimedes", name: "Archimedes II", image: "/card-archimedes.png", cost: 1200, profitBoost: 25, visibleAfter: "arch-1", requireToBuy: "arch-1" },
-  { id: "eucl-1", family: "euclid", name: "Euclid I", image: "/card-euclid.png", cost: 2000, profitBoost: 50, visibleAfter: "arch-5", requireToBuy: "arch-5" },
-  // می‌توانید بقیه ۲۰ کارت اقلیدس و ۱۰ کارت وایل را اینجا اضافه کنید
+  // اصلاح شده: حالا اقلیدس منتظر کارت شماره ۲ می‌ماند نه ۵
+  { id: "eucl-1", family: "euclid", name: "Euclid I", image: "/card-euclid.png", cost: 2000, profitBoost: 50, visibleAfter: "arch-2", requireToBuy: "arch-2" },
 ];
 
 export default function Home() {
@@ -155,7 +155,7 @@ export default function Home() {
       card.visibleAfter === null || purchasedCards.includes(card.visibleAfter)
     ).map(card => {
       const alreadyBought = purchasedCards.includes(card.id);
-      const isLocked = card.requireToBuy && !purchasedCards.includes(card.requireToBuy);
+      const isLocked = !!(card.requireToBuy && !purchasedCards.includes(card.requireToBuy));
 
       return (
         <div key={card.id} style={{ 
