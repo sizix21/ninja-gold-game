@@ -161,9 +161,7 @@ export default function Home() {
     display: "flex", 
     flexDirection: "column", 
     width: "100%",
-    touchAction: "none", // تغییر از pan-y به none برای تست نهایی در موبایل
-    userSelect: "none",
-    WebkitUserSelect: "none"
+    touchAction: "pan-y" // این خط کلید حل مشکل است! اجازه می‌دهد اسکرول عمودی کار کند ولی افقی را به Swipe می‌سپارد
   }}
 
           >
