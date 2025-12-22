@@ -146,16 +146,23 @@ export default function Home() {
         <>
           {/* Main Container with Swipe */}
           <motion.div 
-            key={activeTab}
-            initial={{ opacity: 0.8, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            drag="x"
-            dragConstraints={{ left: 0, right: 0 }}
-            onDragEnd={(e, info) => {
-              if (info.offset.x < -50) handleSwipe("left");
-              if (info.offset.x > 50) handleSwipe("right");
-            }}
-            style={{ flex: 1, display: "flex", flexDirection: "column", width: "100%" }}
+  key={activeTab}
+  drag="x"
+  dragConstraints={{ left: 0, right: 0 }}
+  dragElastic={0.1}
+  onDragEnd={(e, info) => {
+    const threshold = 40; // حساسیت حرکت
+    if (info.offset.x < -threshold) handleSwipe("left");
+    if (info.offset.x > threshold) handleSwipe("right");
+  }}
+  style={{ 
+    flex: 1, 
+    display: "flex", 
+    flexDirection: "column", 
+    width: "100%",
+    touchAction: "pan-y" // این خط کلید حل مشکل است! اجازه می‌دهد اسکرول عمودی کار کند ولی افقی را به Swipe می‌سپارد
+  }}
+
           >
             {/* Cards Tab */}
             {activeTab === "Cards" && (
