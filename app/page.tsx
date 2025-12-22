@@ -167,9 +167,21 @@ export default function Home() {
           >
             {/* Cards Tab */}
             {activeTab === "Cards" && (
-              <div style={{ flex: 1, padding: "20px", overflowY: "auto", paddingBottom: "100px" }}>
-                <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Upgrades</h2>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
+  <div style={{ 
+    flex: 1, 
+    padding: "20px", 
+    overflowY: "auto", // اسکرول عمودی
+    paddingBottom: "100px",
+    touchAction: "pan-y" // بسیار مهم: اجازه می‌دهد اسکرول عمودی انجام شود اما اسکرول افقی را آزاد می‌گذارد برای Swipe
+  }}>
+    <h2 style={{ textAlign: "center", marginBottom: "20px" }}>Upgrades</h2>
+    
+    <div style={{ 
+      display: "grid", 
+      gridTemplateColumns: "1fr 1fr", 
+      gap: "15px",
+      pointerEvents: "auto" // اطمینان از اینکه کلیک‌ها روی دکمه‌ها کار می‌کند
+    }}>
                   {CARDS_DATA.map((card) => (
                     <div key={card.id} style={{ background: "#222", padding: "15px", borderRadius: "20px", border: "1px solid #333", textAlign: "center" }}>
                       <div style={{ fontSize: "35px" }}>{card.icon}</div>
