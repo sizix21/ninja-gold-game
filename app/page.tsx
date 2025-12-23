@@ -627,7 +627,7 @@ useEffect(() => {
   justifyContent: "center", // تغییر از space-between به center برای تمرکز بهتر
   alignItems: "center",
   width: "100%",           // حیاتی برای وسط‌چین شدن در کل عرض صفحه
-  gap: "30px", 
+  gap: "20px", 
   zIndex: 30, 
   paddingBottom: "15px",
   position: "absolute",    // اگر می‌خواهی همیشه ته صفحه بماند
