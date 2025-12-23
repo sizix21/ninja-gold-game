@@ -111,7 +111,22 @@ export default function Home() {
       });
     }
   };
-  
+  // مکانیزم ذخیره‌سازی دوره‌ای برای جلوگیری از فشار به سرور و روان ماندن بازی
+useEffect(() => {
+  if (!isDataLoaded) return; // تا وقتی لود نشده، ذخیره نکن
+
+  const interval = setInterval(() => {
+    saveToCloud("greenCoins", greenCoins);
+    saveToCloud("redCoins", redCoins);
+    saveToCloud("orangeCoins", orangeCoins);
+    saveToCloud("saladToken", saladToken);
+    saveToCloud("purchasedCards", purchasedCards);
+    saveToCloud("totalProfit", totalProfit);
+    console.log("دیتای بازی خودکار ذخیره شد");
+  }, 20000); // هر ۲۰ ثانیه یکبار (زمان بهینه برای تلگرام)
+
+  return () => clearInterval(interval);
+}, [isDataLoaded, greenCoins, redCoins, orangeCoins, saladToken, purchasedCards, totalProfit]);
   const handleBuyCard = (card: any) => {
   // ۱. بررسی پیش‌شرط
   if (card.requireToBuy && !purchasedCards.includes(card.requireToBuy)) {
