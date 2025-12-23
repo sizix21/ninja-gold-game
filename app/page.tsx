@@ -119,28 +119,19 @@ export default function Home() {
     return;
   }
 useEffect(() => {
-  const handleSaveData = () => {
-    if (isDataLoaded) {
-      saveToCloud("greenCoins", greenCoins);
-      saveToCloud("redCoins", redCoins);
-      saveToCloud("orangeCoins", orangeCoins);
-      saveToCloud("saladToken", saladToken);
-      saveToCloud("purchasedCards", purchasedCards);
-      saveToCloud("totalProfit", totalProfit);
-    }
-  };
+  if (!isDataLoaded) return;
 
-  // رویداد بسته شدن یا تغییر وضعیت صفحه
-  window.addEventListener("beforeunload", handleSaveData);
-  window.addEventListener("visibilitychange", () => {
-    if (document.visibilityState === "hidden") {
-      handleSaveData();
-    }
-  });
+  const interval = setInterval(() => {
+    saveToCloud("greenCoins", greenCoins);
+    saveToCloud("redCoins", redCoins);
+    saveToCloud("orangeCoins", orangeCoins);
+    saveToCloud("saladToken", saladToken);
+    saveToCloud("purchasedCards", purchasedCards);
+    saveToCloud("totalProfit", totalProfit);
+    console.log("Auto-save completed.");
+  }, 30000); // هر 30 ثانیه یک بار
 
-  return () => {
-    window.removeEventListener("beforeunload", handleSaveData);
-  };
+  return () => clearInterval(interval);
 }, [greenCoins, redCoins, orangeCoins, saladToken, purchasedCards, totalProfit, isDataLoaded]);
   // ۲. مقادیر جدید
   const nextGreen = greenCoins - card.cost;
