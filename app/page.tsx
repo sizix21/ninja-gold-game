@@ -136,6 +136,12 @@ setProgress(Math.min(currentProgress, 100));
       });
     }
   };
+  useEffect(() => {
+  saveToCloud("greenCoins", greenCoins);
+  saveToCloud("redCoins", redCoins);
+  saveToCloud("orangeCoins", orangeCoins);
+  saveToCloud("saladToken", saladToken); // حتماً این را هم ذخیره کنید
+}, [greenCoins, redCoins, orangeCoins, saladToken]);
   const handleBuyCard = (card: any) => {
   // ۱. بررسی پیش‌شرط
   if (card.requireToBuy && !purchasedCards.includes(card.requireToBuy)) {
