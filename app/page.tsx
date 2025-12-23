@@ -46,7 +46,16 @@ export default function Home() {
   const [isMakingSalad, setIsMakingSalad] = useState(false); // آیا در حال ساخت سالاد است؟
   const [saladStartTime, setSaladStartTime] = useState<number | null>(null); // زمان شروع ساخت
   const [progress, setProgress] = useState(0); // درصد نوار پیشرفت
-
+  
+  const adjustValue = (type: string, amount: number) => {
+  switch (type) {
+    case 'green': setGreenCoins(prev => Math.max(0, prev + amount)); break; //مقادیر دستی
+    case 'red': setRedCoins(prev => Math.max(0, prev + amount)); break;
+    case 'orange': setOrangeCoins(prev => Math.max(0, prev + amount)); break;
+    case 'salad': setSaladCount(prev => Math.max(0, prev + amount)); break;
+    case 'energy': setEnergy(prev => Math.max(0, Math.min(2000, prev + amount))); break;
+  }
+};
   const handleStartSalad = () => {
   if (isMakingSalad) {
     alert("در حال حاضر یک سالاد در حال پخت است!");
@@ -369,7 +378,60 @@ useEffect(() => {
               </div>
               
             )}
+{/* ساخت صفحه تب QR به صورت دستی */}
+{activeTab === "QR" && (
+  <div style={{ 
+    flex: 1, 
+    display: "flex", 
+    flexDirection: "column", 
+    alignItems: "center", 
+    justifyContent: "center", 
+    padding: "20px",
+    color: "white" 
+  }}>
+    
+    <h2 style={{ marginBottom: "20px" }}>Test & Debug</h2>
 
+    {/* پنل تنظیمات دستی (Debug Menu) */}
+    <div style={{ 
+      background: "rgba(255, 255, 255, 0.05)", 
+      padding: "20px", 
+      borderRadius: "20px", 
+      width: "100%", 
+      border: "1px solid rgba(255,255,255,0.1)" 
+    }}>
+      {[
+        { label: "Green Coins", key: "green", color: "#4CAF50" },
+        { label: "Red Coins", key: "red", color: "#F44336" },
+        { label: "Orange Coins", key: "orange", color: "#FF9800" },
+        { label: "Salad Count", key: "salad", color: "#FFEB3B" },
+        { label: "Energy", key: "energy", color: "#2196F3" }
+      ].map((item) => (
+        <div key={item.key} style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", alignItems: "center" }}>
+          <span style={{ color: item.color, fontWeight: "bold" }}>{item.label}</span>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button 
+              onClick={() => adjustValue(item.key, -100)} 
+              style={{ background: "#444", color: "#fff", border: "none", borderRadius: "8px", padding: "5px 12px" }}
+            >
+              -100
+            </button>
+            <button 
+              onClick={() => adjustValue(item.key, 100)} 
+              style={{ background: "#444", color: "#fff", border: "none", borderRadius: "8px", padding: "5px 12px" }}
+            >
+              +100
+            </button>
+          </div>
+        </div>
+      ))}
+    </div>
+
+    <p style={{ marginTop: "20px", fontSize: "12px", color: "#666" }}>
+      این صفحه فقط برای تست است و در نسخه نهایی حذف می‌شود.
+    </p>
+  </div>
+)}
             {activeTab === "Mine" && (
   <div style={{ 
         flex: 1, 
@@ -598,7 +660,7 @@ useEffect(() => {
         <img 
           src={footerIcons[label]} 
           style={{ 
-            width: "40px", // اندازه دکمه ها
+            height: "40px", // اندازه دکمه ها
             filter: isActive ? "none" : "grayscale(100%)", 
             opacity: isActive ? 1 : 0.6,
             transition: "0.2s" 
@@ -623,7 +685,7 @@ useEffect(() => {
   width: "100%", 
   height: "100vh", 
   // لایه مشکی نیمه‌شفاف (0.7) روی تصویر قرار می‌گیرد
-  backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/salad-back.jpg')", 
+  backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5)), url('/salad-back.jpg')", 
   backgroundSize: "cover", 
   backgroundPosition: "center",
   zIndex: 100, 
@@ -636,20 +698,30 @@ useEffect(() => {
     <button onClick={() => setIsSaladPage(false)} style={{ position: "absolute", top: "20px", left: "20px", background: "none", border: "none", zIndex: 110 }}><img src="/back-butt.png" style={{ width: "7px" }} /></button>
 
     {/* ۱. بخش تعداد سالاد (بالا وسط) */}
-    <div style={{ marginTop: "60px", display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <img src="/salad-token.png" style={{ width: "80px" }} />
-      <span style={{ fontSize: "24px", fontWeight: "bold" }}>{saladCount}</span>
-    </div>
+    <div style={{ 
+  marginTop: "100px", // این مقدار را از 60 به 100 تغییر دادیم تا پایین‌تر بیاید
+  display: "flex",
+  backgroundColor: "rgba(0,0,0,0.5)", 
+  padding: "10px 20px",
+  borderRadius: "15px",
+  flexDirection: "row-reverse", 
+  alignItems: "center", 
+  gap: "10px" 
+}}>
+  <img src="/salad-token.png" style={{ width: "50px" }} alt="Salad Token" />
+  <span style={{ fontSize: "24px", fontWeight: "bold" }}>{saladCount}</span>
+</div>
 
     {/* ۲. موجودی فعلی سکه‌ها */}
     <div style={{ display: "flex", gap: "15px", marginTop: "20px", backgroundColor: "rgba(0,0,0,0.5)", padding: "10px 20px", borderRadius: "15px" }}>
+      
       <div style={{ display: "flex", alignItems: "center", gap: "5px" }}><img src="/currency-c.png" style={{ width: "18px" }} />{greenCoins}</div>
       <div style={{ display: "flex", alignItems: "center", gap: "5px" }}><img src="/currency-r.png" style={{ width: "18px" }} />{redCoins}</div>
       <div style={{ display: "flex", alignItems: "center", gap: "5px" }}><img src="/currency-t.png" style={{ width: "18px" }} />{orangeCoins}</div>
     </div>
 
     {/* ۳. هزینه ساخت (عمودی) */}
-    <div style={{ marginTop: "30px", display: "flex", flexDirection: "column", gap: "8px", alignItems: "flex-start" }}>
+    <div style={{ marginTop: "30px", display: "flex", flexDirection: "column", gap: "8px", alignItems: "flex-start", backgroundColor: "rgba(0,0,0,0.5)", padding: "10px 20px", borderRadius: "15px" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "18px", color: greenCoins >= 1000 ? "#fff" : "#ff4d4d" }}>
         <img src="/currency-c.png" style={{ width: "22px" }} /> 1,000
       </div>
@@ -666,7 +738,13 @@ useEffect(() => {
       <img 
         src="/salad-token.png" 
         onClick={handleStartSalad}
-        style={{ width: "180px", cursor: "pointer", filter: isMakingSalad ? "grayscale(50%)" : "none", transition: "0.3s" }} 
+       style={{ 
+  width: "120px", 
+  cursor: "pointer", 
+  // هر دو فیلتر (سایه و خاکستری) را کنار هم قرار می‌دهیم
+  filter: `drop-shadow(0px 8px 10px rgba(0,0,0,0.4)) ${isMakingSalad ? "grayscale(80%)" : "none"}`, 
+  transition: "0.3s"
+}} 
       />
       
       {/* نوار پیشرفت */}
