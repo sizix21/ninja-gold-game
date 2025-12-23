@@ -75,24 +75,28 @@ export default function Home() {
 
   useEffect(() => {
   const tele = (window as any).Telegram?.WebApp;
-  if (tele) {
-    tele.ready();
-    // خواندن کلیدهای ذخیره شده از ابر تلگرام
-    tele.CloudStorage.getItems(["greenCoins", "redCoins", "orangeCoins", "purchasedCards", "totalProfit"], (err: any, values: any) => {
-      if (!err && values) {
-        if (values.greenCoins) setGreenCoins(Number(values.greenCoins));
-        if (values.redCoins) setRedCoins(Number(values.redCoins));
-        if (values.orangeCoins) setOrangeCoins(Number(values.orangeCoins));
-        if (values.totalProfit) setTotalProfit(Number(values.totalProfit));
-        if (values.saladToken) setSaladToken(Number(values.saladToken));
-        if (values.purchasedCards) {
-          try { setPurchasedCards(JSON.parse(values.purchasedCards)); } catch(e) { setPurchasedCards([]); }
-        }
+  if (tele) tele.ready();
+
+  const loadData = () => {
+    const fields = ["greenCoins", "redCoins", "orangeCoins", "totalProfit", "saladToken"];
+    fields.forEach(field => {
+      const val = localStorage.getItem(field);
+      if (val) {
+        if (field === "greenCoins") setGreenCoins(Number(val));
+        if (field === "redCoins") setRedCoins(Number(val));
+        if (field === "orangeCoins") setOrangeCoins(Number(val));
+        if (field === "totalProfit") setTotalProfit(Number(val));
+        if (field === "saladToken") setSaladToken(Number(val));
       }
-      // کلید حل مشکل: این خط به برنامه می‌گوید لودینگ تمام شد، حالا اجازه داری ذخیره کنی
-      setIsDataLoaded(true); 
     });
-  }
+
+    const savedCards = localStorage.getItem("purchasedCards");
+    if (savedCards) setPurchasedCards(JSON.parse(savedCards));
+    
+    setIsDataLoaded(true);
+  };
+
+  loadData();
 }, []);
   // --- Handlers ---
   const handleSwipe = (direction: "left" | "right") => {
@@ -103,32 +107,48 @@ export default function Home() {
       setActiveTab(TABS[currentIndex + 1]);
     }
   };
-// تابع کمکی برای ذخیره در ابر تلگرام
+// ذخیره در موبایل
   const saveToCloud = (key: string, value: any) => {
-    const tele = (window as any).Telegram?.WebApp;
-    if (tele && tele.CloudStorage) {
-      const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
-      tele.CloudStorage.setItem(key, stringValue, (err: any) => {
-        if (err) console.error("Cloud Save Error:", err);
-      });
-    }
-  };
+  try {
+    const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
+    localStorage.setItem(key, stringValue);
+  } catch (e) {
+    console.error("Local Save Error:", e);
+  }
+};
   // مکانیزم ذخیره‌سازی دوره‌ای برای جلوگیری از فشار به سرور و روان ماندن بازی
 useEffect(() => {
-  if (!isDataLoaded) return; // تا وقتی لود نشده، ذخیره نکن
+  // شبیه‌سازی آماده‌سازی تلگرام (برای اینکه بقیه کدها به مشکل نخورند)
+  const tele = (window as any).Telegram?.WebApp;
+  if (tele) tele.ready();
 
-  const interval = setInterval(() => {
+  // خواندن داده‌ها از حافظه محلی
+  const localGreen = localStorage.getItem("greenCoins");
+  const localRed = localStorage.getItem("redCoins");
+  const localOrange = localStorage.getItem("orangeCoins");
+  const localProfit = localStorage.getItem("totalProfit");
+  const localSalad = localStorage.getItem("saladToken");
+  const localCards = localStorage.getItem("purchasedCards");
+
+  if (localGreen) setGreenCoins(Number(localGreen));
+  if (localRed) setRedCoins(Number(localRed));
+  if (localOrange) setOrangeCoins(Number(localOrange));
+  if (localProfit) setTotalProfit(Number(localProfit));
+  if (localSalad) setSaladToken(Number(localSalad));
+  if (localCards) setPurchasedCards(JSON.parse(localCards));
+useEffect(() => {
+  if (isDataLoaded) {
     saveToCloud("greenCoins", greenCoins);
     saveToCloud("redCoins", redCoins);
     saveToCloud("orangeCoins", orangeCoins);
     saveToCloud("saladToken", saladToken);
     saveToCloud("purchasedCards", purchasedCards);
     saveToCloud("totalProfit", totalProfit);
-    console.log("دیتای بازی خودکار ذخیره شد");
-  }, 20000); // هر ۲۰ ثانیه یکبار (زمان بهینه برای تلگرام)
-
-  return () => clearInterval(interval);
-}, [isDataLoaded, greenCoins, redCoins, orangeCoins, saladToken, purchasedCards, totalProfit]);
+  }
+}, [greenCoins, redCoins, orangeCoins, saladToken, purchasedCards, totalProfit, isDataLoaded]);
+  // فعال کردن اجازه ذخیره‌سازی
+  setIsDataLoaded(true);
+}, []);
   const handleBuyCard = (card: any) => {
   // ۱. بررسی پیش‌شرط
   if (card.requireToBuy && !purchasedCards.includes(card.requireToBuy)) {
