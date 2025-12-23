@@ -21,6 +21,7 @@ const CARDS_DATA = [
 
 export default function Home() {
   // --- States ---
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [activeTab, setActiveTab] = useState("Tap");
   const [userName, setUserName] = useState("Ninja Player");
   const [greenCoins, setGreenCoins] = useState(0);
@@ -71,28 +72,7 @@ export default function Home() {
     alert("سکه کافی ندارید!");
   }
 };
-useEffect(() => {
-  let interval: any;
-  if (isMakingSalad && saladStartTime) {
-    interval = setInterval(() => {
-      const now = Date.now();
-      const elapsed = now - saladStartTime;
-const duration = 15 * 60 * 1000; // تنظیم روی ۱۵ دقیقه
-const currentProgress = (elapsed / duration) * 100; 
 
-setProgress(Math.min(currentProgress, 100));
-
-      if (currentProgress >= 100) {
-        setSaladToken(prev => prev + 1);
-        setIsMakingSalad(false);
-        setSaladStartTime(null);
-        setProgress(0);
-        clearInterval(interval);
-      }
-    }, 1000);
-  }
-  return () => clearInterval(interval);
-}, [isMakingSalad, saladStartTime]);
   useEffect(() => {
   const tele = (window as any).Telegram?.WebApp;
   if (tele) {
@@ -104,18 +84,13 @@ setProgress(Math.min(currentProgress, 100));
         if (values.redCoins) setRedCoins(Number(values.redCoins));
         if (values.orangeCoins) setOrangeCoins(Number(values.orangeCoins));
         if (values.totalProfit) setTotalProfit(Number(values.totalProfit));
+        if (values.saladToken) setSaladToken(Number(values.saladToken));
         if (values.purchasedCards) setPurchasedCards(JSON.parse(values.purchasedCards));
+        setIsDataLoaded(true); // اعلام کن که دیتا با موفقیت لود شد
       }
     });
   }
-  const saveToCloud = (key: string, value: any) => {
-  const tele = (window as any).Telegram?.WebApp;
-  if (tele?.CloudStorage) {
-    tele.CloudStorage.setItem(key, value.toString(), (err: any, success: boolean) => {
-      if (err) console.error("Error saving to cloud:", err);
-    });
-  }
-};
+  
 }, []);
   // --- Handlers ---
   const handleSwipe = (direction: "left" | "right") => {
@@ -137,11 +112,15 @@ setProgress(Math.min(currentProgress, 100));
     }
   };
   useEffect(() => {
-  saveToCloud("greenCoins", greenCoins);
-  saveToCloud("redCoins", redCoins);
-  saveToCloud("orangeCoins", orangeCoins);
-  saveToCloud("saladToken", saladToken); // حتماً این را هم ذخیره کنید
-}, [greenCoins, redCoins, orangeCoins, saladToken]);
+  // فقط اگر دیتا قبلاً لود شده بود و سکه‌ها صفر نبودند ذخیره کن
+  if (isDataLoaded) {
+    saveToCloud("greenCoins", greenCoins);
+    saveToCloud("redCoins", redCoins);
+    saveToCloud("orangeCoins", orangeCoins);
+    saveToCloud("saladToken", saladToken);
+    saveToCloud("purchasedCards", purchasedCards); // حتما کارت‌ها را هم اضافه کن
+  }
+}, [greenCoins, redCoins, orangeCoins, saladToken, purchasedCards, isDataLoaded]);
   const handleBuyCard = (card: any) => {
   // ۱. بررسی پیش‌شرط
   if (card.requireToBuy && !purchasedCards.includes(card.requireToBuy)) {
@@ -195,15 +174,7 @@ setProgress(Math.min(currentProgress, 100));
     switchAudioRef.current = new Audio("/switch.mp3");
     switchAudioRef.current.volume = 0.5;
 
-    // Loading from LocalStorage
-    const savedGreen = localStorage.getItem("ninjaGreenCoins");
-    if (savedGreen) setGreenCoins(parseInt(savedGreen));
-    const savedRed = localStorage.getItem("ninjaRedCoins");
-    if (savedRed) setRedCoins(parseInt(savedRed));
-    const savedOrange = localStorage.getItem("ninjaOrangeCoins");
-    if (savedOrange) setOrangeCoins(parseInt(savedOrange));
-    const savedSalad = localStorage.getItem("ninjaSalad");
-    if (savedSalad) setSaladToken(parseInt(savedSalad));
+   
   }, []);
 
   // Timer for Mining
