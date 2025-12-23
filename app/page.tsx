@@ -46,15 +46,18 @@ export default function Home() {
   const [saladStartTime, setSaladStartTime] = useState<number | null>(null); 
   const [progress, setProgress] = useState(0); 
 
-  // --- سیستم ذخیره خودکار روی حافظه موبایل (LocalStorage) ---
-  useEffect(() => {
-    localStorage.setItem("greenCoins", greenCoins.toString());
-    localStorage.setItem("redCoins", redCoins.toString());
-    localStorage.setItem("orangeCoins", orangeCoins.toString());
-    localStorage.setItem("saladToken", saladToken.toString());
-    localStorage.setItem("totalProfit", totalProfit.toString());
-    localStorage.setItem("purchasedCards", JSON.stringify(purchasedCards));
-  }, [greenCoins, redCoins, orangeCoins, saladToken, totalProfit, purchasedCards]);
+  // سیستم ذخیره هوشمند: فقط وقتی مقادیر از صفر بیشتر شدند ذخیره کن
+useEffect(() => {
+  // جلوگیری از بازنویسی دیتای قدیمی با صفر در لحظه لود شدن
+  if (greenCoins === 0 && redCoins === 0 && totalProfit === 0) return;
+
+  localStorage.setItem("greenCoins", greenCoins.toString());
+  localStorage.setItem("redCoins", redCoins.toString());
+  localStorage.setItem("orangeCoins", orangeCoins.toString());
+  localStorage.setItem("saladToken", saladToken.toString());
+  localStorage.setItem("totalProfit", totalProfit.toString());
+  localStorage.setItem("purchasedCards", JSON.stringify(purchasedCards));
+}, [greenCoins, redCoins, orangeCoins, saladToken, totalProfit, purchasedCards]);
   
   const adjustValue = (type: string, amount: number) => {
     switch (type) {
@@ -105,26 +108,32 @@ useEffect(() => {
 }, [isMakingSalad, saladStartTime]);
 
 useEffect(() => {
-  const tele = (window as any).Telegram?.WebApp;
-  if (tele) {
-    tele.ready();
+  // ۱. تنظیم صداها
+  audioRef.current = new Audio("/click.mp3");
+  switchAudioRef.current = new Audio("/switch.mp3");
+
+  // ۲. لود کردن با اطمینان بالا
+  const getSaved = (key: string) => localStorage.getItem(key);
+
+  const sGreen = getSaved("greenCoins");
+  const sRed = getSaved("redCoins");
+  const sOrange = getSaved("orangeCoins");
+  const sSalad = getSaved("saladToken");
+  const sProfit = getSaved("totalProfit");
+  const sCards = getSaved("purchasedCards");
+
+  if (sGreen !== null) setGreenCoins(Number(sGreen));
+  if (sRed !== null) setRedCoins(Number(sRed));
+  if (sOrange !== null) setOrangeCoins(Number(sOrange));
+  if (sSalad !== null) setSaladToken(Number(sSalad));
+  if (sProfit !== null) setTotalProfit(Number(sProfit));
+  if (sCards !== null) {
+    try {
+      setPurchasedCards(JSON.parse(sCards));
+    } catch (e) {
+      console.error("Error parsing cards", e);
+    }
   }
-
-  // --- جایگزینی لود کردن از تلگرام با لود کردن از حافظه موبایل (LocalStorage) ---
-  const savedGreen = localStorage.getItem("greenCoins");
-  const savedRed = localStorage.getItem("redCoins");
-  const savedOrange = localStorage.getItem("orangeCoins");
-  const savedSalad = localStorage.getItem("saladToken");
-  const savedProfit = localStorage.getItem("totalProfit");
-  const savedCards = localStorage.getItem("purchasedCards");
-
-  if (savedGreen) setGreenCoins(Number(savedGreen));
-  if (savedRed) setRedCoins(Number(savedRed));
-  if (savedOrange) setOrangeCoins(Number(savedOrange));
-  if (savedSalad) setSaladToken(Number(savedSalad));
-  if (savedProfit) setTotalProfit(Number(savedProfit));
-  if (savedCards) setPurchasedCards(JSON.parse(savedCards));
-
 }, []);
   // --- Handlers ---
 const handleSwipe = (direction: "left" | "right") => {
