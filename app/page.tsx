@@ -41,7 +41,74 @@ export default function Home() {
   const [purchasedCards, setPurchasedCards] = useState<string[]>([]); // آی‌دی کارت‌های خریده شده
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const switchAudioRef = useRef<HTMLAudioElement | null>(null);
+  const [lastSafeCoins, setLastSafeCoins] = useState(greenCoins);//آخرین تعداد سکه ها
+  const [saladCount, setSaladCount] = useState(0); // تعداد سالادهای ساخته شده
+  const [isMakingSalad, setIsMakingSalad] = useState(false); // آیا در حال ساخت سالاد است؟
+  const [saladStartTime, setSaladStartTime] = useState<number | null>(null); // زمان شروع ساخت
+  const [progress, setProgress] = useState(0); // درصد نوار پیشرفت
 
+  const handleStartSalad = () => {
+  if (isMakingSalad) {
+    alert("در حال حاضر یک سالاد در حال پخت است!");
+    return;
+  }
+  if (greenCoins >= 1000 && redCoins >= 500 && orangeCoins >= 100) {
+    setGreenCoins(prev => prev - 1000);
+    setRedCoins(prev => prev - 500);
+    setOrangeCoins(prev => prev - 100);
+    setIsMakingSalad(true);
+    setSaladStartTime(Date.now());
+  } else {
+    alert("سکه کافی ندارید!");
+  }
+};
+useEffect(() => {
+  let interval: any;
+  if (isMakingSalad && saladStartTime) {
+    interval = setInterval(() => {
+      const now = Date.now();
+      const elapsed = now - saladStartTime;
+      const oneHour = 60 * 60 * 1000; // ۳۶۰۰۰۰۰ میلی‌ثانیه
+      const currentProgress = Math.min((elapsed / oneHour) * 100, 100);
+      
+      setProgress(currentProgress);
+
+      if (currentProgress >= 100) {
+        setSaladCount(prev => prev + 1);
+        setIsMakingSalad(false);
+        setSaladStartTime(null);
+        setProgress(0);
+        clearInterval(interval);
+      }
+    }, 1000);
+  }
+  return () => clearInterval(interval);
+}, [isMakingSalad, saladStartTime]);
+  useEffect(() => {
+  const tele = (window as any).Telegram?.WebApp;
+  if (tele) {
+    tele.ready();
+    // خواندن کلیدهای ذخیره شده از ابر تلگرام
+    tele.CloudStorage.getItems(["greenCoins", "redCoins", "orangeCoins", "purchasedCards", "totalProfit"], (err: any, values: any) => {
+      if (!err) {
+        if (values.greenCoins) setGreenCoins(Number(values.greenCoins));
+        if (values.redCoins) setRedCoins(Number(values.redCoins));
+        if (values.orangeCoins) setOrangeCoins(Number(values.orangeCoins));
+        if (values.totalProfit) setTotalProfit(Number(values.totalProfit));
+        if (values.purchasedCards) setPurchasedCards(JSON.parse(values.purchasedCards));
+      }
+    });
+  }
+  const saveToCloud = (key: string, value: any) => {
+  const tele = (window as any).Telegram?.WebApp;
+  if (tele) {
+    const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
+    tele.CloudStorage.setItem(key, stringValue, (err: any, success: any) => {
+      if (err) console.error("Cloud Save Error:", err);
+    });
+  }
+};
+}, []);
   // --- Handlers ---
   const handleSwipe = (direction: "left" | "right") => {
     const currentIndex = TABS.indexOf(activeTab);
@@ -51,25 +118,63 @@ export default function Home() {
       setActiveTab(TABS[currentIndex + 1]);
     }
   };
-
-  const handleBuyCard = (card: any) => {
-    // ۱. بررسی موجودی
-    if (greenCoins < card.cost) {
-      alert("سکه سبز کافی نداری!");
-      return;
+// تابع کمکی برای ذخیره در ابر تلگرام
+  const saveToCloud = (key: string, value: any) => {
+    const tele = (window as any).Telegram?.WebApp;
+    if (tele && tele.CloudStorage) {
+      const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
+      tele.CloudStorage.setItem(key, stringValue, (err: any) => {
+        if (err) console.error("Cloud Save Error:", err);
+      });
     }
-    
-    // ۲. بررسی پیش‌شرط خرید
-    if (card.requireToBuy && !purchasedCards.includes(card.requireToBuy)) {
-      alert("ابتدا باید کارت قبلی را بخرید!");
-      return;
-    }
-
-    // ۳. اعمال خرید
-    setGreenCoins(prev => prev - card.cost);
-    setPurchasedCards(prev => [...prev, card.id]);
-    setTotalProfit(prev => prev + card.profitBoost);
   };
+  const handleBuyCard = (card: any) => {
+  // ۱. بررسی پیش‌شرط
+  if (card.requireToBuy && !purchasedCards.includes(card.requireToBuy)) {
+    alert("ابتدا باید کارت قبلی را بخرید!");
+    return;
+  }
+
+  // ۲. مقادیر جدید
+  const nextGreen = greenCoins - card.cost;
+  const nextPurchased = [...purchasedCards, card.id];
+  const nextProfit = totalProfit + card.profitBoost;
+
+  // ۳. آپدیت استیت‌های بازی
+  setGreenCoins(nextGreen);
+  setPurchasedCards(nextPurchased);
+  setTotalProfit(nextProfit);
+
+  // ۴. ذخیره در ابر تلگرام (با مقادیر دقیق جدید)
+  saveToCloud("greenCoins", nextGreen);
+  saveToCloud("purchasedCards", nextPurchased);
+  saveToCloud("totalProfit", nextProfit);
+};
+  //نوار سالادسازی 
+  useEffect(() => {
+  let interval: any;
+  if (isMakingSalad && saladStartTime) {
+    interval = setInterval(() => {
+      const now = Date.now();
+      const elapsed = now - saladStartTime;
+      const oneHour = 60 * 60 * 1000;
+      const currentProgress = Math.min((elapsed / oneHour) * 100, 100);
+      
+      setProgress(currentProgress);
+
+      if (currentProgress >= 100) {
+        setSaladCount(prev => prev + 1);
+        setIsMakingSalad(false);
+        setSaladStartTime(null);
+        setProgress(0);
+        clearInterval(interval);
+        alert("سالاد شما آماده شد!");
+      }
+    }, 1000);
+  }
+  
+  return () => clearInterval(interval);
+}, [isMakingSalad, saladStartTime]);
 
   useEffect(() => {
     audioRef.current = new Audio("/click.mp3");
@@ -104,6 +209,37 @@ export default function Home() {
       switchAudioRef.current.play().catch(() => {});
     }
   };
+  useEffect(() => {
+  const checkSecurity = async () => {
+    if (activeTab === "Cards") {
+      const tele = (window as any).Telegram?.WebApp;
+      if (tele && tele.CloudStorage) {
+        
+        // ۱. دریافت آخرین موجودی معتبر از سرور تلگرام
+        tele.CloudStorage.getItem("greenCoins", (err: any, savedValue: string) => {
+          if (!err && savedValue) {
+            const cloudCoins = Number(savedValue);
+            
+            // ۲. تعریف حاشیه خطا (مثلاً سود ۱۰ ثانیه اخیر)
+            const marginOfError = totalProfit * (10 / 3600); 
+            
+            // ۳. اگر موجودی فعلی در کد، به طرز مشکوکی بیشتر از ذخیره ابری بود
+            if (greenCoins > cloudCoins + marginOfError + 100) { 
+              console.error("Security Breach: Coin mismatch detected.");
+              
+              // بازگرداندن موجودی به مقدار معتبر ابری
+              setGreenCoins(cloudCoins);
+              
+              tele.showAlert("اختلاف در موجودی شناسایی شد. مقادیر بازنشانی شدند.");
+            }
+          }
+        });
+      }
+    }
+  };
+
+  checkSecurity();
+}, [activeTab]);
 
   const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
     if (energy <= 0) return;
@@ -222,7 +358,16 @@ export default function Home() {
                 <div onClick={handleClick} style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", cursor: "pointer", marginTop: "-100px" }}>
                   <img src="/coin.png" style={{ width: "260px", transform: isTapping ? "scale(0.92)" : "scale(1)", transition: "0.05s" }} />
                 </div>
+                <>
+          <button onClick={() => setActiveTab("QR")} style={{ position: "absolute", bottom: "100px", left: "12%", background: "none", border: "none" }}>
+            <img src="/qr-butt.png" style={{ width: "35px" }} />
+          </button>
+          <button onClick={() => setActiveTab("Boost")} style={{ position: "absolute", bottom: "100px", right: "12%", background: "none", border: "none" }}>
+            <img src="/boost-butt.png" style={{ width: "35px" }} />
+          </button>
+        </>
               </div>
+              
             )}
 
             {activeTab === "Mine" && (
@@ -453,7 +598,7 @@ export default function Home() {
         <img 
           src={footerIcons[label]} 
           style={{ 
-            width: "40px", // کمی بزرگتر برای دسترسی بهتر
+            width: "40px", // اندازه دکمه ها
             filter: isActive ? "none" : "grayscale(100%)", 
             opacity: isActive ? 1 : 0.6,
             transition: "0.2s" 
@@ -467,24 +612,80 @@ export default function Home() {
       ) : (
         /* --- Salad Page --- */
         <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#000" }}>
-          <button onClick={() => setIsSaladPage(false)} style={{ padding: "10px 20px", backgroundColor: "#ffd700", borderRadius: "10px", fontWeight: "bold" }}>🔙 Back</button>
+    
+
+    {/* محتوای صفحه سالاد (مثلاً عنوان یا تصاویر) */}
+    {isSaladPage && (
+  <div style={{ 
+  position: "fixed", 
+  top: 0, 
+  left: 0, 
+  width: "100%", 
+  height: "100vh", 
+  // لایه مشکی نیمه‌شفاف (0.7) روی تصویر قرار می‌گیرد
+  backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('/salad-back.jpg')", 
+  backgroundSize: "cover", 
+  backgroundPosition: "center",
+  zIndex: 100, 
+  display: "flex", 
+  flexDirection: "column", 
+  alignItems: "center", 
+  color: "white" 
+}}>
+    
+    <button onClick={() => setIsSaladPage(false)} style={{ position: "absolute", top: "20px", left: "20px", background: "none", border: "none", zIndex: 110 }}><img src="/back-butt.png" style={{ width: "7px" }} /></button>
+
+    {/* ۱. بخش تعداد سالاد (بالا وسط) */}
+    <div style={{ marginTop: "60px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <img src="/salad-token.png" style={{ width: "80px" }} />
+      <span style={{ fontSize: "24px", fontWeight: "bold" }}>{saladCount}</span>
+    </div>
+
+    {/* ۲. موجودی فعلی سکه‌ها */}
+    <div style={{ display: "flex", gap: "15px", marginTop: "20px", backgroundColor: "rgba(0,0,0,0.5)", padding: "10px 20px", borderRadius: "15px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "5px" }}><img src="/currency-c.png" style={{ width: "18px" }} />{greenCoins}</div>
+      <div style={{ display: "flex", alignItems: "center", gap: "5px" }}><img src="/currency-r.png" style={{ width: "18px" }} />{redCoins}</div>
+      <div style={{ display: "flex", alignItems: "center", gap: "5px" }}><img src="/currency-t.png" style={{ width: "18px" }} />{orangeCoins}</div>
+    </div>
+
+    {/* ۳. هزینه ساخت (عمودی) */}
+    <div style={{ marginTop: "30px", display: "flex", flexDirection: "column", gap: "8px", alignItems: "flex-start" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "18px", color: greenCoins >= 1000 ? "#fff" : "#ff4d4d" }}>
+        <img src="/currency-c.png" style={{ width: "22px" }} /> 1,000
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "18px", color: redCoins >= 500 ? "#fff" : "#ff4d4d" }}>
+        <img src="/currency-r.png" style={{ width: "22px" }} /> 500
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "18px", color: orangeCoins >= 100 ? "#fff" : "#ff4d4d" }}>
+        <img src="/currency-t.png" style={{ width: "22px" }} /> 100
+      </div>
+    </div>
+
+    {/* ۴. کاسه سالاد بزرگ و نوار پیشرفت */}
+    <div style={{ marginTop: "40px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+      <img 
+        src="/salad-token.png" 
+        onClick={handleStartSalad}
+        style={{ width: "180px", cursor: "pointer", filter: isMakingSalad ? "grayscale(50%)" : "none", transition: "0.3s" }} 
+      />
+      
+      {/* نوار پیشرفت */}
+      <div style={{ width: "250px", height: "12px", backgroundColor: "rgba(255,255,255,0.2)", borderRadius: "10px", marginTop: "20px", overflow: "hidden", border: "1px solid #fff" }}>
+        <div style={{ width: `${progress}%`, height: "100%", backgroundColor: "#4CAF50", transition: "width 1s linear" }} />
+      </div>
+      <span style={{ marginTop: "8px", fontSize: "12px" }}>{isMakingSalad ? "در حال آماده‌سازی..." : "برای شروع کلیک کنید"}</span>
+    </div>
+
+      
+    {/* بقیه کدها و آیتم‌های سالاد اینجا قرار می‌گیرند */}
+
+  </div>
+)}
           <h2 style={{ marginTop: "20px" }}>Salad Shop</h2>
         </div>
       )}
 
-      {/* Overlays */}
-      {activeTab === "Tap" && (
-        <>
-          <button onClick={() => setActiveTab("QR")} style={{ position: "absolute", bottom: "100px", left: "12%", background: "none", border: "none" }}>
-            <img src="/qr-butt.png" style={{ width: "35px" }} />
-          </button>
-          <button onClick={() => setActiveTab("Boost")} style={{ position: "absolute", bottom: "100px", right: "12%", background: "none", border: "none" }}>
-            <img src="/boost-butt.png" style={{ width: "35px" }} />
-          </button>
-        </>
-      )}
-
-      {floatingNumbers.map(num => (
+        {floatingNumbers.map(num => (
         <div key={num.id} style={{ position: "fixed", left: num.x, top: num.y, color: "#ffd700", fontSize: "32px", fontWeight: "bold", animation: "f 0.8s forwards", pointerEvents: "none", zIndex: 1000 }}>
           +1
         </div>
