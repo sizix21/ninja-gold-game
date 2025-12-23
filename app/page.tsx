@@ -111,23 +111,37 @@ export default function Home() {
       });
     }
   };
-  useEffect(() => {
-  // فقط اگر دیتا قبلاً لود شده بود و سکه‌ها صفر نبودند ذخیره کن
-  if (isDataLoaded) {
-    saveToCloud("greenCoins", greenCoins);
-    saveToCloud("redCoins", redCoins);
-    saveToCloud("orangeCoins", orangeCoins);
-    saveToCloud("saladToken", saladToken);
-    saveToCloud("purchasedCards", purchasedCards); // حتما کارت‌ها را هم اضافه کن
-  }
-}, [greenCoins, redCoins, orangeCoins, saladToken, purchasedCards, isDataLoaded]);
+  
   const handleBuyCard = (card: any) => {
   // ۱. بررسی پیش‌شرط
   if (card.requireToBuy && !purchasedCards.includes(card.requireToBuy)) {
     alert("ابتدا باید کارت قبلی را بخرید!");
     return;
   }
+useEffect(() => {
+  const handleSaveData = () => {
+    if (isDataLoaded) {
+      saveToCloud("greenCoins", greenCoins);
+      saveToCloud("redCoins", redCoins);
+      saveToCloud("orangeCoins", orangeCoins);
+      saveToCloud("saladToken", saladToken);
+      saveToCloud("purchasedCards", purchasedCards);
+      saveToCloud("totalProfit", totalProfit);
+    }
+  };
 
+  // رویداد بسته شدن یا تغییر وضعیت صفحه
+  window.addEventListener("beforeunload", handleSaveData);
+  window.addEventListener("visibilitychange", () => {
+    if (document.visibilityState === "hidden") {
+      handleSaveData();
+    }
+  });
+
+  return () => {
+    window.removeEventListener("beforeunload", handleSaveData);
+  };
+}, [greenCoins, redCoins, orangeCoins, saladToken, purchasedCards, totalProfit, isDataLoaded]);
   // ۲. مقادیر جدید
   const nextGreen = greenCoins - card.cost;
   const nextPurchased = [...purchasedCards, card.id];
