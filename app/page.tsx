@@ -492,7 +492,7 @@ useEffect(() => {
               zIndex: 0,      // raftan poshte elemanha
               pointerEvents: "none"
             }}>
-              <img src="/chef-robot.png" style={{ width: "100%", height: "auto", objectFit: "contain" }} />
+              <img src="/chef-robot.jpg" style={{ width: "100%", height: "auto", objectFit: "contain" }} />
             </div>
 
 
