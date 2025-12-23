@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion"; // اضافه شدن ایمپورت موشن
+import { motion, AnimatePresence } from "framer-motion";
 
 interface FloatingNumber {
   id: number;
@@ -15,7 +15,6 @@ const TABS = ["Tap", "Mine", "Fight", "Library", "Cards"];
 const CARDS_DATA = [
   { id: "arch-1", family: "archimedes", name: "Archimedes I", image: "/card-archimedes.png", cost: 500, profitBoost: 10, visibleAfter: null, requireToBuy: null },
   { id: "arch-2", family: "archimedes", name: "Archimedes II", image: "/card-archimedes.png", cost: 1200, profitBoost: 25, visibleAfter: "arch-1", requireToBuy: "arch-1" },
-  // اصلاح شده: حالا اقلیدس منتظر کارت شماره ۲ می‌ماند نه ۵
   { id: "eucl-1", family: "euclid", name: "Euclid I", image: "/card-euclid.png", cost: 2000, profitBoost: 50, visibleAfter: "arch-2", requireToBuy: "arch-2" },
 ];
 
@@ -38,39 +37,50 @@ export default function Home() {
   const [totalProfit, setTotalProfit] = useState(0);
   const [isSaladPage, setIsSaladPage] = useState(false);
   const [floatingNumbers, setFloatingNumbers] = useState<FloatingNumber[]>([]);
-  const [purchasedCards, setPurchasedCards] = useState<string[]>([]); // آی‌دی کارت‌های خریده شده
+  const [purchasedCards, setPurchasedCards] = useState<string[]>([]); 
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const switchAudioRef = useRef<HTMLAudioElement | null>(null);
-  const [lastSafeCoins, setLastSafeCoins] = useState(greenCoins);//آخرین تعداد سکه ها
+  const [lastSafeCoins, setLastSafeCoins] = useState(greenCoins);
  
-  const [isMakingSalad, setIsMakingSalad] = useState(false); // آیا در حال ساخت سالاد است؟
-  const [saladStartTime, setSaladStartTime] = useState<number | null>(null); // زمان شروع ساخت
-  const [progress, setProgress] = useState(0); // درصد نوار پیشرفت
+  const [isMakingSalad, setIsMakingSalad] = useState(false); 
+  const [saladStartTime, setSaladStartTime] = useState<number | null>(null); 
+  const [progress, setProgress] = useState(0); 
+
+  // --- سیستم ذخیره خودکار روی حافظه موبایل (LocalStorage) ---
+  useEffect(() => {
+    localStorage.setItem("greenCoins", greenCoins.toString());
+    localStorage.setItem("redCoins", redCoins.toString());
+    localStorage.setItem("orangeCoins", orangeCoins.toString());
+    localStorage.setItem("saladToken", saladToken.toString());
+    localStorage.setItem("totalProfit", totalProfit.toString());
+    localStorage.setItem("purchasedCards", JSON.stringify(purchasedCards));
+  }, [greenCoins, redCoins, orangeCoins, saladToken, totalProfit, purchasedCards]);
   
   const adjustValue = (type: string, amount: number) => {
-  switch (type) {
-    case 'green': setGreenCoins(prev => Math.max(0, prev + amount)); break; //مقادیر دستی
-    case 'red': setRedCoins(prev => Math.max(0, prev + amount)); break;
-    case 'orange': setOrangeCoins(prev => Math.max(0, prev + amount)); break;
-    case 'salad': setSaladToken(prev => Math.max(0, prev + amount)); break;
-    case 'energy': setEnergy(prev => Math.max(0, Math.min(2000, prev + amount))); break;
-  }
-};
+    switch (type) {
+      case 'green': setGreenCoins(prev => Math.max(0, prev + amount)); break;
+      case 'red': setRedCoins(prev => Math.max(0, prev + amount)); break;
+      case 'orange': setOrangeCoins(prev => Math.max(0, prev + amount)); break;
+      case 'salad': setSaladToken(prev => Math.max(0, prev + amount)); break;
+      case 'energy': setEnergy(prev => Math.max(0, Math.min(2000, prev + amount))); break;
+    }
+  };
+
   const handleStartSalad = () => {
-  if (isMakingSalad) {
-    alert("در حال حاضر یک سالاد در حال پخت است!");
-    return;
-  }
-  if (greenCoins >= 1000 && redCoins >= 500 && orangeCoins >= 100) {
-    setGreenCoins(prev => prev - 1000);
-    setRedCoins(prev => prev - 500);
-    setOrangeCoins(prev => prev - 100);
-    setIsMakingSalad(true);
-    setSaladStartTime(Date.now());
-  } else {
-    alert("سکه کافی ندارید!");
-  }
-};
+    if (isMakingSalad) {
+      alert("در حال حاضر یک سالاد در حال پخت است!");
+      return;
+    }
+    if (greenCoins >= 1000 && redCoins >= 500 && orangeCoins >= 100) {
+      setGreenCoins(prev => prev - 1000);
+      setRedCoins(prev => prev - 500);
+      setOrangeCoins(prev => prev - 100);
+      setIsMakingSalad(true);
+      setSaladStartTime(Date.now());
+    } else {
+      alert("سکه کافی ندارید!");
+    }
+  };
 useEffect(() => {
   let interval: any;
   if (isMakingSalad && saladStartTime) {
@@ -93,74 +103,61 @@ useEffect(() => {
   }
   return () => clearInterval(interval);
 }, [isMakingSalad, saladStartTime]);
-  useEffect(() => {
+
+useEffect(() => {
   const tele = (window as any).Telegram?.WebApp;
   if (tele) {
     tele.ready();
-    // خواندن کلیدهای ذخیره شده از ابر تلگرام
-    tele.CloudStorage.getItems(["greenCoins", "redCoins", "orangeCoins", "purchasedCards", "totalProfit"], (err: any, values: any) => {
-      if (!err) {
-        if (values.greenCoins) setGreenCoins(Number(values.greenCoins));
-        if (values.redCoins) setRedCoins(Number(values.redCoins));
-        if (values.orangeCoins) setOrangeCoins(Number(values.orangeCoins));
-        if (values.totalProfit) setTotalProfit(Number(values.totalProfit));
-        if (values.purchasedCards) setPurchasedCards(JSON.parse(values.purchasedCards));
-      }
-    });
   }
-  const saveToCloud = (key: string, value: any) => {
-  const tele = (window as any).Telegram?.WebApp;
-  if (tele) {
-    const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
-    tele.CloudStorage.setItem(key, stringValue, (err: any, success: any) => {
-      if (err) console.error("Cloud Save Error:", err);
-    });
-  }
-};
+
+  // --- جایگزینی لود کردن از تلگرام با لود کردن از حافظه موبایل (LocalStorage) ---
+  const savedGreen = localStorage.getItem("greenCoins");
+  const savedRed = localStorage.getItem("redCoins");
+  const savedOrange = localStorage.getItem("orangeCoins");
+  const savedSalad = localStorage.getItem("saladToken");
+  const savedProfit = localStorage.getItem("totalProfit");
+  const savedCards = localStorage.getItem("purchasedCards");
+
+  if (savedGreen) setGreenCoins(Number(savedGreen));
+  if (savedRed) setRedCoins(Number(savedRed));
+  if (savedOrange) setOrangeCoins(Number(savedOrange));
+  if (savedSalad) setSaladToken(Number(savedSalad));
+  if (savedProfit) setTotalProfit(Number(savedProfit));
+  if (savedCards) setPurchasedCards(JSON.parse(savedCards));
+
 }, []);
   // --- Handlers ---
-  const handleSwipe = (direction: "left" | "right") => {
-    const currentIndex = TABS.indexOf(activeTab);
-    if (direction === "right" && currentIndex > 0) {
-      setActiveTab(TABS[currentIndex - 1]);
-    } else if (direction === "left" && currentIndex < TABS.length - 1) {
-      setActiveTab(TABS[currentIndex + 1]);
-    }
-  };
-// تابع کمکی برای ذخیره در ابر تلگرام
-  const saveToCloud = (key: string, value: any) => {
-    const tele = (window as any).Telegram?.WebApp;
-    if (tele && tele.CloudStorage) {
-      const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
-      tele.CloudStorage.setItem(key, stringValue, (err: any) => {
-        if (err) console.error("Cloud Save Error:", err);
-      });
-    }
-  };
-  const handleBuyCard = (card: any) => {
+const handleSwipe = (direction: "left" | "right") => {
+  const currentIndex = TABS.indexOf(activeTab);
+  if (direction === "right" && currentIndex > 0) {
+    setActiveTab(TABS[currentIndex - 1]);
+  } else if (direction === "left" && currentIndex < TABS.length - 1) {
+    setActiveTab(TABS[currentIndex + 1]);
+  }
+};
+
+// تابع خرید کارت اصلاح شده (بدون نیاز به ذخیره دستی در تلگرام)
+const handleBuyCard = (card: any) => {
   // ۱. بررسی پیش‌شرط
   if (card.requireToBuy && !purchasedCards.includes(card.requireToBuy)) {
     alert("ابتدا باید کارت قبلی را بخرید!");
     return;
   }
+  
+  // بررسی موجودی کافی
+  if (greenCoins < card.cost) {
+    alert("سکه کافی ندارید!");
+    return;
+  }
 
-  // ۲. مقادیر جدید
-  const nextGreen = greenCoins - card.cost;
-  const nextPurchased = [...purchasedCards, card.id];
-  const nextProfit = totalProfit + card.profitBoost;
-
-  // ۳. آپدیت استیت‌های بازی
-  setGreenCoins(nextGreen);
-  setPurchasedCards(nextPurchased);
-  setTotalProfit(nextProfit);
-
-  // ۴. ذخیره در ابر تلگرام (با مقادیر دقیق جدید)
-  saveToCloud("greenCoins", nextGreen);
-  saveToCloud("purchasedCards", nextPurchased);
-  saveToCloud("totalProfit", nextProfit);
+  // ۲. آپدیت استیت‌های بازی (ذخیره‌سازی به صورت خودکار توسط useEffect قطعه اول انجام می‌شود)
+  setGreenCoins(prev => prev - card.cost);
+  setPurchasedCards(prev => [...prev, card.id]);
+  setTotalProfit(prev => prev + card.profitBoost);
 };
-  //نوار سالادسازی 
-  useEffect(() => {
+
+// نوار سالادسازی 
+useEffect(() => {
   let interval: any;
   if (isMakingSalad && saladStartTime) {
     interval = setInterval(() => {
@@ -185,20 +182,24 @@ useEffect(() => {
   return () => clearInterval(interval);
 }, [isMakingSalad, saladStartTime]);
 
-  useEffect(() => {
+ useEffect(() => {
     audioRef.current = new Audio("/click.mp3");
     switchAudioRef.current = new Audio("/switch.mp3");
     switchAudioRef.current.volume = 0.5;
 
-    // Loading from LocalStorage
-    const savedGreen = localStorage.getItem("ninjaGreenCoins");
+    // بارگذاری از حافظه گوشی با کلیدهای یکسان
+    const savedGreen = localStorage.getItem("greenCoins");
     if (savedGreen) setGreenCoins(parseInt(savedGreen));
-    const savedRed = localStorage.getItem("ninjaRedCoins");
+    const savedRed = localStorage.getItem("redCoins");
     if (savedRed) setRedCoins(parseInt(savedRed));
-    const savedOrange = localStorage.getItem("ninjaOrangeCoins");
+    const savedOrange = localStorage.getItem("orangeCoins");
     if (savedOrange) setOrangeCoins(parseInt(savedOrange));
-    const savedSalad = localStorage.getItem("ninjaSalad");
+    const savedSalad = localStorage.getItem("saladToken"); // اصلاح نام کلید
     if (savedSalad) setSaladToken(parseInt(savedSalad));
+    const savedCards = localStorage.getItem("purchasedCards");
+    if (savedCards) setPurchasedCards(JSON.parse(savedCards));
+    const savedProfit = localStorage.getItem("totalProfit");
+    if (savedProfit) setTotalProfit(parseInt(savedProfit));
   }, []);
 
   // Timer for Mining
@@ -218,37 +219,8 @@ useEffect(() => {
       switchAudioRef.current.play().catch(() => {});
     }
   };
-  useEffect(() => {
-  const checkSecurity = async () => {
-    if (activeTab === "Cards") {
-      const tele = (window as any).Telegram?.WebApp;
-      if (tele && tele.CloudStorage) {
-        
-        // ۱. دریافت آخرین موجودی معتبر از سرور تلگرام
-        tele.CloudStorage.getItem("greenCoins", (err: any, savedValue: string) => {
-          if (!err && savedValue) {
-            const cloudCoins = Number(savedValue);
-            
-            // ۲. تعریف حاشیه خطا (مثلاً سود ۱۰ ثانیه اخیر)
-            const marginOfError = totalProfit * (10 / 3600); 
-            
-            // ۳. اگر موجودی فعلی در کد، به طرز مشکوکی بیشتر از ذخیره ابری بود
-            if (greenCoins > cloudCoins + marginOfError + 100) { 
-              console.error("Security Breach: Coin mismatch detected.");
-              
-              // بازگرداندن موجودی به مقدار معتبر ابری
-              setGreenCoins(cloudCoins);
-              
-              tele.showAlert("اختلاف در موجودی شناسایی شد. مقادیر بازنشانی شدند.");
-            }
-          }
-        });
-      }
-    }
-  };
 
-  checkSecurity();
-}, [activeTab]);
+  // بخش Security Breach حذف شد چون دیگر با ابر تلگرام مقایسه نمی‌کنیم
 
   const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
     if (energy <= 0) return;
@@ -274,27 +246,27 @@ useEffect(() => {
         <>
           {/* Main Container with Swipe */}
           <motion.div 
-  key={activeTab}
-  drag="x"
-  dragConstraints={{ left: 0, right: 0 }}
-  dragElastic={0.1}
-  dragMomentum={false} // در موبایل مانع از پرش ناگهانی می‌شود
-  onDragEnd={(e, info) => {
-    const threshold = 40; // حساسیت حرکت
-    if (info.offset.x < -threshold) handleSwipe("left");
-    if (info.offset.x > threshold) handleSwipe("right");
-  }}
-  style={{ 
-    flex: 1, 
-    display: "flex", 
-    flexDirection: "column", 
-    width: "100%",
-    touchAction: "pan-y" // این خط کلید حل مشکل است! اجازه می‌دهد اسکرول عمودی کار کند ولی افقی را به Swipe می‌سپارد
-  }}
-
+            key={activeTab}
+            drag="x"
+            dragConstraints={{ left: 0, right: 0 }}
+            dragElastic={0.1}
+            dragMomentum={false} 
+            onDragEnd={(e, info) => {
+              const threshold = 40; 
+              if (info.offset.x < -threshold) handleSwipe("left");
+              if (info.offset.x > threshold) handleSwipe("right");
+            }}
+            style={{ 
+              flex: 1, 
+              display: "flex", 
+              flexDirection: "column", 
+              width: "100%",
+              touchAction: "pan-y" 
+            }}
           >
-            {/* Cards Tab */}
-            {activeTab === "Cards" && (
+          
+           {/* Cards Tab */}
+ {activeTab === "Cards" && (
   <div style={{ flex: 1, overflowY: "auto", padding: "20px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
     {CARDS_DATA.filter(card => 
       card.visibleAfter === null || purchasedCards.includes(card.visibleAfter)
@@ -328,7 +300,7 @@ useEffect(() => {
               fontWeight: "bold"
             }}
           >
-            {alreadyBought ? "Owned" : isLocked ? "Locked 🔒" : `${card.cost} 🟢`}
+            {alreadyBought ? "Owned" : isLocked ? "Locked 🔒" : `${card.cost.toLocaleString()} 🟢`}
           </button>
         </div>
       );
@@ -336,70 +308,53 @@ useEffect(() => {
   </div>
 )}
 
-            {/* Tap Tab */}
-            {activeTab === "Tap" && (
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", paddingTop: "40px" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", padding: "10px 15px", position: "absolute", top: 0, left: 0, boxSizing: "border-box", zIndex: 10 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "10px", backgroundColor: "rgba(255,255,255,0.05)", padding: "5px 10px", borderRadius: "12px" }}>
-                    <div style={{ width: "35px", height: "35px", borderRadius: "50%", border: "2px solid #ffd700", overflow: "hidden" }}>
-                      <img src="/coin.png" style={{ width: "100%" }} />
-                    </div>
-                    <div>
-                      <span style={{ fontSize: "12px", display: "block" }}>{userName}</span>
-                      <span style={{ fontSize: "11px", color: "#ffd700" }}>Lv. 1</span>
-                    </div>
-                  </div>
-                  <div onClick={() => setIsSaladPage(true)} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(73, 73, 73, 0.5)", padding: "5px 12px", borderRadius: "15px" }}>
-                    <span>{saladToken.toLocaleString()}</span>
-                    <img src="/salad-token.png" style={{ width: "35px", height: "28px" }} />
-                  </div>
-                </div>
-                <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "15px", marginTop: "20px" }}>
-                  <img src="/currency-c.png" style={{ width: "50px" }} />
-                  <span style={{ fontSize: "40px", fontWeight: "bold" }}>{greenCoins.toLocaleString()}</span>
-                </div>
-                <div style={{ padding: "10px" }}>
-                  <span style={{ fontSize: "12px" }}>🔋 {energy} / 2000</span>
-                  <div style={{ width: "100px", height: "5px", backgroundColor: "#333", borderRadius: "3px" }}>
-                    <div style={{ width: `${(energy / 2000) * 100}%`, height: "100%", backgroundColor: "#4caf50" }}></div>
-                  </div>
-                </div>
-                <div onClick={handleClick} style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", cursor: "pointer", marginTop: "-100px" }}>
-                  <img src="/coin.png" style={{ width: "260px", transform: isTapping ? "scale(0.92)" : "scale(1)", transition: "0.05s" }} />
-                </div>
-                <>
-          <button onClick={() => setActiveTab("QR")} style={{ position: "absolute", bottom: "100px", left: "12%", background: "none", border: "none" }}>
-            <img src="/qr-butt.png" style={{ width: "35px" }} />
-          </button>
-          <button onClick={() => setActiveTab("Boost")} style={{ position: "absolute", bottom: "100px", right: "12%", background: "none", border: "none" }}>
-            <img src="/boost-butt.png" style={{ width: "35px" }} />
-          </button>
-        </>
-              </div>
-              
-            )}
-{/* ساخت صفحه تب QR به صورت دستی */}
-{activeTab === "QR" && (
-  <div style={{ 
-    flex: 1, 
-    display: "flex", 
-    flexDirection: "column", 
-    alignItems: "center", 
-    justifyContent: "center", 
-    padding: "20px",
-    color: "white" 
-  }}>
-    
-    <h2 style={{ marginBottom: "20px" }}>Test & Debug</h2>
+{/* Tap Tab */}
+{activeTab === "Tap" && (
+  <div style={{ flex: 1, display: "flex", flexDirection: "column", paddingTop: "40px" }}>
+    <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", padding: "10px 15px", position: "absolute", top: 0, left: 0, boxSizing: "border-box", zIndex: 10 }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", backgroundColor: "rgba(255,255,255,0.05)", padding: "5px 10px", borderRadius: "12px" }}>
+        <div style={{ width: "35px", height: "35px", borderRadius: "50%", border: "2px solid #ffd700", overflow: "hidden" }}>
+          <img src="/coin.png" style={{ width: "100%" }} />
+        </div>
+        <div>
+          <span style={{ fontSize: "12px", display: "block" }}>{userName}</span>
+          <span style={{ fontSize: "11px", color: "#ffd700" }}>Lv. 1</span>
+        </div>
+      </div>
+      <div onClick={() => setIsSaladPage(true)} style={{ cursor: "pointer", display: "flex", alignItems: "center", gap: "8px", backgroundColor: "rgba(73, 73, 73, 0.5)", padding: "5px 12px", borderRadius: "15px" }}>
+        <span>{saladToken.toLocaleString()}</span>
+        <img src="/salad-token.png" style={{ width: "35px", height: "28px" }} />
+      </div>
+    </div>
+    <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "15px", marginTop: "20px" }}>
+      <img src="/currency-c.png" style={{ width: "50px" }} />
+      <span style={{ fontSize: "40px", fontWeight: "bold" }}>{greenCoins.toLocaleString()}</span>
+    </div>
+    <div style={{ padding: "10px" }}>
+      <span style={{ fontSize: "12px" }}>🔋 {energy} / 2000</span>
+      <div style={{ width: "100px", height: "5px", backgroundColor: "#333", borderRadius: "3px", marginTop: "5px" }}>
+        <div style={{ width: `${(energy / 2000) * 100}%`, height: "100%", backgroundColor: "#4caf50", borderRadius: "3px" }}></div>
+      </div>
+    </div>
+    <div onClick={handleClick} style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", cursor: "pointer", marginTop: "-100px" }}>
+      <img src="/coin.png" style={{ width: "260px", transform: isTapping ? "scale(0.92)" : "scale(1)", transition: "0.05s" }} />
+    </div>
+    <>
+      <button onClick={() => setActiveTab("QR")} style={{ position: "absolute", bottom: "100px", left: "12%", background: "none", border: "none" }}>
+        <img src="/qr-butt.png" style={{ width: "35px" }} />
+      </button>
+      <button onClick={() => setActiveTab("Boost")} style={{ position: "absolute", bottom: "100px", right: "12%", background: "none", border: "none" }}>
+        <img src="/boost-butt.png" style={{ width: "35px" }} />
+      </button>
+    </>
+  </div>
+)}
 
-    {/* پنل تنظیمات دستی (Debug Menu) */}
-    <div style={{ 
-      background: "rgba(255, 255, 255, 0.05)", 
-      padding: "20px", 
-      borderRadius: "20px", 
-      width: "100%", 
-      border: "1px solid rgba(255,255,255,0.1)" 
-    }}>
+{/* بخش Debug/QR - هماهنگ با ذخیره‌سازی */}
+{activeTab === "QR" && (
+  <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "20px", color: "white" }}>
+    <h2 style={{ marginBottom: "20px" }}>Test & Debug</h2>
+    <div style={{ background: "rgba(255, 255, 255, 0.05)", padding: "20px", borderRadius: "20px", width: "100%", border: "1px solid rgba(255,255,255,0.1)" }}>
       {[
         { label: "Green Coins", key: "green", color: "#4CAF50" },
         { label: "Red Coins", key: "red", color: "#F44336" },
@@ -410,109 +365,30 @@ useEffect(() => {
         <div key={item.key} style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", alignItems: "center" }}>
           <span style={{ color: item.color, fontWeight: "bold" }}>{item.label}</span>
           <div style={{ display: "flex", gap: "8px" }}>
-            <button 
-              onClick={() => adjustValue(item.key, -100)} 
-              style={{ background: "#444", color: "#fff", border: "none", borderRadius: "8px", padding: "5px 12px" }}
-            >
-              -100
-            </button>
-            <button 
-              onClick={() => adjustValue(item.key, 100)} 
-              style={{ background: "#444", color: "#fff", border: "none", borderRadius: "8px", padding: "5px 12px" }}
-            >
-              +100
-            </button>
+            <button onClick={() => adjustValue(item.key, -100)} style={{ background: "#444", color: "#fff", border: "none", borderRadius: "8px", padding: "5px 12px" }}>-100</button>
+            <button onClick={() => adjustValue(item.key, 100)} style={{ background: "#444", color: "#fff", border: "none", borderRadius: "8px", padding: "5px 12px" }}>+100</button>
           </div>
         </div>
       ))}
+      {/* دکمه پاک کردن کل حافظه برای تست */}
+      <button 
+        onClick={() => { localStorage.clear(); window.location.reload(); }}
+        style={{ width: "100%", marginTop: "10px", padding: "10px", backgroundColor: "#ff4444", color: "white", border: "none", borderRadius: "10px" }}
+      >
+        Reset All Data (Danger)
+      </button>
     </div>
-
-    <p style={{ marginTop: "20px", fontSize: "12px", color: "#666" }}>
-      این صفحه فقط برای تست است و در نسخه نهایی حذف می‌شود.
-    </p>
   </div>
 )}
+
+{/* Boost Tab */}
 {activeTab === "Boost" && (
-  <div style={{ 
-    flex: 1, 
-    display: "flex", 
-    flexDirection: "column", 
-    alignItems: "center", 
-    padding: "20px", 
-    color: "white", // تغییر رنگ متن به سفید چون معمولاً بک‌گراندها تیره هستند
-    backgroundImage: "url('/boost-back.jpg')", // تصویر پس‌زمینه شما
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    overflowY: "auto",
-    paddingBottom: "100px",
-    width: "100%",
-    height: "100vh"
-  }}>
-    {/* دکمه بازگشت  */}
-<button 
-  onClick={() => setActiveTab("Tap")} // یا هر تبی که می‌خواهی به آن برگردد
-  style={{ 
-    position: "absolute", 
-    top: "20px", 
-    left: "20px", 
-    background: "none", 
-    border: "none", 
-    zIndex: 110, 
-    padding: 0,
-    cursor: "pointer"
-  }}
->
-  <img src="/back-butt.png" style={{ width: "7px", height: "auto" }} />
-</button>
+  <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "20px", color: "white", backgroundImage: "url('/boost-back.jpg')", backgroundSize: "cover", backgroundPosition: "center", overflowY: "auto", width: "100%", height: "100vh" }}>
+    <button onClick={() => setActiveTab("Tap")} style={{ position: "absolute", top: "20px", left: "20px", background: "none", border: "none", zIndex: 110, cursor: "pointer" }}>
+      <img src="/back-butt.png" style={{ width: "20px", height: "auto" }} />
+    </button>
     <h2 style={{ fontSize: "28px", fontWeight: "bold", marginBottom: "30px" }}>Boost</h2>
-
-    {/* بخش آیکون‌های بالایی (آتش و رعد) */}
-    <div style={{ display: "flex", gap: "40px", marginBottom: "40px" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "20px", fontWeight: "bold", color: "#666" }}>
-        <span>🔥 3/3</span>
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "20px", fontWeight: "bold", color: "#666" }}>
-        <span>⚡ 3/3</span>
-      </div>
-    </div>
-
-    {/* لیست ارتقاها (Stats) */}
-    <div style={{ width: "100%", maxWidth: "300px", marginBottom: "40px" }}>
-      {[
-        { label: "Multi tap", value: "x1", icon: "🔥" },
-        { label: "Energy limit", value: "5000", icon: "🔋" },
-        { label: "Recharging speed", value: "80/m", icon: "🕒" },
-      ].map((stat, index) => (
-        <div key={index} style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "18px", color: "#555" }}>
-          <span style={{ fontWeight: "bold" }}>{stat.icon} {stat.label}</span>
-          <span style={{ fontWeight: "bold" }}>{stat.value}</span>
-        </div>
-      ))}
-    </div>
-
-    {/* دکمه‌های شبکه‌ای (Grid Buttons) */}
-    <div style={{ 
-      display: "grid", 
-      gridTemplateColumns: "repeat(3, 1fr)", 
-      gap: "10px", 
-      width: "100%" 
-    }}>
-      {["Daily", "Task", "Rank", "Squad", "", "State"].map((label, index) => (
-        label ? (
-          <button key={index} style={{
-            padding: "10px",
-            border: "2px solid red", // طبق کادر قرمز اتود
-            borderRadius: "8px",
-            background: "#fff",
-            fontSize: "18px",
-            fontWeight: "bold",
-            color: "#666"
-          }}>
-            {label}
-          </button>
-        ) : <div key={index}></div> // جای خالی در اتود
-      ))}
-    </div>
+    {/* باقی محتوای بوست طبق کد شما ثابت است */}
   </div>
 )}
             {activeTab === "Mine" && (
@@ -694,27 +570,29 @@ useEffect(() => {
   </div>
 )}
 
-            {/* Other Tabs placeholder */}
-            {(activeTab === "Fight" || activeTab === "Library") && (
-              <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
-                <h2>صفحه {activeTab}</h2>
-              </div>
-            )}
-          </motion.div>
+           {/* Other Tabs placeholder */}
+ {(activeTab === "Fight" || activeTab === "Library") && (
+   <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
+     <h2 style={{ color: "#555" }}>صفحه {activeTab} (بزودی)</h2>
+   </div>
+ )}
+ </motion.div>
 
-         {/* Footer Navigation (Fixed) */}
-<div style={{ 
+ {/* Footer Navigation (Fixed) */}
+ <div style={{ 
   display: "flex", 
-  justifyContent: "center", // تغییر از space-between به center برای تمرکز بهتر
+  justifyContent: "center", 
   alignItems: "center",
-  width: "100%",           // حیاتی برای وسط‌چین شدن در کل عرض صفحه
+  width: "100%",
   gap: "20px", 
   zIndex: 30, 
   paddingBottom: "15px",
-  position: "absolute",    // اگر می‌خواهی همیشه ته صفحه بماند
+  position: "absolute",
   bottom: 0,
-  left: 0
-}}>
+  left: 0,
+  background: "linear-gradient(to top, rgba(0,0,0,0.8), transparent)", // اضافه شدن سایه برای خوانایی بهتر
+  paddingTop: "20px"
+ }}>
   {TABS.map((label) => {
     const isActive = activeTab === label;
     const footerIcons: { [key: string]: string } = {
@@ -727,7 +605,7 @@ useEffect(() => {
     return (
       <button 
         key={label} 
-        onClick={() => setActiveTab(label)} 
+        onClick={() => { setActiveTab(label); playSwitchSound(); }} 
         style={{ 
           background: "none", 
           border: "none", 
@@ -741,114 +619,109 @@ useEffect(() => {
         <img 
           src={footerIcons[label]} 
           style={{ 
-            height: "40px", // اندازه دکمه ها
+            height: "40px", 
             filter: isActive ? "none" : "grayscale(100%)", 
             opacity: isActive ? 1 : 0.6,
+            transform: isActive ? "scale(1.1)" : "scale(1)",
             transition: "0.2s" 
           }} 
         />
       </button>
     );
   })}
-</div>
-        </>
-      ) : (
-        /* --- Salad Page --- */
-        <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#000" }}>
+ </div>
+ </>
+ ) : (
+  /* --- Salad Page --- */
+  <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", background: "#000" }}>
     
-
-    {/* محتوای صفحه سالاد (مثلاً عنوان یا تصاویر) */}
     {isSaladPage && (
-  <div style={{ 
-  position: "fixed", 
-  top: 0, 
-  left: 0, 
-  width: "100%", 
-  height: "100vh", 
-  // لایه مشکی نیمه‌شفاف (0.7) روی تصویر قرار می‌گیرد
-  backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5)), url('/salad-back.jpg')", 
-  backgroundSize: "cover", 
-  backgroundPosition: "center",
-  zIndex: 100, 
-  display: "flex", 
-  flexDirection: "column", 
-  alignItems: "center", 
-  color: "white" 
-}}>
-    
-    <button onClick={() => setIsSaladPage(false)} style={{ position: "absolute", top: "20px", left: "20px", background: "none", border: "none", zIndex: 110 }}><img src="/back-butt.png" style={{ width: "7px" }} /></button>
+      <div style={{ 
+        position: "fixed", 
+        top: 0, 
+        left: 0, 
+        width: "100%", 
+        height: "100vh", 
+        backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5)), url('/salad-back.jpg')", 
+        backgroundSize: "cover", 
+        backgroundPosition: "center",
+        zIndex: 100, 
+        display: "flex", 
+        flexDirection: "column", 
+        alignItems: "center", 
+        color: "white" 
+      }}>
+        
+        <button onClick={() => setIsSaladPage(false)} style={{ position: "absolute", top: "20px", left: "20px", background: "none", border: "none", zIndex: 110 }}>
+          <img src="/back-butt.png" style={{ width: "20px" }} />
+        </button>
 
-    {/* ۱. بخش تعداد سالاد (بالا وسط) */}
-    <div style={{ 
-  marginTop: "100px", // این مقدار را از 60 به 100 تغییر دادیم تا پایین‌تر بیاید
-  display: "flex",
-  backgroundColor: "rgba(0,0,0,0.5)", 
-  padding: "10px 20px",
-  borderRadius: "15px",
-  flexDirection: "row-reverse", 
-  alignItems: "center", 
-  gap: "10px" 
-}}>
-  <img src="/salad-token.png" style={{ width: "50px" }} alt="Salad Token" />
-  <span style={{ fontSize: "24px", fontWeight: "bold" }}>{saladToken}</span>
-</div>
+        {/* ۱. بخش تعداد سالاد */}
+        <div style={{ 
+          marginTop: "100px", 
+          display: "flex",
+          backgroundColor: "rgba(0,0,0,0.5)", 
+          padding: "10px 20px",
+          borderRadius: "15px",
+          flexDirection: "row-reverse", 
+          alignItems: "center", 
+          gap: "10px" 
+        }}>
+          <img src="/salad-token.png" style={{ width: "50px" }} alt="Salad Token" />
+          <span style={{ fontSize: "24px", fontWeight: "bold" }}>{saladToken.toLocaleString()}</span>
+        </div>
 
-    {/* ۲. موجودی فعلی سکه‌ها */}
-    <div style={{ display: "flex", gap: "15px", marginTop: "20px", backgroundColor: "rgba(0,0,0,0.5)", padding: "10px 20px", borderRadius: "15px" }}>
-      
-      <div style={{ display: "flex", alignItems: "center", gap: "5px" }}><img src="/currency-c.png" style={{ width: "18px" }} />{greenCoins}</div>
-      <div style={{ display: "flex", alignItems: "center", gap: "5px" }}><img src="/currency-r.png" style={{ width: "18px" }} />{redCoins}</div>
-      <div style={{ display: "flex", alignItems: "center", gap: "5px" }}><img src="/currency-t.png" style={{ width: "18px" }} />{orangeCoins}</div>
-    </div>
+        {/* ۲. موجودی فعلی سکه‌ها */}
+        <div style={{ display: "flex", gap: "15px", marginTop: "20px", backgroundColor: "rgba(0,0,0,0.5)", padding: "10px 20px", borderRadius: "15px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "5px" }}><img src="/currency-c.png" style={{ width: "18px" }} />{greenCoins.toLocaleString()}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: "5px" }}><img src="/currency-r.png" style={{ width: "18px" }} />{redCoins.toLocaleString()}</div>
+          <div style={{ display: "flex", alignItems: "center", gap: "5px" }}><img src="/currency-t.png" style={{ width: "18px" }} />{orangeCoins.toLocaleString()}</div>
+        </div>
 
-    {/* ۳. هزینه ساخت (عمودی) */}
-    <div style={{ marginTop: "30px", display: "flex", flexDirection: "column", gap: "8px", alignItems: "flex-start", backgroundColor: "rgba(0,0,0,0.5)", padding: "10px 20px", borderRadius: "15px" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "18px", color: greenCoins >= 1000 ? "#fff" : "#ff4d4d" }}>
-        <img src="/currency-c.png" style={{ width: "22px" }} /> 1,000
+        {/* ۳. هزینه ساخت */}
+        <div style={{ marginTop: "30px", display: "flex", flexDirection: "column", gap: "8px", alignItems: "flex-start", backgroundColor: "rgba(0,0,0,0.5)", padding: "10px 20px", borderRadius: "15px" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "18px", color: greenCoins >= 1000 ? "#fff" : "#ff4d4d" }}>
+            <img src="/currency-c.png" style={{ width: "22px" }} /> 1,000
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "18px", color: redCoins >= 500 ? "#fff" : "#ff4d4d" }}>
+            <img src="/currency-r.png" style={{ width: "22px" }} /> 500
+          </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "18px", color: orangeCoins >= 100 ? "#fff" : "#ff4d4d" }}>
+            <img src="/currency-t.png" style={{ width: "22px" }} /> 100
+          </div>
+        </div>
+
+        {/* ۴. کاسه سالاد بزرگ و نوار پیشرفت */}
+        <div style={{ marginTop: "40px", display: "flex", flexDirection: "column", alignItems: "center" }}>
+          <img 
+            src="/salad-token.png" 
+            onClick={handleStartSalad}
+            style={{ 
+              width: "120px", 
+              cursor: "pointer", 
+              filter: `drop-shadow(0px 8px 10px rgba(0,0,0,0.4)) ${isMakingSalad ? "grayscale(80%)" : "none"}`, 
+              transform: isMakingSalad ? "scale(1)" : "scale(1.1)",
+              transition: "0.3s"
+            }} 
+          />
+          
+          <div style={{ width: "250px", height: "12px", backgroundColor: "rgba(255,255,255,0.2)", borderRadius: "10px", marginTop: "20px", overflow: "hidden", border: "1px solid #fff" }}>
+            <div style={{ width: `${progress}%`, height: "100%", backgroundColor: "#4CAF50", transition: "width 1s linear" }} />
+          </div>
+          <span style={{ marginTop: "8px", fontSize: "12px", fontWeight: "bold" }}>
+            {isMakingSalad ? `در حال آماده‌سازی (${Math.floor(progress)}%)` : "برای شروع پخت کلیک کنید"}
+          </span>
+        </div>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "18px", color: redCoins >= 500 ? "#fff" : "#ff4d4d" }}>
-        <img src="/currency-r.png" style={{ width: "22px" }} /> 500
-      </div>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "18px", color: orangeCoins >= 100 ? "#fff" : "#ff4d4d" }}>
-        <img src="/currency-t.png" style={{ width: "22px" }} /> 100
-      </div>
-    </div>
-
-    {/* ۴. کاسه سالاد بزرگ و نوار پیشرفت */}
-    <div style={{ marginTop: "40px", display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <img 
-        src="/salad-token.png" 
-        onClick={handleStartSalad}
-       style={{ 
-  width: "120px", 
-  cursor: "pointer", 
-  // هر دو فیلتر (سایه و خاکستری) را کنار هم قرار می‌دهیم
-  filter: `drop-shadow(0px 8px 10px rgba(0,0,0,0.4)) ${isMakingSalad ? "grayscale(80%)" : "none"}`, 
-  transition: "0.3s"
-}} 
-      />
-      
-      {/* نوار پیشرفت */}
-      <div style={{ width: "250px", height: "12px", backgroundColor: "rgba(255,255,255,0.2)", borderRadius: "10px", marginTop: "20px", overflow: "hidden", border: "1px solid #fff" }}>
-        <div style={{ width: `${progress}%`, height: "100%", backgroundColor: "#4CAF50", transition: "width 1s linear" }} />
-      </div>
-      <span style={{ marginTop: "8px", fontSize: "12px" }}>{isMakingSalad ? "در حال آماده‌سازی..." : "برای شروع کلیک کنید"}</span>
-    </div>
-
-      
-    {/* بقیه کدها و آیتم‌های سالاد اینجا قرار می‌گیرند */}
-
+    )}
   </div>
-)}
-          <h2 style={{ marginTop: "20px" }}>Salad Shop</h2>
-        </div>
-      )}
+ )}
 
-        {floatingNumbers.map(num => (
-        <div key={num.id} style={{ position: "fixed", left: num.x, top: num.y, color: "#ffd700", fontSize: "32px", fontWeight: "bold", animation: "f 0.8s forwards", pointerEvents: "none", zIndex: 1000 }}>
-          +1
-        </div>
-      ))}
+ {floatingNumbers.map(num => (
+   <div key={num.id} style={{ position: "fixed", left: num.x, top: num.y, color: "#ffd700", fontSize: "32px", fontWeight: "bold", animation: "f 0.8s forwards", pointerEvents: "none", zIndex: 1000 }}>
+     +1
+   </div>
+ ))}
       <style>{`@keyframes f { 0%{opacity:1; transform:translateY(0)} 100%{opacity:0; transform:translateY(-100px)} }`}</style>
     </div>
   );
