@@ -225,27 +225,186 @@ export default function Home() {
               </div>
             )}
 
-            {/* Mine Tab */}
             {activeTab === "Mine" && (
-              <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", backgroundColor: "#1a1a1a" }}>
-                <div style={{ width: "100%", backgroundColor: "rgba(0,0,0,0.8)", padding: "20px 15px", borderRadius: "0 0 30px 30px", zIndex: 10 }}>
-                  <div style={{ display: "flex", justifyContent: "space-around" }}>
-                    <div><img src="/currency-c.png" style={{width: "18px"}}/> {greenCoins}</div>
-                    <div><img src="/currency-r.png" style={{width: "18px"}}/> {redCoins}</div>
-                    <div><img src="/currency-t.png" style={{width: "18px"}}/> {orangeCoins}</div>
-                  </div>
-                </div>
-                <div style={{ position: "absolute", top: 0, left: 0, width: "100%", zIndex: 0 }}>
-                  <img src="/chef-robot.png" style={{ width: "100%" }} />
-                </div>
-                <div style={{ flex: 1 }} />
-                <div style={{ display: "flex", gap: "15px", marginBottom: "20px", zIndex: 5 }}>
-                  <img onClick={() => {setIsGreenActive(!isGreenActive); setIsRedActive(false); setIsOrangeActive(false); playSwitchSound();}} src={isGreenActive ? "/cartridge-green-on.png" : "/cartridge-green-off.png"} style={{ width: "75px" }} />
-                  <img onClick={() => {setIsRedActive(!isRedActive); setIsGreenActive(false); setIsOrangeActive(false); playSwitchSound();}} src={isRedActive ? "/cartridge-red-on.png" : "/cartridge-red-off.png"} style={{ width: "75px" }} />
-                  <img onClick={() => {setIsOrangeActive(!isOrangeActive); setIsGreenActive(false); setIsRedActive(false); playSwitchSound();}} src={isOrangeActive ? "/cartridge-orange-on.png" : "/cartridge-orange-off.png"} style={{ width: "75px" }} />
-                </div>
-              </div>
-            )}
+  <div style={{ 
+        flex: 1, 
+    display: "flex", 
+    flexDirection: "column", 
+    alignItems: "center", 
+    padding: "0px",
+    position: "relative", 
+    height: "100%", 
+    overflow: "hidden",
+    backgroundColor: "#1a1a1a"
+
+  }}>
+    {/* ۱. بخش موجودی‌ها (بالا) */}
+    <div style={{ 
+    width: "100%", 
+    backgroundColor: "rgba(0,0,0,0.8)", 
+    backdropFilter: "blur(12px)", 
+    borderRadius: "0 0 30px 30px", 
+    padding: "20px 15px",
+    opacity: 0.8, 
+    zIndex: 10,
+    borderBottom: "2px solid rgba(255,215,0,0.3)",
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center"
+}}>
+    {/* radife seke ha*/}
+    <div style={{ display: "flex", justifyContent: "space-around", width: "100%", marginBottom: "2px", alignItems: "flex-start" }}>
+    
+    {/* sotoone seke haye sabz*/}
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+            <img src="/currency-c.png" style={{width: "18px"}}/>
+            <span style={{fontSize: "13px", fontWeight: "bold"}}>{greenCoins.toLocaleString()}</span>
+        </div>
+        <div style={{ fontSize: "11px", color: "#aaa", marginTop: "2px" }}>
+            {greenProfit * 60}/m
+        </div>
+        <div style={{ fontSize: "10px", color: "#fff", opacity: 0.6, marginTop: "2px" }}>
+        </div>
+    </div>
+
+    {/* sotone seke haye ghermez*/}
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+            <img src="/currency-r.png" style={{width: "18px"}}/>
+            <span style={{fontSize: "13px", fontWeight: "bold"}}>{redCoins.toLocaleString()}</span>
+        </div>
+        <div style={{ fontSize: "11px", color: "#aaa", marginTop: "2px" }}>
+            {redProfit * 60}/m
+        </div>
+        {/* tanzime zamane offline baraye baghie seke ha*/}
+        <div style={{ height: "12px" }}></div> 
+    </div>
+
+    {/* sotone seke narenji*/}
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", flex: 1 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+            <img src="/currency-t.png" style={{width: "18px"}}/>
+            <span style={{fontSize: "13px", fontWeight: "bold"}}>{orangeCoins.toLocaleString()}</span>
+        </div>
+        <div style={{ fontSize: "11px", color: "#aaa", marginTop: "2px" }}>
+            {orangeProfit * 60}/m
+        </div>
+        <div style={{ height: "12px" }}></div>
+    </div>
+</div>
+
+    {/* radife profit va zaman*/}
+    <div style={{ 
+        width: "90%", 
+        display: "flex", 
+        justifyContent: "space-between", 
+        alignItems: "center",
+        borderTop: "1px solid rgba(255,255,255,0.1)",
+        paddingTop: "10px"
+    }}>
+        <div style={{ color: "#ffd700", fontSize: "15px", fontWeight: "bold" }}>
+    Profit: {totalProfit.toLocaleString()}
+</div>
+        <div style={{ color: "#fff", fontSize: "14px", fontWeight: "500", display: "flex", alignItems: "center", gap: "4px" }}>
+            <span>🕒</span>
+            <span>5min</span>
+        </div>
+    </div>
+
+    {/* namayeshgare bozorge hoshmand*/}
+<div style={{ 
+    display: "flex", 
+    alignItems: "center", 
+    gap: "12px",
+    backgroundColor: "rgba(255,215,0,0.1)",
+    padding: "5px 30px",
+    borderRadius: "20px",
+    border: `1px solid ${isRedActive ? "#f44336" : isOrangeActive ? "#ff9800" : "#4CAF50"}`, // تغییر رنگ مرز بر اساس فعالیت
+    width: "fit-content"
+}}>
+    {/* taghiire khodkare icon*/}
+    <img 
+        src={isRedActive ? "/currency-r.png" : isOrangeActive ? "/currency-t.png" : "/currency-c.png"} 
+        style={{ width: "30px", height: "30px" }} 
+    />
+    {/* taghiire khodkare adad*/}
+    <span style={{ fontSize: "28px", fontWeight: "900", color: "#fff" }}>
+        {isRedActive ? redCoins.toLocaleString() : isOrangeActive ? orangeCoins.toLocaleString() : greenCoins.toLocaleString()}
+    </span>
+</div>
+</div>
+
+
+    {/* ۲. عکس ربات (بخش مرکزی) */}
+    <div style={{
+              position: "absolute",
+              top: "0%",
+              left: "0%",
+              width: "100%",
+              height: "100%",
+              opacity: 0.8,
+              zIndex: 0,      // raftan poshte elemanha
+              pointerEvents: "none"
+            }}>
+              <img src="/chef-robot.png" style={{ width: "100%", height: "auto", objectFit: "contain" }} />
+            </div>
+
+
+    {/* ۳. بخش کارتریج‌ها (قفل شده به پایین صفحه) */}
+                {/* hol dadne kartrij ha be paiin*/}
+            <div style={{ flex: 1 }} /> 
+
+    {/* kartrij ha*/}
+<div style={{ 
+  width: "90%", 
+  display: "flex", 
+  justifyContent: "center", 
+  alignItems: "flex-end",
+  gap: "25px", 
+  zIndex: 5,
+  marginBottom: "50px",
+  padding: "15px",
+  borderRadius: "20px"
+}}>
+  {/* کارتریج سبز */}
+  <img 
+    onClick={() => {setIsGreenActive(!isGreenActive); setIsRedActive(false); setIsOrangeActive(false); playSwitchSound();}} 
+    src={isGreenActive ? "/cartridge-green-on.png" : "/cartridge-green-off.png"} 
+    style={{ 
+      width: "75px", 
+      cursor: "pointer",
+      filter: isGreenActive ? "drop-shadow(0 0 15px rgba(76, 175, 80, 0.8))" : "none",
+      transition: "0.3s"
+    }} 
+  />
+
+  {/* کارتریج قرمز */}
+  <img 
+    onClick={() => {setIsRedActive(!isRedActive); setIsGreenActive(false); setIsOrangeActive(false); playSwitchSound();}} 
+    src={isRedActive ? "/cartridge-red-on.png" : "/cartridge-red-off.png"} 
+    style={{ 
+      width: "75px", 
+      cursor: "pointer",
+      filter: isRedActive ? "drop-shadow(0 0 15px rgba(244, 67, 54, 0.8))" : "none",
+      transition: "0.3s"
+    }} 
+  />
+
+  {/* کارتریج نارنجی */}
+  <img 
+    onClick={() => {setIsOrangeActive(!isOrangeActive); setIsGreenActive(false); setIsRedActive(false); playSwitchSound();}} 
+    src={isOrangeActive ? "/cartridge-orange-on.png" : "/cartridge-orange-off.png"} 
+    style={{ 
+      width: "75px", 
+      cursor: "pointer",
+      filter: isOrangeActive ? "drop-shadow(0 0 15px rgba(255, 152, 0, 0.8))" : "none",
+      transition: "0.3s"
+    }} 
+  />
+</div>
+  </div>
+)}
 
             {/* Other Tabs placeholder */}
             {(activeTab === "Fight" || activeTab === "Library") && (
@@ -255,20 +414,55 @@ export default function Home() {
             )}
           </motion.div>
 
-          {/* Footer Navigation (Fixed) */}
-          <div style={{ display: "flex", justifyContent: "space-between", gap: "5px", zIndex: 30, paddingBottom: "10px" }}>
-            {TABS.map((label) => {
-              const isActive = activeTab === label;
-              const footerIcons: { [key: string]: string } = {
-                "Tap": "/tap-butt.png", "Mine": "/mine-butt.png", "Fight": "/fight-butt.png", "Library": "/closet-butt.png", "Cards": "/cards-butt.png"
-              };
-              return (
-                <button key={label} onClick={() => setActiveTab(label)} style={{ flex: 1, background: "none", border: "none" }}>
-                  <img src={footerIcons[label]} style={{ width: "40px", filter: isActive ? "none" : "grayscale(100%)", opacity: isActive ? 1 : 0.6 }} />
-                </button>
-              );
-            })}
-          </div>
+         {/* Footer Navigation (Fixed) */}
+<div style={{ 
+  display: "flex", 
+  justifyContent: "center", // تغییر از space-between به center برای تمرکز بهتر
+  alignItems: "center",
+  width: "100%",           // حیاتی برای وسط‌چین شدن در کل عرض صفحه
+  gap: "30px", 
+  zIndex: 30, 
+  paddingBottom: "15px",
+  position: "absolute",    // اگر می‌خواهی همیشه ته صفحه بماند
+  bottom: 0,
+  left: 0
+}}>
+  {TABS.map((label) => {
+    const isActive = activeTab === label;
+    const footerIcons: { [key: string]: string } = {
+      "Tap": "/tap-butt.png", 
+      "Mine": "/mine-butt.png", 
+      "Fight": "/fight-butt.png", 
+      "Library": "/closet-butt.png", 
+      "Cards": "/cards-butt.png"
+    };
+    return (
+      <button 
+        key={label} 
+        onClick={() => setActiveTab(label)} 
+        style={{ 
+          background: "none", 
+          border: "none", 
+          display: "flex", 
+          justifyContent: "center", 
+          alignItems: "center",
+          padding: "5px",
+          cursor: "pointer"
+        }}
+      >
+        <img 
+          src={footerIcons[label]} 
+          style={{ 
+            width: "40px", // کمی بزرگتر برای دسترسی بهتر
+            filter: isActive ? "none" : "grayscale(100%)", 
+            opacity: isActive ? 1 : 0.6,
+            transition: "0.2s" 
+          }} 
+        />
+      </button>
+    );
+  })}
+</div>
         </>
       ) : (
         /* --- Salad Page --- */
