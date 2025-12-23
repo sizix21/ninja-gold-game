@@ -79,18 +79,20 @@ export default function Home() {
     tele.ready();
     // خواندن کلیدهای ذخیره شده از ابر تلگرام
     tele.CloudStorage.getItems(["greenCoins", "redCoins", "orangeCoins", "purchasedCards", "totalProfit"], (err: any, values: any) => {
-      if (!err) {
+      if (!err && values) {
         if (values.greenCoins) setGreenCoins(Number(values.greenCoins));
         if (values.redCoins) setRedCoins(Number(values.redCoins));
         if (values.orangeCoins) setOrangeCoins(Number(values.orangeCoins));
         if (values.totalProfit) setTotalProfit(Number(values.totalProfit));
         if (values.saladToken) setSaladToken(Number(values.saladToken));
-        if (values.purchasedCards) setPurchasedCards(JSON.parse(values.purchasedCards));
-        setIsDataLoaded(true); // اعلام کن که دیتا با موفقیت لود شد
+        if (values.purchasedCards) {
+          try { setPurchasedCards(JSON.parse(values.purchasedCards)); } catch(e) { setPurchasedCards([]); }
+        }
       }
+      // کلید حل مشکل: این خط به برنامه می‌گوید لودینگ تمام شد، حالا اجازه داری ذخیره کنی
+      setIsDataLoaded(true); 
     });
   }
-  
 }, []);
   // --- Handlers ---
   const handleSwipe = (direction: "left" | "right") => {
