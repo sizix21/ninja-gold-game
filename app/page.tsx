@@ -42,7 +42,7 @@ export default function Home() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const switchAudioRef = useRef<HTMLAudioElement | null>(null);
   const [lastSafeCoins, setLastSafeCoins] = useState(greenCoins);//آخرین تعداد سکه ها
-  const [saladCount, setSaladCount] = useState(0); // تعداد سالادهای ساخته شده
+ 
   const [isMakingSalad, setIsMakingSalad] = useState(false); // آیا در حال ساخت سالاد است؟
   const [saladStartTime, setSaladStartTime] = useState<number | null>(null); // زمان شروع ساخت
   const [progress, setProgress] = useState(0); // درصد نوار پیشرفت
@@ -52,7 +52,7 @@ export default function Home() {
     case 'green': setGreenCoins(prev => Math.max(0, prev + amount)); break; //مقادیر دستی
     case 'red': setRedCoins(prev => Math.max(0, prev + amount)); break;
     case 'orange': setOrangeCoins(prev => Math.max(0, prev + amount)); break;
-    case 'salad': setSaladCount(prev => Math.max(0, prev + amount)); break;
+    case 'salad': setSaladToken(prev => Math.max(0, prev + amount)); break;
     case 'energy': setEnergy(prev => Math.max(0, Math.min(2000, prev + amount))); break;
   }
 };
@@ -83,7 +83,7 @@ useEffect(() => {
       setProgress(currentProgress);
 
       if (currentProgress >= 100) {
-        setSaladCount(prev => prev + 1);
+        setSaladToken(prev => prev + 1);
         setIsMakingSalad(false);
         setSaladStartTime(null);
         setProgress(0);
@@ -172,7 +172,7 @@ useEffect(() => {
       setProgress(currentProgress);
 
       if (currentProgress >= 100) {
-        setSaladCount(prev => prev + 1);
+        setSaladToken(prev => prev + 1);
         setIsMakingSalad(false);
         setSaladStartTime(null);
         setProgress(0);
@@ -430,6 +430,89 @@ useEffect(() => {
     <p style={{ marginTop: "20px", fontSize: "12px", color: "#666" }}>
       این صفحه فقط برای تست است و در نسخه نهایی حذف می‌شود.
     </p>
+  </div>
+)}
+{activeTab === "Boost" && (
+  <div style={{ 
+    flex: 1, 
+    display: "flex", 
+    flexDirection: "column", 
+    alignItems: "center", 
+    padding: "20px", 
+    color: "white", // تغییر رنگ متن به سفید چون معمولاً بک‌گراندها تیره هستند
+    backgroundImage: "url('/boost-back.jpg')", // تصویر پس‌زمینه شما
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    overflowY: "auto",
+    paddingBottom: "100px",
+    width: "100%",
+    height: "100vh"
+  }}>
+    {/* دکمه بازگشت  */}
+<button 
+  onClick={() => setActiveTab("Tap")} // یا هر تبی که می‌خواهی به آن برگردد
+  style={{ 
+    position: "absolute", 
+    top: "20px", 
+    left: "20px", 
+    background: "none", 
+    border: "none", 
+    zIndex: 110, 
+    padding: 0,
+    cursor: "pointer"
+  }}
+>
+  <img src="/back-butt.png" style={{ width: "7px", height: "auto" }} />
+</button>
+    <h2 style={{ fontSize: "28px", fontWeight: "bold", marginBottom: "30px" }}>Boost</h2>
+
+    {/* بخش آیکون‌های بالایی (آتش و رعد) */}
+    <div style={{ display: "flex", gap: "40px", marginBottom: "40px" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "20px", fontWeight: "bold", color: "#666" }}>
+        <span>🔥 3/3</span>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "20px", fontWeight: "bold", color: "#666" }}>
+        <span>⚡ 3/3</span>
+      </div>
+    </div>
+
+    {/* لیست ارتقاها (Stats) */}
+    <div style={{ width: "100%", maxWidth: "300px", marginBottom: "40px" }}>
+      {[
+        { label: "Multi tap", value: "x1", icon: "🔥" },
+        { label: "Energy limit", value: "5000", icon: "🔋" },
+        { label: "Recharging speed", value: "80/m", icon: "🕒" },
+      ].map((stat, index) => (
+        <div key={index} style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "18px", color: "#555" }}>
+          <span style={{ fontWeight: "bold" }}>{stat.icon} {stat.label}</span>
+          <span style={{ fontWeight: "bold" }}>{stat.value}</span>
+        </div>
+      ))}
+    </div>
+
+    {/* دکمه‌های شبکه‌ای (Grid Buttons) */}
+    <div style={{ 
+      display: "grid", 
+      gridTemplateColumns: "repeat(3, 1fr)", 
+      gap: "10px", 
+      width: "100%" 
+    }}>
+      {["Daily", "Task", "Rank", "Squad", "", "State"].map((label, index) => (
+        label ? (
+          <button key={index} style={{
+            padding: "10px",
+            border: "2px solid red", // طبق کادر قرمز اتود
+            borderRadius: "8px",
+            background: "#fff",
+            fontSize: "18px",
+            fontWeight: "bold",
+            color: "#666"
+          }}>
+            {label}
+          </button>
+        ) : <div key={index}></div> // جای خالی در اتود
+      ))}
+    </div>
   </div>
 )}
             {activeTab === "Mine" && (
@@ -709,7 +792,7 @@ useEffect(() => {
   gap: "10px" 
 }}>
   <img src="/salad-token.png" style={{ width: "50px" }} alt="Salad Token" />
-  <span style={{ fontSize: "24px", fontWeight: "bold" }}>{saladCount}</span>
+  <span style={{ fontSize: "24px", fontWeight: "bold" }}>{saladToken}</span>
 </div>
 
     {/* ۲. موجودی فعلی سکه‌ها */}
