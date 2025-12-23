@@ -118,21 +118,7 @@ export default function Home() {
     alert("ابتدا باید کارت قبلی را بخرید!");
     return;
   }
-useEffect(() => {
-  if (!isDataLoaded) return;
 
-  const interval = setInterval(() => {
-    saveToCloud("greenCoins", greenCoins);
-    saveToCloud("redCoins", redCoins);
-    saveToCloud("orangeCoins", orangeCoins);
-    saveToCloud("saladToken", saladToken);
-    saveToCloud("purchasedCards", purchasedCards);
-    saveToCloud("totalProfit", totalProfit);
-    console.log("Auto-save completed.");
-  }, 30000); // هر 30 ثانیه یک بار
-
-  return () => clearInterval(interval);
-}, [greenCoins, redCoins, orangeCoins, saladToken, purchasedCards, totalProfit, isDataLoaded]);
   // ۲. مقادیر جدید
   const nextGreen = greenCoins - card.cost;
   const nextPurchased = [...purchasedCards, card.id];
@@ -329,6 +315,7 @@ useEffect(() => {
               </div>
               
             )}
+            
 {/* ساخت صفحه تب QR به صورت دستی */}
 {activeTab === "QR" && (
   <div style={{ 
