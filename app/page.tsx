@@ -21,7 +21,6 @@ const CARDS_DATA = [
 
 export default function Home() {
   // --- States ---
-  const [isDataLoaded, setIsDataLoaded] = useState(false);
   const [activeTab, setActiveTab] = useState("Tap");
   const [userName, setUserName] = useState("Ninja Player");
   const [greenCoins, setGreenCoins] = useState(0);
@@ -72,31 +71,52 @@ export default function Home() {
     alert("سکه کافی ندارید!");
   }
 };
+useEffect(() => {
+  let interval: any;
+  if (isMakingSalad && saladStartTime) {
+    interval = setInterval(() => {
+      const now = Date.now();
+      const elapsed = now - saladStartTime;
+      const oneHour = 60 * 60 * 1000; // ۳۶۰۰۰۰۰ میلی‌ثانیه
+      const currentProgress = Math.min((elapsed / oneHour) * 100, 100);
+      
+      setProgress(currentProgress);
 
+      if (currentProgress >= 100) {
+        setSaladToken(prev => prev + 1);
+        setIsMakingSalad(false);
+        setSaladStartTime(null);
+        setProgress(0);
+        clearInterval(interval);
+      }
+    }, 1000);
+  }
+  return () => clearInterval(interval);
+}, [isMakingSalad, saladStartTime]);
   useEffect(() => {
   const tele = (window as any).Telegram?.WebApp;
-  if (tele) tele.ready();
-
-  const loadData = () => {
-    const fields = ["greenCoins", "redCoins", "orangeCoins", "totalProfit", "saladToken"];
-    fields.forEach(field => {
-      const val = localStorage.getItem(field);
-      if (val) {
-        if (field === "greenCoins") setGreenCoins(Number(val));
-        if (field === "redCoins") setRedCoins(Number(val));
-        if (field === "orangeCoins") setOrangeCoins(Number(val));
-        if (field === "totalProfit") setTotalProfit(Number(val));
-        if (field === "saladToken") setSaladToken(Number(val));
+  if (tele) {
+    tele.ready();
+    // خواندن کلیدهای ذخیره شده از ابر تلگرام
+    tele.CloudStorage.getItems(["greenCoins", "redCoins", "orangeCoins", "purchasedCards", "totalProfit"], (err: any, values: any) => {
+      if (!err) {
+        if (values.greenCoins) setGreenCoins(Number(values.greenCoins));
+        if (values.redCoins) setRedCoins(Number(values.redCoins));
+        if (values.orangeCoins) setOrangeCoins(Number(values.orangeCoins));
+        if (values.totalProfit) setTotalProfit(Number(values.totalProfit));
+        if (values.purchasedCards) setPurchasedCards(JSON.parse(values.purchasedCards));
       }
     });
-
-    const savedCards = localStorage.getItem("purchasedCards");
-    if (savedCards) setPurchasedCards(JSON.parse(savedCards));
-    
-    setIsDataLoaded(true);
-  };
-
-  loadData();
+  }
+  const saveToCloud = (key: string, value: any) => {
+  const tele = (window as any).Telegram?.WebApp;
+  if (tele) {
+    const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
+    tele.CloudStorage.setItem(key, stringValue, (err: any, success: any) => {
+      if (err) console.error("Cloud Save Error:", err);
+    });
+  }
+};
 }, []);
   // --- Handlers ---
   const handleSwipe = (direction: "left" | "right") => {
@@ -107,48 +127,16 @@ export default function Home() {
       setActiveTab(TABS[currentIndex + 1]);
     }
   };
-// ذخیره در موبایل
+// تابع کمکی برای ذخیره در ابر تلگرام
   const saveToCloud = (key: string, value: any) => {
-  try {
-    const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
-    localStorage.setItem(key, stringValue);
-  } catch (e) {
-    console.error("Local Save Error:", e);
-  }
-};
-  // مکانیزم ذخیره‌سازی دوره‌ای برای جلوگیری از فشار به سرور و روان ماندن بازی
-useEffect(() => {
-  // شبیه‌سازی آماده‌سازی تلگرام (برای اینکه بقیه کدها به مشکل نخورند)
-  const tele = (window as any).Telegram?.WebApp;
-  if (tele) tele.ready();
-
-  // خواندن داده‌ها از حافظه محلی
-  const localGreen = localStorage.getItem("greenCoins");
-  const localRed = localStorage.getItem("redCoins");
-  const localOrange = localStorage.getItem("orangeCoins");
-  const localProfit = localStorage.getItem("totalProfit");
-  const localSalad = localStorage.getItem("saladToken");
-  const localCards = localStorage.getItem("purchasedCards");
-
-  if (localGreen) setGreenCoins(Number(localGreen));
-  if (localRed) setRedCoins(Number(localRed));
-  if (localOrange) setOrangeCoins(Number(localOrange));
-  if (localProfit) setTotalProfit(Number(localProfit));
-  if (localSalad) setSaladToken(Number(localSalad));
-  if (localCards) setPurchasedCards(JSON.parse(localCards));
-useEffect(() => {
-  if (isDataLoaded) {
-    saveToCloud("greenCoins", greenCoins);
-    saveToCloud("redCoins", redCoins);
-    saveToCloud("orangeCoins", orangeCoins);
-    saveToCloud("saladToken", saladToken);
-    saveToCloud("purchasedCards", purchasedCards);
-    saveToCloud("totalProfit", totalProfit);
-  }
-}, [greenCoins, redCoins, orangeCoins, saladToken, purchasedCards, totalProfit, isDataLoaded]);
-  // فعال کردن اجازه ذخیره‌سازی
-  setIsDataLoaded(true);
-}, []);
+    const tele = (window as any).Telegram?.WebApp;
+    if (tele && tele.CloudStorage) {
+      const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
+      tele.CloudStorage.setItem(key, stringValue, (err: any) => {
+        if (err) console.error("Cloud Save Error:", err);
+      });
+    }
+  };
   const handleBuyCard = (card: any) => {
   // ۱. بررسی پیش‌شرط
   if (card.requireToBuy && !purchasedCards.includes(card.requireToBuy)) {
@@ -202,7 +190,15 @@ useEffect(() => {
     switchAudioRef.current = new Audio("/switch.mp3");
     switchAudioRef.current.volume = 0.5;
 
-   
+    // Loading from LocalStorage
+    const savedGreen = localStorage.getItem("ninjaGreenCoins");
+    if (savedGreen) setGreenCoins(parseInt(savedGreen));
+    const savedRed = localStorage.getItem("ninjaRedCoins");
+    if (savedRed) setRedCoins(parseInt(savedRed));
+    const savedOrange = localStorage.getItem("ninjaOrangeCoins");
+    if (savedOrange) setOrangeCoins(parseInt(savedOrange));
+    const savedSalad = localStorage.getItem("ninjaSalad");
+    if (savedSalad) setSaladToken(parseInt(savedSalad));
   }, []);
 
   // Timer for Mining
@@ -222,7 +218,37 @@ useEffect(() => {
       switchAudioRef.current.play().catch(() => {});
     }
   };
- 
+  useEffect(() => {
+  const checkSecurity = async () => {
+    if (activeTab === "Cards") {
+      const tele = (window as any).Telegram?.WebApp;
+      if (tele && tele.CloudStorage) {
+        
+        // ۱. دریافت آخرین موجودی معتبر از سرور تلگرام
+        tele.CloudStorage.getItem("greenCoins", (err: any, savedValue: string) => {
+          if (!err && savedValue) {
+            const cloudCoins = Number(savedValue);
+            
+            // ۲. تعریف حاشیه خطا (مثلاً سود ۱۰ ثانیه اخیر)
+            const marginOfError = totalProfit * (10 / 3600); 
+            
+            // ۳. اگر موجودی فعلی در کد، به طرز مشکوکی بیشتر از ذخیره ابری بود
+            if (greenCoins > cloudCoins + marginOfError + 100) { 
+              console.error("Security Breach: Coin mismatch detected.");
+              
+              // بازگرداندن موجودی به مقدار معتبر ابری
+              setGreenCoins(cloudCoins);
+              
+              tele.showAlert("اختلاف در موجودی شناسایی شد. مقادیر بازنشانی شدند.");
+            }
+          }
+        });
+      }
+    }
+  };
+
+  checkSecurity();
+}, [activeTab]);
 
   const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
     if (energy <= 0) return;
@@ -352,7 +378,6 @@ useEffect(() => {
               </div>
               
             )}
-            
 {/* ساخت صفحه تب QR به صورت دستی */}
 {activeTab === "QR" && (
   <div style={{ 
@@ -409,21 +434,19 @@ useEffect(() => {
 )}
 {activeTab === "Boost" && (
   <div style={{ 
-    position: "fixed", 
-    top: 0, 
-    left: 0, 
-    width: "100vw", 
-    height: "100vh", 
-    backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5)) ,url('/boost-back.jpg')", 
-    backgroundSize: "cover", 
-    backgroundPosition: "center",
-    zIndex: 5, // عدد بزرگتر برای اطمینان از قرارگیری روی همه لایه‌ها
+    flex: 1, 
     display: "flex", 
     flexDirection: "column", 
     alignItems: "center", 
-    color: "white",
+    padding: "20px", 
+    color: "white", // تغییر رنگ متن به سفید چون معمولاً بک‌گراندها تیره هستند
+    backgroundImage: "url('/boost-back.jpg')", // تصویر پس‌زمینه شما
+    backgroundSize: "cover",
+    backgroundPosition: "center",
     overflowY: "auto",
-    padding: "20px"
+    paddingBottom: "100px",
+    width: "100%",
+    height: "100vh"
   }}>
     {/* دکمه بازگشت  */}
 <button 
@@ -445,10 +468,10 @@ useEffect(() => {
 
     {/* بخش آیکون‌های بالایی (آتش و رعد) */}
     <div style={{ display: "flex", gap: "40px", marginBottom: "40px" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "20px", fontWeight: "bold", color: "#ffffffff" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "20px", fontWeight: "bold", color: "#666" }}>
         <span>🔥 3/3</span>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "20px", fontWeight: "bold", color: "#ffffffff" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "20px", fontWeight: "bold", color: "#666" }}>
         <span>⚡ 3/3</span>
       </div>
     </div>
@@ -460,7 +483,7 @@ useEffect(() => {
         { label: "Energy limit", value: "5000", icon: "🔋" },
         { label: "Recharging speed", value: "80/m", icon: "🕒" },
       ].map((stat, index) => (
-        <div key={index} style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "18px", color: "#dad6d6ff" }}>
+        <div key={index} style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "18px", color: "#555" }}>
           <span style={{ fontWeight: "bold" }}>{stat.icon} {stat.label}</span>
           <span style={{ fontWeight: "bold" }}>{stat.value}</span>
         </div>
@@ -469,36 +492,27 @@ useEffect(() => {
 
     {/* دکمه‌های شبکه‌ای (Grid Buttons) */}
     <div style={{ 
-  display: "grid", 
-  gridTemplateColumns: "repeat(3, 1fr)", 
-  gap: "12px", 
-  width: "100%",
-  maxWidth: "360px",
-  marginTop: "auto", // هل دادن کل شبکه دکمه‌ها به پایین
-  marginBottom: "120px" // فاصله از کف صفحه برای عدم تداخل با منوی اصلی
-}}>
-  {["Daily", "Task", "Rank", "Squad", "", "State"].map((label, index) => (
-    label ? (
-      <button key={index} style={{
-          
-        padding: "18px 5px", // بلندتر شدن دکمه‌ها
-        border: "1px solid rgba(248, 248, 248, 0.84)", // حذف خط قرمز
-        borderRadius: "15px",
-        // رنگ طوسی تیره با شفافیت (مات)
-        backgroundColor: "rgba(90, 90, 90, 0.24)", 
-        // ایجاد حالت تاری پشت دکمه (Blur)
-        backdropFilter: "blur(2px)",
-        fontSize: "16px",
-        fontWeight: "bold",
-        color: "#ddd", // رنگ متن طوسی روشن برای خوانایی روی پس‌زمینه تیره
-        cursor: "pointer",
-        boxShadow: "0 4px 15px rgba(0,0,0,0.2)" // سایه ملایم برای عمق دادن
-      }}>
-        {label}
-      </button>
-    ) : <div key={index}></div>
-  ))}
-</div>
+      display: "grid", 
+      gridTemplateColumns: "repeat(3, 1fr)", 
+      gap: "10px", 
+      width: "100%" 
+    }}>
+      {["Daily", "Task", "Rank", "Squad", "", "State"].map((label, index) => (
+        label ? (
+          <button key={index} style={{
+            padding: "10px",
+            border: "2px solid red", // طبق کادر قرمز اتود
+            borderRadius: "8px",
+            background: "#fff",
+            fontSize: "18px",
+            fontWeight: "bold",
+            color: "#666"
+          }}>
+            {label}
+          </button>
+        ) : <div key={index}></div> // جای خالی در اتود
+      ))}
+    </div>
   </div>
 )}
             {activeTab === "Mine" && (
@@ -611,7 +625,6 @@ useEffect(() => {
 </div>
 </div>
 
-
     {/* ۲. عکس ربات (بخش مرکزی) */}
     <div style={{
               position: "absolute",
@@ -625,7 +638,6 @@ useEffect(() => {
             }}>
               <img src="/chef-robot.jpg" style={{ width: "100%", height: "auto", objectFit: "contain" }} />
             </div>
-
 
     {/* ۳. بخش کارتریج‌ها (قفل شده به پایین صفحه) */}
                 {/* hol dadne kartrij ha be paiin*/}
@@ -841,3 +853,4 @@ useEffect(() => {
     </div>
   );
 }
+
