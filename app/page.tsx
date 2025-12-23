@@ -434,19 +434,21 @@ useEffect(() => {
 )}
 {activeTab === "Boost" && (
   <div style={{ 
-    flex: 1, 
+    position: "fixed", 
+    top: 0, 
+    left: 0, 
+    width: "100vw", 
+    height: "100vh", 
+    backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6)) ,url('/boost-back.jpg')", 
+    backgroundSize: "cover", 
+    backgroundPosition: "center",
+    zIndex: 5, // عدد بزرگتر برای اطمینان از قرارگیری روی همه لایه‌ها
     display: "flex", 
     flexDirection: "column", 
     alignItems: "center", 
-    padding: "20px", 
-    color: "white", // تغییر رنگ متن به سفید چون معمولاً بک‌گراندها تیره هستند
-    backgroundImage: "url('/boost-back.jpg')", // تصویر پس‌زمینه شما
-    backgroundSize: "cover",
-    backgroundPosition: "center",
+    color: "white",
     overflowY: "auto",
-    paddingBottom: "100px",
-    width: "100%",
-    height: "100vh"
+    padding: "20px"
   }}>
     {/* دکمه بازگشت  */}
 <button 
@@ -468,10 +470,10 @@ useEffect(() => {
 
     {/* بخش آیکون‌های بالایی (آتش و رعد) */}
     <div style={{ display: "flex", gap: "40px", marginBottom: "40px" }}>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "20px", fontWeight: "bold", color: "#666" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "20px", fontWeight: "bold", color: "#ffffffff" }}>
         <span>🔥 3/3</span>
       </div>
-      <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "20px", fontWeight: "bold", color: "#666" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "20px", fontWeight: "bold", color: "#ffffffff" }}>
         <span>⚡ 3/3</span>
       </div>
     </div>
@@ -483,7 +485,7 @@ useEffect(() => {
         { label: "Energy limit", value: "5000", icon: "🔋" },
         { label: "Recharging speed", value: "80/m", icon: "🕒" },
       ].map((stat, index) => (
-        <div key={index} style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "18px", color: "#555" }}>
+        <div key={index} style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "18px", color: "#dad6d6ff" }}>
           <span style={{ fontWeight: "bold" }}>{stat.icon} {stat.label}</span>
           <span style={{ fontWeight: "bold" }}>{stat.value}</span>
         </div>
@@ -492,27 +494,36 @@ useEffect(() => {
 
     {/* دکمه‌های شبکه‌ای (Grid Buttons) */}
     <div style={{ 
-      display: "grid", 
-      gridTemplateColumns: "repeat(3, 1fr)", 
-      gap: "10px", 
-      width: "100%" 
-    }}>
-      {["Daily", "Task", "Rank", "Squad", "", "State"].map((label, index) => (
-        label ? (
-          <button key={index} style={{
-            padding: "10px",
-            border: "2px solid red", // طبق کادر قرمز اتود
-            borderRadius: "8px",
-            background: "#fff",
-            fontSize: "18px",
-            fontWeight: "bold",
-            color: "#666"
-          }}>
-            {label}
-          </button>
-        ) : <div key={index}></div> // جای خالی در اتود
-      ))}
-    </div>
+  display: "grid", 
+  gridTemplateColumns: "repeat(3, 1fr)", 
+  gap: "12px", 
+  width: "100%",
+  maxWidth: "360px",
+  marginTop: "auto", // هل دادن کل شبکه دکمه‌ها به پایین
+  marginBottom: "120px" // فاصله از کف صفحه برای عدم تداخل با منوی اصلی
+}}>
+  {["Daily", "Task", "Rank", "Squad", "", "State"].map((label, index) => (
+    label ? (
+      <button key={index} style={{
+          
+        padding: "18px 5px", // بلندتر شدن دکمه‌ها
+        border: "1px solid rgba(248, 248, 248, 0.84)", // حذف خط قرمز
+        borderRadius: "15px",
+        // رنگ طوسی تیره با شفافیت (مات)
+        backgroundColor: "rgba(90, 90, 90, 0.24)", 
+        // ایجاد حالت تاری پشت دکمه (Blur)
+        backdropFilter: "blur(2px)",
+        fontSize: "16px",
+        fontWeight: "bold",
+        color: "#ddd", // رنگ متن طوسی روشن برای خوانایی روی پس‌زمینه تیره
+        cursor: "pointer",
+        boxShadow: "0 4px 15px rgba(0,0,0,0.2)" // سایه ملایم برای عمق دادن
+      }}>
+        {label}
+      </button>
+    ) : <div key={index}></div>
+  ))}
+</div>
   </div>
 )}
             {activeTab === "Mine" && (
