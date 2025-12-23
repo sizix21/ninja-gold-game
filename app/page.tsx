@@ -77,10 +77,10 @@ useEffect(() => {
     interval = setInterval(() => {
       const now = Date.now();
       const elapsed = now - saladStartTime;
-      const oneHour = 60 * 60 * 1000; // ۳۶۰۰۰۰۰ میلی‌ثانیه
-      const currentProgress = Math.min((elapsed / oneHour) * 100, 100);
-      
-      setProgress(currentProgress);
+const duration = 15 * 60 * 1000; // تنظیم روی ۱۵ دقیقه
+const currentProgress = (elapsed / duration) * 100; 
+
+setProgress(Math.min(currentProgress, 100));
 
       if (currentProgress >= 100) {
         setSaladToken(prev => prev + 1);
@@ -218,37 +218,7 @@ useEffect(() => {
       switchAudioRef.current.play().catch(() => {});
     }
   };
-  useEffect(() => {
-  const checkSecurity = async () => {
-    if (activeTab === "Cards") {
-      const tele = (window as any).Telegram?.WebApp;
-      if (tele && tele.CloudStorage) {
-        
-        // ۱. دریافت آخرین موجودی معتبر از سرور تلگرام
-        tele.CloudStorage.getItem("greenCoins", (err: any, savedValue: string) => {
-          if (!err && savedValue) {
-            const cloudCoins = Number(savedValue);
-            
-            // ۲. تعریف حاشیه خطا (مثلاً سود ۱۰ ثانیه اخیر)
-            const marginOfError = totalProfit * (10 / 3600); 
-            
-            // ۳. اگر موجودی فعلی در کد، به طرز مشکوکی بیشتر از ذخیره ابری بود
-            if (greenCoins > cloudCoins + marginOfError + 100) { 
-              console.error("Security Breach: Coin mismatch detected.");
-              
-              // بازگرداندن موجودی به مقدار معتبر ابری
-              setGreenCoins(cloudCoins);
-              
-              tele.showAlert("اختلاف در موجودی شناسایی شد. مقادیر بازنشانی شدند.");
-            }
-          }
-        });
-      }
-    }
-  };
-
-  checkSecurity();
-}, [activeTab]);
+ 
 
   const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
     if (energy <= 0) return;
