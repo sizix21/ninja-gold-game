@@ -439,7 +439,7 @@ useEffect(() => {
     left: 0, 
     width: "100vw", 
     height: "100vh", 
-    backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.6)) ,url('/boost-back.jpg')", 
+    backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5)) ,url('/boost-back.jpg')", 
     backgroundSize: "cover", 
     backgroundPosition: "center",
     zIndex: 5, // عدد بزرگتر برای اطمینان از قرارگیری روی همه لایه‌ها
