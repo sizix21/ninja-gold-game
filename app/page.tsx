@@ -110,10 +110,9 @@ setProgress(Math.min(currentProgress, 100));
   }
   const saveToCloud = (key: string, value: any) => {
   const tele = (window as any).Telegram?.WebApp;
-  if (tele) {
-    const stringValue = typeof value === 'object' ? JSON.stringify(value) : String(value);
-    tele.CloudStorage.setItem(key, stringValue, (err: any, success: any) => {
-      if (err) console.error("Cloud Save Error:", err);
+  if (tele?.CloudStorage) {
+    tele.CloudStorage.setItem(key, value.toString(), (err: any, success: boolean) => {
+      if (err) console.error("Error saving to cloud:", err);
     });
   }
 };
