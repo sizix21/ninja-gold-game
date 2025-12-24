@@ -17,7 +17,20 @@ const CARDS_DATA = [
   { id: "arch-2", family: "archimedes", name: "Archimedes II", image: "/card-archimedes.png", cost: 1200, profitBoost: 25, visibleAfter: "arch-1", requireToBuy: "arch-1" },
   { id: "eucl-1", family: "euclid", name: "Euclid I", image: "/card-euclid.png", cost: 2000, profitBoost: 50, visibleAfter: "arch-2", requireToBuy: "arch-2" },
 ];
-
+const spinRewards = [
+  { label: "100 🟢", amount: 100, type: "green" },
+  { label: "Nitro", amount: 1, type: "nitro" },
+  { label: "500 🟢", amount: 500, type: "green" },
+  { label: "Speed", amount: 0, type: "speed" },
+  { label: "1000 🟢", amount: 1000, type: "green" },
+  { label: "200 🟢", amount: 200, type: "green" },
+  { label: "Try Again", amount: 0, type: "none" },
+  { label: "50 🟢", amount: 50, type: "green" },
+  { label: "150 🟢", amount: 150, type: "green" },
+  { label: "Bonus", amount: 300, type: "green" },
+  { label: "800 🟢", amount: 800, type: "green" },
+  { label: "Luck x2", amount: 0, type: "none" },
+];
 export default function Home() {
   // --- States ---
   const [activeTab, setActiveTab] = useState("Tap");
@@ -46,16 +59,117 @@ export default function Home() {
   const [isNitroActive, setIsNitroActive] = useState(false);
   const [nitroMultiplier, setNitroMultiplier] = useState(1);
   const [energyCharges, setEnergyCharges] = useState(3);// انرژی فول
- 
+  const [spinTimer, setSpinTimer] = useState<string>("Ready to Spin!");
+  const [canSpin, setCanSpin] = useState<boolean>(true);
+  const [specialNitro, setSpecialNitro] = useState<number>(0);
+  const [speedBoostActive, setSpeedBoostActive] = useState<boolean>(false);
+  const [rotation, setRotation] = useState<number>(0);
+  const [isSpinning, setIsSpinning] = useState<boolean>(false);
+  const [currentDay, setCurrentDay] = useState(1); // روزی که کاربر در آن قرار دارد (۱ تا ۱۴)
+  const [lastClaimTime, setLastClaimTime] = useState(0); // زمان آخرین کلیک موفق
+  const [canClaim, setCanClaim] = useState(true); // آیا ۲۴ ساعت گذشته است؟
   const [showDailyPage, setShowDailyPage] = useState(false);// ریواردهای روزانه
   const [isMakingSalad, setIsMakingSalad] = useState(false); 
   const [saladStartTime, setSaladStartTime] = useState<number | null>(null); 
   const [progress, setProgress] = useState(0); 
+  const [showCodePage, setShowCodePage] = useState(false);// صفحه دیلی کد
+  const [showSpinPage, setShowSpinPage] = useState(false);// صفحه اسپین 
+ 
+  const handleClaimReward = (dayIndex: number) => {
+  const actualDay = dayIndex + 1;
+ 
+  // ۳. تعریف خود تابع چرخیدن (چون سرچ کردی و نبود، الان این را بساز)
+  
 
+  // ۱. بررسی ترتیب (فقط روز جاری قابل کلیک است)
+  if (actualDay !== currentDay) {
+    if (actualDay < currentDay) alert("این جایزه را قبلاً دریافت کرده‌اید!");
+    else alert("ابتدا باید جایزه‌های روزهای قبل را بگیرید!");
+    return;
+  }
+
+  // ۲. بررسی زمان ۲۴ ساعت
+  const now = Date.now();
+  if (now - lastClaimTime < 86400000) {
+    const timeLeft = 86400000 - (now - lastClaimTime);
+    const hours = Math.floor(timeLeft / 3600000);
+    const minutes = Math.floor((timeLeft % 3600000) / 60000);
+    alert(`لطفاً ${hours} ساعت و ${minutes} دقیقه دیگر صبر کنید.`);
+    return;
+  }
+
+  // ۳. لیست جوایز بر اساس دیتای شما
+  const rewards = [
+    { amount: 5000, type: "C" },    // Day 1
+    { amount: 10000, type: "C" },   // Day 2
+    { amount: 25000, type: "C" },   // Day 3
+    { amount: 50000, type: "C" },   // Day 4
+    { amount: 2000, type: "T" },    // Day 5
+    { amount: 200000, type: "C" },  // Day 6
+    { amount: 500000, type: "C" },  // Day 7
+    { amount: 5000, type: "T" },    // Day 8
+    { amount: 10000, type: "T" },   // Day 9
+    { amount: 100000, type: "C" },  // Day 10
+    { amount: 50000, type: "R" },   // Day 11
+    { amount: 500000, type: "C" },  // Day 12
+    { amount: 30000, type: "T" },   // Day 13
+    { amount: 1000000, type: "C" }  // Day 14
+  ];
+
+  const reward = rewards[dayIndex];
+
+  // ۴. واریز سکه به موجودی
+  if (reward.type === "C") setGreenCoins(prev => prev + reward.amount);
+  else if (reward.type === "R") setRedCoins(prev => prev + reward.amount);
+  else if (reward.type === "T") setOrangeCoins(prev => prev + reward.amount);
+
+  // ۵. به‌روزرسانی استیت و ذخیره در حافظه
+  let nextDay = actualDay + 1;
+  if (actualDay === 14) nextDay = 1; // ریست شدن بعد از ۱۴ روز
+
+  setCurrentDay(nextDay);
+  setLastClaimTime(now);
+  setCanClaim(false);
+
+  localStorage.setItem("dailyDay", nextDay.toString());
+  localStorage.setItem("lastClaimTime", now.toString());
+
+  alert(`تبریک! روز ${actualDay} باز شد و جایزه واریز شد.`);
+};
+const spinTheWheel = () => {
+  if (isSpinning || !canSpin) return;
+  setIsSpinning(true);
+  
+  const randomDegree = Math.floor(Math.random() * 360);
+  const newRotation = rotation + 1800 + randomDegree;
+  setRotation(newRotation);
+  
+  setTimeout(() => {
+    setIsSpinning(false);
+    setCanSpin(false);
+    
+    // پیدا کردن جایزه بر اساس زاویه
+    const actualDegree = (360 - (randomDegree % 360)) % 360;
+    const rewardIndex = Math.floor(actualDegree / 30);
+    const wonReward = spinRewards[rewardIndex];
+    
+    applyReward(wonReward);
+    alert(`🎉 You won: ${wonReward.label}`);
+  }, 4000);
+};
+// ۲. تعریف تابع اعمال جایزه (applyReward)
+  const applyReward = (reward: any) => {
+    if (!reward) return;
+    if (reward.type === "green") {
+      setGreenCoins(prev => prev + reward.amount);
+    } else if (reward.type === "nitro") {
+      setSpecialNitro(prev => prev + 1);
+      alert("You won a Special Nitro! 🔥");
+    }
+  };
   // سیستم ذخیره هوشمند: 
 useEffect(() => {
-  // جلوگیری از بازنویسی دیتای قدیمی با صفر در لحظه لود شدن
-  
+    
   if (greenCoins === 0 && redCoins === 0 && totalProfit === 0) return;
 
   localStorage.setItem("greenCoins", greenCoins.toString());
@@ -116,6 +230,22 @@ useEffect(() => {
 }, [isMakingSalad, saladStartTime]);
 
 useEffect(() => {
+  const savedDay = localStorage.getItem("dailyDay");
+  const savedTime = localStorage.getItem("lastClaimTime");
+  
+  if (savedDay) setCurrentDay(Number(savedDay));
+  if (savedTime) {
+    const lastTime = Number(savedTime);
+    setLastClaimTime(lastTime);
+    
+    // چک کردن اینکه آیا ۲۴ ساعت گذشته؟ (۸۶۴۰۰۰۰۰ میلی‌ثانیه)
+    const now = Date.now();
+    if (now - lastTime < 86400000) {
+      setCanClaim(false);
+    } else {
+      setCanClaim(true);
+    }
+  }
   // ۱. تنظیم صداها
   audioRef.current = new Audio("/click.mp3");
   switchAudioRef.current = new Audio("/switch.mp3");
@@ -372,7 +502,6 @@ useEffect(() => {
       </div>
     </div>
 
-
     {/* سکه مرکزی برای تپ کردن */}
 <div 
   onClick={handleClick} 
@@ -439,7 +568,6 @@ useEffect(() => {
   )}
 
 {/* نمایش زمان باقی‌مانده نیترو (اختیاری) */}
-
 
 {/* بخش Debug/QR - هماهنگ با ذخیره‌سازی */}
 {activeTab === "QR" && (
@@ -643,97 +771,125 @@ useEffect(() => {
   </div>
 )}
 {/* Daily Rewards Page */}
+
 {showDailyPage && (
   <div style={{ 
-    position: "fixed", // استفاده از fixed برای پوشش کل صفحه
-    top: 0, 
-    left: 0, 
-    width: "100%", 
-    height: "100%", 
-    backgroundColor: "#121212", // رنگ پس‌زمینه تیره و یکدست
-    zIndex: 9999, // بالاترین لایه ممکن برای پوشاندن فوتر
+    position: "fixed", top: 0, left: 0, width: "100%", height: "100%", 
+    backgroundImage: "url('/daily-back.jpg')", 
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    zIndex: 10000, 
     display: "flex", 
     flexDirection: "column",
+    color: "white" 
   }}>
-    {/* هدر صفحه با دکمه بازگشت کوچک */}
-    <div style={{ 
-      display: "flex", 
-      alignItems: "center", 
-      padding: "20px 15px",
-      background: "rgba(0,0,0,0.4)",
-      borderBottom: "1px solid rgba(255,255,255,0.05)"
-    }}>
-      <button 
-        onClick={() => setShowDailyPage(false)} 
-        style={{ 
-          background: "none", 
-          border: "none", 
-          cursor: "pointer", 
-          display: "flex", 
-          alignItems: "center",
-          padding: "10px" 
-        }}
-      >
-        <img src="/back-butt.png" style={{ width: "7px", height: "auto" }} />
+    
+    {/* هدر */}
+    <div style={{ display: "flex", alignItems: "center", padding: "20px 15px", position: "relative" }}>
+      <button onClick={() => setShowDailyPage(false)} style={{ background: "none", border: "none", cursor: "pointer", padding: "10px", zIndex: 11 }}>
+        <img src="/back-butt.png" style={{ width: "7px" }} />
       </button>
-      <h2 style={{ flex: 1, textAlign: "center", color: "white", margin: 0, fontSize: "20px", fontWeight: "bold" }}>
-        Daily Rewards
-      </h2>
+
+      <div style={{ flex: 1, textAlign: "center" }}>
+        <div style={{ fontSize: "14px", fontWeight: "bold", opacity: 0.8 }}>Ninja Potato</div>
+        <h2 style={{ margin: 0, fontSize: "26px", fontWeight: "900", textShadow: "0 2px 10px rgba(0,0,0,0.5)" }}>Daily Rewards</h2>
+      </div>
+      <div style={{ width: "27px" }}></div> 
     </div>
 
-    {/* محتوای جوایز */}
-    <div style={{ 
-      flex: 1, 
-      overflowY: "auto", 
-      padding: "20px 15px",
-      scrollbarWidth: "none" 
-    }}>
-      <div style={{ textAlign: "center", marginBottom: "25px" }}>
-         <div style={{ fontSize: "60px", marginBottom: "10px" }}>🎁</div>
-         <p style={{ color: "#888", fontSize: "14px" }}>هر روز وارد شوید تا سطح جایزه شما بالا برود</p>
-      </div>
+    <div style={{ flex: 1, overflowY: "auto", padding: "10px 20px" }}>
+      
+      {/* دکمه‌های بالایی در صفحه Daily Rewards */}
+<div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "12px", marginBottom: "30px" }}>
+  
+  {/* دکمه Spin Wheel */}
+  <div 
+    onClick={() => setShowSpinPage(true)} 
+    style={{ 
+      width: "85%", padding: "12px", borderRadius: "12px",
+      background: "#36363681",
+      border: canSpin ? "1px solid #4CAF50" : "1px solid #9b9b9bc0",
+      backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
+      textAlign: "center", cursor: "pointer"
+    }}
+  >
+    <div style={{ fontSize: "18px", fontWeight: "bold" }}>Spin Wheel</div>
+    <div style={{ fontSize: "13px", color: canSpin ? "#4CAF50" : "#ffd700", fontWeight: "bold" }}>
+      {spinTimer}
+    </div>
+  </div>
 
+  {/* دکمه Daily Ninja Code */}
+  <div 
+  onClick={() => {
+    if (!showSpinPage) {
+      setShowSpinPage(true); // باز کردن صفحه اسپین
+    }
+  }} 
+    style={{ 
+      width: "85%", padding: "12px", borderRadius: "12px",
+      background: "#36363681",
+      border: "1px solid #9b9b9bc0",
+      backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
+      textAlign: "center", cursor: "pointer"
+    }}
+  >
+   <div style={{ fontSize: "18px", fontWeight: "bold" }}>Spin Wheel</div>
+  <div style={{ fontSize: "13px", color: canSpin ? "#4CAF50" : "#ffd700" }}>
+    {spinTimer}
+  </div>
+  </div>
+
+</div>
+
+      {/* شبکه کادوها با مرز (Border) مشخص */}
       <div style={{ 
         display: "grid", 
-        gridTemplateColumns: "repeat(4, 1fr)", 
-        gap: "10px" 
+        gridTemplateColumns: "repeat(5, 1fr)", 
+        gap: "12px", 
+        paddingBottom: "40px" 
       }}>
-        {[...Array(30)].map((_, i) => (
-          <div key={i} style={{ 
-            background: "rgba(255,255,255,0.03)", 
-            borderRadius: "12px", 
-            padding: "15px 5px", 
-            textAlign: "center",
-            border: "1px solid rgba(255,255,255,0.05)",
-            display: "flex",
-            flexDirection: "column",
-            gap: "5px"
-          }}>
-            <span style={{ fontSize: "10px", color: "#666" }}>Day {i + 1}</span>
-            <span style={{ fontSize: "18px" }}>💰</span>
-            <span style={{ fontSize: "11px", fontWeight: "bold", color: "#ffd700" }}>
-               {((i + 1) * 500).toLocaleString()}
-            </span>
-          </div>
-        ))}
-      </div>
+       {[...Array(14)].map((_, i) => {
+  const dayNumber = i + 1;
+  const isClaimed = dayNumber < currentDay;
+  const isCurrent = dayNumber === currentDay;
+  const isLocked = dayNumber > currentDay;
+  const showAsLocked = isLocked || (isCurrent && !canClaim);
+
+  return (
+    <div 
+      key={i} 
+      onClick={() => handleClaimReward(i)}
+      style={{ 
+        aspectRatio: "1/1",
+        // رنگ سفید برای پس‌زمینه با شفافیت بسیار کم
+        background: isCurrent && canClaim ? "rgba(255, 255, 255, 0.2)" : "rgba(255, 255, 255, 0.3)", 
+        backdropFilter: "blur(1.5px)",
+        borderRadius: "10px", 
+        display: "flex", 
+        flexDirection: "column",
+        alignItems: "center", 
+        justifyContent: "center",
+        // مرز سفید ضخیم‌تر و روشن‌تر
+        border: isCurrent && canClaim ? "2px solid #ffffff" : "1px solid rgba(255, 255, 255, 0.4)", 
+         
+        cursor: showAsLocked ? "not-allowed" : "pointer",
+        position: "relative",
+        boxShadow: isCurrent && canClaim ? "0 0 15px rgba(255, 255, 255, 0.3)" : "none"
+      }}
+    >
       
-      {/* دکمه دریافت جایزه */}
-      <button style={{
-        marginTop: "30px",
-        width: "100%",
-        padding: "16px",
-        borderRadius: "16px",
-        background: "linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)",
-        color: "white",
-        fontWeight: "bold",
-        border: "none",
-        fontSize: "18px",
-        boxShadow: "0 4px 15px rgba(76, 175, 80, 0.3)",
-        marginBottom: "30px" // فاصله از لبه پایین صفحه
-      }}>
-        Claim Reward
-      </button>
+      
+      {/* آیکون‌ها */}
+      <span style={{ fontSize: "24px", filter: isCurrent && canClaim ? "drop-shadow(0 0 5px white)" : "none" }}>
+        {isClaimed ? "✅" : (showAsLocked ? "🔒" : "🎁")}
+      </span>
+
+    
+    </div>
+  );
+})}
+      </div>
     </div>
   </div>
 )}
@@ -1063,6 +1219,80 @@ useEffect(() => {
     )}
   </div>
  )}
+ {/* صفحه جدید و خالی گردونه شانس */}
+{showSpinPage && (
+  <div style={{ 
+    position: "fixed", 
+    top: 0, 
+    left: 0, 
+    width: "100%", 
+    height: "100%", 
+    backgroundColor: "#121212", // پس‌زمینه تیره و شیک
+    zIndex: 20000, // بالاتر از همه صفحات حتی دیلی
+    display: "flex", 
+    flexDirection: "column",
+    color: "white"
+  }}>
+    
+    {/* هدر صفحه با دکمه بازگشت اندازه ۷ */}
+    <div style={{ padding: "20px", display: "flex", alignItems: "center" }}>
+      <button 
+        onClick={() => setShowSpinPage(false)} 
+        style={{ background: "none", border: "none", cursor: "pointer", padding: "10px" }}
+      >
+        <img src="/back-butt.png" style={{ width: "7px" }} alt="Back" />
+      </button>
+      
+      <div style={{ flex: 1, textAlign: "center", marginRight: "27px" }}>
+        <h2 style={{ fontSize: "22px", fontWeight: "bold", margin: 0 }}>Lucky Spin</h2>
+      </div>
+    </div>
+
+    {/* محتوای وسط صفحه (فعلاً خالی برای طراحی گردونه) */}
+    <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column" }}>
+      <div style={{ 
+        width: "280px", 
+        height: "280px", 
+        borderRadius: "50%", 
+        border: "5px dashed #333", // جای خالی گردونه
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        color: "#555"
+      }}>
+        گردونه اینجا قرار می‌گیرد
+      </div>
+      
+      <p style={{ marginTop: "20px", color: "#ffd700" }}>{spinTimer}</p>
+    </div>
+
+  </div>
+)}
+{/* صفحه جدید و خالی نینجا کد */}
+{showCodePage && (
+  <div style={{ 
+    position: "fixed", top: 0, left: 0, width: "100%", height: "100%", 
+    backgroundColor: "#0d0d0d", // تم کمی متفاوت برای تمایز
+    zIndex: 20001, 
+    display: "flex", flexDirection: "column", color: "white"
+  }}>
+    <div style={{ padding: "20px", display: "flex", alignItems: "center" }}>
+      <button 
+        onClick={() => setShowCodePage(false)} 
+        style={{ background: "none", border: "none", cursor: "pointer", padding: "10px" }}
+      >
+        <img src="/back-butt.png" style={{ width: "7px" }} alt="Back" />
+      </button>
+      <div style={{ flex: 1, textAlign: "center", marginRight: "27px" }}>
+        <h2 style={{ fontSize: "22px", fontWeight: "bold", margin: 0 }}>Ninja Code</h2>
+      </div>
+    </div>
+
+    <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
+      <p style={{ opacity: 0.5 }}>بخش وارد کردن کد (بزودی)</p>
+    </div>
+  </div>
+)}
 
  {floatingNumbers.map(num => (
     <div key={num.id} style={{ 
@@ -1096,4 +1326,5 @@ useEffect(() => {
     
   );
 }
+
 
