@@ -41,18 +41,21 @@ export default function Home() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const switchAudioRef = useRef<HTMLAudioElement | null>(null);
   const [lastSafeCoins, setLastSafeCoins] = useState(greenCoins);
-  const [nitroCharges, setNitroCharges] = useState(3); // تعداد باقی‌مانده
+  const [nitroCharges, setNitroCharges] = useState(3); //  تنظیمات نیترو . تعداد باقی‌مانده
   const [isNitroReady, setIsNitroReady] = useState(false);
   const [isNitroActive, setIsNitroActive] = useState(false);
   const [nitroMultiplier, setNitroMultiplier] = useState(1);
+  const [energyCharges, setEnergyCharges] = useState(3);// انرژی فول
  
+  const [showDailyPage, setShowDailyPage] = useState(false);// ریواردهای روزانه
   const [isMakingSalad, setIsMakingSalad] = useState(false); 
   const [saladStartTime, setSaladStartTime] = useState<number | null>(null); 
   const [progress, setProgress] = useState(0); 
 
-  // سیستم ذخیره هوشمند: فقط وقتی مقادیر از صفر بیشتر شدند ذخیره کن
+  // سیستم ذخیره هوشمند: 
 useEffect(() => {
   // جلوگیری از بازنویسی دیتای قدیمی با صفر در لحظه لود شدن
+  
   if (greenCoins === 0 && redCoins === 0 && totalProfit === 0) return;
 
   localStorage.setItem("greenCoins", greenCoins.toString());
@@ -61,6 +64,7 @@ useEffect(() => {
   localStorage.setItem("saladToken", saladToken.toString());
   localStorage.setItem("totalProfit", totalProfit.toString());
   localStorage.setItem("purchasedCards", JSON.stringify(purchasedCards));
+  localStorage.setItem("energyCharges", energyCharges.toString());
 }, [greenCoins, redCoins, orangeCoins, saladToken, totalProfit, purchasedCards]);
   
   const adjustValue = (type: string, amount: number) => {
@@ -115,7 +119,9 @@ useEffect(() => {
   // ۱. تنظیم صداها
   audioRef.current = new Audio("/click.mp3");
   switchAudioRef.current = new Audio("/switch.mp3");
-
+  // لود انرژی
+  const sEnergyCh = localStorage.getItem("energyCharges");
+  if (sEnergyCh) setEnergyCharges(Number(sEnergyCh));
   // ۲. لود کردن با اطمینان بالا
   const getSaved = (key: string) => localStorage.getItem(key);
 
@@ -233,9 +239,12 @@ useEffect(() => {
     }
   };
 
-  // بخش Security Breach حذف شد چون دیگر با ابر تلگرام مقایسه نمی‌کنیم
+  
 
   const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
+    // ایجاد اثر ضربه (Squeeze Effect)
+  setIsTapping(true);
+  setTimeout(() => setIsTapping(false), 50); // بعد از ۵۰ میلی‌ثانیه به حالت عادی برگرد
   if (energy <= 0) return;
 
   // محاسبه مقدار سکه بر اساس نیترو
@@ -364,10 +373,30 @@ useEffect(() => {
     </div>
 
 
-    {/* ۵. سکه مرکزی برای تپ کردن */}
-    <div onClick={handleClick} style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", cursor: "pointer", marginTop: "-100px" }}>
-      <img src="/coin.png" style={{ width: "260px", transform: isTapping ? "scale(0.92)" : "scale(1)", transition: "0.05s" }} />
-    </div>
+    {/* سکه مرکزی برای تپ کردن */}
+<div 
+  onClick={handleClick} 
+  style={{ 
+    flex: 1, 
+    display: "flex", 
+    justifyContent: "center", 
+    alignItems: "center", 
+    cursor: "pointer", 
+    marginTop: "-100px",
+    WebkitTapHighlightColor: "transparent" // حذف هاله آبی در موبایل هنگام کلیک
+  }}
+>
+  <img 
+    src="/coin.png" 
+    style={{ 
+      width: "260px", 
+      /* تغییر مقیاس بر اساس وضعیت تپ کردن */
+      transform: isTapping ? "scale(0.92) translateY(5px)" : "scale(1) translateY(0)", 
+      transition: "all 0.05s ease-out", // سرعت بسیار بالا برای حس بهتر
+      filter: isTapping ? "brightness(1.1)" : "none" // کمی روشن‌تر شدن موقع ضربه
+    }} 
+  />
+</div>
 
    
 
@@ -410,11 +439,7 @@ useEffect(() => {
   )}
 
 {/* نمایش زمان باقی‌مانده نیترو (اختیاری) */}
-{isNitroActive && (
-  <div style={{ position: "absolute", top: "100px", color: "#ff4444", fontWeight: "bold", fontSize: "20px" }}>
-    NITRO MODE ON! 🔥
-  </div>
-)}
+
 
 {/* بخش Debug/QR - هماهنگ با ذخیره‌سازی */}
 {activeTab === "QR" && (
@@ -436,10 +461,33 @@ useEffect(() => {
           </div>
         </div>
       ))}
-      {/* دکمه پاک کردن کل حافظه برای تست */}
+
+      {/* --- ردیف جدید برای شارژ نیترو --- */}
+      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", alignItems: "center", borderTop: "1px solid rgba(255,255,255,0.1)", paddingTop: "15px" }}>
+        <span style={{ color: "#ff4444", fontWeight: "bold" }}>Nitro (🔥 {nitroCharges}/3)</span>
+        <button 
+          onClick={() => {
+            setNitroCharges(3);
+            alert("نیترو با موفقیت شارژ شد!");
+          }} 
+          style={{ background: "#ff4444", color: "#fff", border: "none", borderRadius: "8px", padding: "8px 15px", fontWeight: "bold", cursor: "pointer" }}
+        >
+          Refill Nitro
+        </button>
+      </div>
+          <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", alignItems: "center" }}>
+  <span style={{ color: "#2196F3", fontWeight: "bold" }}>Energy (⚡ {energyCharges}/3)</span>
+  <button 
+    onClick={() => setEnergyCharges(3)} 
+    style={{ background: "#2196F3", color: "#fff", border: "none", borderRadius: "8px", padding: "8px 15px", fontWeight: "bold" }}
+  >
+    Refill Energy Charges
+  </button>
+</div>
+      {/* دکمه پاک کردن کل حافظه */}
       <button 
         onClick={() => { localStorage.clear(); window.location.reload(); }}
-        style={{ width: "100%", marginTop: "10px", padding: "10px", backgroundColor: "#ff4444", color: "white", border: "none", borderRadius: "10px" }}
+        style={{ width: "100%", marginTop: "10px", padding: "10px", backgroundColor: "#ff4444", color: "white", border: "none", borderRadius: "10px", opacity: 0.8 }}
       >
         Reset All Data (Danger)
       </button>
@@ -494,12 +542,11 @@ useEffect(() => {
       localStorage.setItem("lastNitroReset", now.toString());
     }
 
+    // فعال‌سازی سریع بدون Alert
     if (nitroCharges > 0 && !isNitroReady && !isNitroActive) {
-      setNitroCharges(prev => prev - 1); // یکی کم کن
+      setNitroCharges(prev => prev - 1);
       setIsNitroReady(true);
-      alert("نیترو فعال شد! در صفحه Tap روی آتش کلیک کنید.");
-    } else if (nitroCharges === 0) {
-      alert("شارژ امروز تمام شده است!");
+      playSwitchSound(); // پخش صدا به جای پیام متنی
     }
   }}
   style={{ 
@@ -512,17 +559,41 @@ useEffect(() => {
   <span>{nitroCharges}/3</span>
 </div>
   
-  <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "20px", fontWeight: "bold" }}>
-    <span>⚡ 3/3</span>
-  </div>
+  <div 
+  onClick={() => {
+    // چک کردن ریست ۲۴ ساعته (مشابه نیترو)
+    const lastReset = localStorage.getItem("lastEnergyReset");
+    const now = Date.now();
+    if (!lastReset || now - Number(lastReset) > 86400000) {
+      setEnergyCharges(3);
+      localStorage.setItem("lastEnergyReset", now.toString());
+    }
+
+    if (energyCharges > 0) {
+      setEnergy(2000); // پر کردن نوار انرژی
+      setEnergyCharges(prev => prev - 1); // کم کردن یک شارژ
+      // اگر افکت صوتی داری اینجا پخش کن
+    } else {
+      alert("شارژ انرژی امروز تمام شده است!");
+    }
+  }}
+  style={{ 
+    display: "flex", alignItems: "center", gap: "10px", fontSize: "20px", 
+    fontWeight: "bold", cursor: "pointer",
+    opacity: energyCharges === 0 ? 0.5 : 1
+  }}
+>
+  <span style={{ fontSize: "24px" }}>⚡</span>
+  <span>{energyCharges}/3</span>
+</div>
 </div>
 
     {/* لیست ارتقاها (Stats) */}
     <div style={{ width: "100%", maxWidth: "300px", marginBottom: "40px" }}>
       {[
         { label: "Multi tap", value: "x1", icon: "🔥" },
-        { label: "Energy limit", value: "5000", icon: "🔋" },
-        { label: "Recharging speed", value: "80/m", icon: "🕒" },
+        { label: "Energy limit", value: "2000", icon: "🔋" },
+        { label: "Recharging speed", value: "60/m", icon: "🕒" },
       ].map((stat, index) => (
         <div key={index} style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "18px", color: "#ffffffff" }}>
           <span style={{ fontWeight: "bold" }}>{stat.icon} {stat.label}</span>
@@ -544,7 +615,14 @@ useEffect(() => {
     }}>
       {["Daily", "Task", "Rank", "Squad", "", "State"].map((label, index) => (
         label ? (
-          <button key={index} style={{
+          <button
+           key={index} 
+           onClick={() => {
+        if (label === "Daily") {
+          setShowDailyPage(true);
+        }
+      }}
+           style={{
             padding: "10px",
             border: "1px solid #9b9b9bc0", 
             borderRadius: "8px",
@@ -554,12 +632,108 @@ useEffect(() => {
             color: "#ffffffff",
             backdropFilter: "blur(2px)", 
             WebkitBackdropFilter: "blur(8px)", // برای پشتیبانی در آیفون و سافاری
-            boxShadow: "0 4px 15px rgba(0,0,0,0.2)" // کمی سایه برای عمق بیشتر
+            boxShadow: "0 4px 15px rgba(0,0,0,0.2)", // کمی سایه برای عمق بیشتر
+            cursor: "pointer"
           }}>
             {label}
           </button>
         ) : <div key={index}></div>
       ))}
+    </div>
+  </div>
+)}
+{/* Daily Rewards Page */}
+{showDailyPage && (
+  <div style={{ 
+    position: "fixed", // استفاده از fixed برای پوشش کل صفحه
+    top: 0, 
+    left: 0, 
+    width: "100%", 
+    height: "100%", 
+    backgroundColor: "#121212", // رنگ پس‌زمینه تیره و یکدست
+    zIndex: 9999, // بالاترین لایه ممکن برای پوشاندن فوتر
+    display: "flex", 
+    flexDirection: "column",
+  }}>
+    {/* هدر صفحه با دکمه بازگشت کوچک */}
+    <div style={{ 
+      display: "flex", 
+      alignItems: "center", 
+      padding: "20px 15px",
+      background: "rgba(0,0,0,0.4)",
+      borderBottom: "1px solid rgba(255,255,255,0.05)"
+    }}>
+      <button 
+        onClick={() => setShowDailyPage(false)} 
+        style={{ 
+          background: "none", 
+          border: "none", 
+          cursor: "pointer", 
+          display: "flex", 
+          alignItems: "center",
+          padding: "10px" 
+        }}
+      >
+        <img src="/back-butt.png" style={{ width: "7px", height: "auto" }} />
+      </button>
+      <h2 style={{ flex: 1, textAlign: "center", color: "white", margin: 0, fontSize: "20px", fontWeight: "bold" }}>
+        Daily Rewards
+      </h2>
+    </div>
+
+    {/* محتوای جوایز */}
+    <div style={{ 
+      flex: 1, 
+      overflowY: "auto", 
+      padding: "20px 15px",
+      scrollbarWidth: "none" 
+    }}>
+      <div style={{ textAlign: "center", marginBottom: "25px" }}>
+         <div style={{ fontSize: "60px", marginBottom: "10px" }}>🎁</div>
+         <p style={{ color: "#888", fontSize: "14px" }}>هر روز وارد شوید تا سطح جایزه شما بالا برود</p>
+      </div>
+
+      <div style={{ 
+        display: "grid", 
+        gridTemplateColumns: "repeat(4, 1fr)", 
+        gap: "10px" 
+      }}>
+        {[...Array(30)].map((_, i) => (
+          <div key={i} style={{ 
+            background: "rgba(255,255,255,0.03)", 
+            borderRadius: "12px", 
+            padding: "15px 5px", 
+            textAlign: "center",
+            border: "1px solid rgba(255,255,255,0.05)",
+            display: "flex",
+            flexDirection: "column",
+            gap: "5px"
+          }}>
+            <span style={{ fontSize: "10px", color: "#666" }}>Day {i + 1}</span>
+            <span style={{ fontSize: "18px" }}>💰</span>
+            <span style={{ fontSize: "11px", fontWeight: "bold", color: "#ffd700" }}>
+               {((i + 1) * 500).toLocaleString()}
+            </span>
+          </div>
+        ))}
+      </div>
+      
+      {/* دکمه دریافت جایزه */}
+      <button style={{
+        marginTop: "30px",
+        width: "100%",
+        padding: "16px",
+        borderRadius: "16px",
+        background: "linear-gradient(135deg, #4caf50 0%, #2e7d32 100%)",
+        color: "white",
+        fontWeight: "bold",
+        border: "none",
+        fontSize: "18px",
+        boxShadow: "0 4px 15px rgba(76, 175, 80, 0.3)",
+        marginBottom: "30px" // فاصله از لبه پایین صفحه
+      }}>
+        Claim Reward
+      </button>
     </div>
   </div>
 )}
