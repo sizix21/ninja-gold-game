@@ -41,6 +41,10 @@ export default function Home() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const switchAudioRef = useRef<HTMLAudioElement | null>(null);
   const [lastSafeCoins, setLastSafeCoins] = useState(greenCoins);
+  const [nitroCharges, setNitroCharges] = useState(3); // تعداد باقی‌مانده
+  const [isNitroReady, setIsNitroReady] = useState(false);
+  const [isNitroActive, setIsNitroActive] = useState(false);
+  const [nitroMultiplier, setNitroMultiplier] = useState(1);
  
   const [isMakingSalad, setIsMakingSalad] = useState(false); 
   const [saladStartTime, setSaladStartTime] = useState<number | null>(null); 
@@ -232,21 +236,28 @@ useEffect(() => {
   // بخش Security Breach حذف شد چون دیگر با ابر تلگرام مقایسه نمی‌کنیم
 
   const handleClick = (e: React.MouseEvent | React.TouchEvent) => {
-    if (energy <= 0) return;
-    setIsTapping(true);
-    setTimeout(() => setIsTapping(false), 100);
-    setGreenCoins(prev => prev + 1);
-    setEnergy(prev => Math.max(0, prev - 1));
-    if (audioRef.current) {
-      audioRef.current.currentTime = 0;
-      audioRef.current.play().catch(() => {});
-    }
-    const clientX = 'touches' in e ? (e as React.TouchEvent).touches[0].clientX : (e as React.MouseEvent).clientX;
-    const clientY = 'touches' in e ? (e as React.TouchEvent).touches[0].clientY : (e as React.MouseEvent).clientY;
-    const newNum = { id: Date.now(), x: clientX, y: clientY, value: 1 };
-    setFloatingNumbers(prev => [...prev, newNum]);
-    setTimeout(() => setFloatingNumbers(prev => prev.filter(n => n.id !== newNum.id)), 1000);
-  };
+  if (energy <= 0) return;
+
+  // محاسبه مقدار سکه بر اساس نیترو
+  let gain = 1;
+  if (isNitroActive) {
+    // انتخاب ضریب شانس بین 2، 3 یا 4
+    const randomMultiplier = Math.floor(Math.random() * 3) + 2; 
+    gain = randomMultiplier;
+  }
+
+  setGreenCoins(prev => prev + gain);
+  setEnergy(prev => Math.max(0, prev - 1));
+
+  // نمایش عدد شناور (Floating Number) با مقدار جدید
+  const clientX = 'touches' in e ? (e as React.TouchEvent).touches[0].clientX : (e as React.MouseEvent).clientX;
+  const clientY = 'touches' in e ? (e as React.TouchEvent).touches[0].clientY : (e as React.MouseEvent).clientY;
+  const newNum = { id: Date.now(), x: clientX, y: clientY, value: gain };
+  
+  // بقیه کدهای مربوط به انیمیشن و صدا...
+  setFloatingNumbers(prev => [...prev, newNum]);
+  setTimeout(() => setFloatingNumbers(prev => prev.filter(n => n.id !== newNum.id)), 1000);
+};
 
   return (
     <div style={{ display: "flex", flexDirection: "column", height: "100vh", backgroundColor: "#1a1a1a", color: "white", fontFamily: "sans-serif", padding: "20px", boxSizing: "border-box", overflow: "hidden", position: "relative" }}>
@@ -319,7 +330,9 @@ useEffect(() => {
 
 {/* Tap Tab */}
 {activeTab === "Tap" && (
-  <div style={{ flex: 1, display: "flex", flexDirection: "column", paddingTop: "40px" }}>
+  <div style={{ flex: 1, display: "flex", flexDirection: "column", paddingTop: "40px", position: "relative" }}>
+    
+    {/* ۱. هدر (نام کاربری و سالاد) */}
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", width: "100%", padding: "10px 15px", position: "absolute", top: 0, left: 0, boxSizing: "border-box", zIndex: 10 }}>
       <div style={{ display: "flex", alignItems: "center", gap: "10px", backgroundColor: "rgba(255,255,255,0.05)", padding: "5px 10px", borderRadius: "12px" }}>
         <div style={{ width: "35px", height: "35px", borderRadius: "50%", border: "2px solid #ffd700", overflow: "hidden" }}>
@@ -335,27 +348,71 @@ useEffect(() => {
         <img src="/salad-token.png" style={{ width: "35px", height: "28px" }} />
       </div>
     </div>
+
+    {/* ۲. مقدار سکه‌ها */}
     <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "15px", marginTop: "20px" }}>
       <img src="/currency-c.png" style={{ width: "50px" }} />
       <span style={{ fontSize: "40px", fontWeight: "bold" }}>{greenCoins.toLocaleString()}</span>
     </div>
+
+    {/* ۳. نوار انرژی */}
     <div style={{ padding: "10px" }}>
       <span style={{ fontSize: "12px" }}>🔋 {energy} / 2000</span>
       <div style={{ width: "100px", height: "5px", backgroundColor: "#333", borderRadius: "3px", marginTop: "5px" }}>
         <div style={{ width: `${(energy / 2000) * 100}%`, height: "100%", backgroundColor: "#4caf50", borderRadius: "3px" }}></div>
       </div>
     </div>
+
+
+    {/* ۵. سکه مرکزی برای تپ کردن */}
     <div onClick={handleClick} style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", cursor: "pointer", marginTop: "-100px" }}>
       <img src="/coin.png" style={{ width: "260px", transform: isTapping ? "scale(0.92)" : "scale(1)", transition: "0.05s" }} />
     </div>
-    <>
+
+   
+
+    {/* دکمه‌های QR و Boost */}
       <button onClick={() => setActiveTab("QR")} style={{ position: "absolute", bottom: "100px", left: "12%", background: "none", border: "none" }}>
         <img src="/qr-butt.png" style={{ width: "35px" }} />
       </button>
       <button onClick={() => setActiveTab("Boost")} style={{ position: "absolute", bottom: "100px", right: "12%", background: "none", border: "none" }}>
         <img src="/boost-butt.png" style={{ width: "35px" }} />
       </button>
-    </>
+
+      
+      {isNitroReady && (
+        <div
+          onClick={() => {
+            setIsNitroReady(false);
+            setIsNitroActive(true);
+            const randomMultiplier = Math.floor(Math.random() * 3) + 2; 
+            setNitroMultiplier(randomMultiplier);
+            setTimeout(() => {
+              setIsNitroActive(false);
+              setNitroMultiplier(1);
+            }, 10000);
+          }}
+          style={{
+            position: "absolute",
+            bottom: "160px", 
+            right: "20px",
+            zIndex: 100,
+            cursor: "pointer",
+            fontSize: "50px",
+            animation: "floatNitro 2s ease-in-out infinite",
+            filter: "drop-shadow(0 0 15px #ff4444)"
+          }}
+        >
+          🔥
+        </div>
+      )}
+    </div> 
+  )}
+
+{/* نمایش زمان باقی‌مانده نیترو (اختیاری) */}
+{isNitroActive && (
+  <div style={{ position: "absolute", top: "100px", color: "#ff4444", fontWeight: "bold", fontSize: "20px" }}>
+    NITRO MODE ON! 🔥
   </div>
 )}
 
@@ -390,16 +447,123 @@ useEffect(() => {
   </div>
 )}
 
-{/* Boost Tab */}
 {activeTab === "Boost" && (
-  <div style={{ flex: 1, display: "flex", flexDirection: "column", alignItems: "center", padding: "20px", color: "white", backgroundImage: "url('/boost-back.jpg')", backgroundSize: "cover", backgroundPosition: "center", overflowY: "auto", width: "100%", height: "100vh" }}>
-    <button onClick={() => setActiveTab("Tap")} style={{ position: "absolute", top: "20px", left: "20px", background: "none", border: "none", zIndex: 110, cursor: "pointer" }}>
-      <img src="/back-butt.png" style={{ width: "20px", height: "auto" }} />
-    </button>
+  <div style={{ 
+    flex: 1, 
+    display: "flex", 
+    flexDirection: "column", 
+    alignItems: "center", 
+    padding: "20px", 
+    color: "white", // تغییر رنگ متن به سفید چون معمولاً بک‌گراندها تیره هستند
+    backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5)), url('/boost-back.jpg')", // تصویر پس‌زمینه شما
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    overflowY: "auto",
+    paddingBottom: "100px",
+    width: "100%",
+    height: "100vh"
+  }}>
+    {/* دکمه بازگشت  */}
+<button 
+  onClick={() => setActiveTab("Tap")} // یا هر تبی که می‌خواهی به آن برگردد
+  style={{ 
+    position: "absolute", 
+    top: "20px", 
+    left: "20px", 
+    background: "none", 
+    border: "none", 
+    zIndex: 110, 
+    padding: 0,
+    cursor: "pointer"
+  }}
+>
+  <img src="/back-butt.png" style={{ width: "7px", height: "auto" }} />
+</button>
     <h2 style={{ fontSize: "28px", fontWeight: "bold", marginBottom: "30px" }}>Boost</h2>
-    {/* باقی محتوای بوست طبق کد شما ثابت است */}
+
+    {/* بخش آیکون‌های بالایی */}
+<div style={{ display: "flex", gap: "40px", marginBottom: "40px" }}>
+  {/* دکمه نیترو (آتش) */}
+  <div 
+  onClick={() => {
+    // چک کردن زمان برای ریست شدن شارژها (هر ۲۴ ساعت)
+    const lastUsed = localStorage.getItem("lastNitroReset");
+    const now = Date.now();
+    if (!lastUsed || now - Number(lastUsed) > 24 * 60 * 60 * 1000) {
+      setNitroCharges(3);
+      localStorage.setItem("lastNitroReset", now.toString());
+    }
+
+    if (nitroCharges > 0 && !isNitroReady && !isNitroActive) {
+      setNitroCharges(prev => prev - 1); // یکی کم کن
+      setIsNitroReady(true);
+      alert("نیترو فعال شد! در صفحه Tap روی آتش کلیک کنید.");
+    } else if (nitroCharges === 0) {
+      alert("شارژ امروز تمام شده است!");
+    }
+  }}
+  style={{ 
+    display: "flex", alignItems: "center", gap: "10px", fontSize: "20px", 
+    fontWeight: "bold", cursor: "pointer",
+    opacity: (nitroCharges === 0) ? 0.5 : 1
+  }}
+>
+  <span style={{ fontSize: "24px" }}>🔥</span>
+  <span>{nitroCharges}/3</span>
+</div>
+  
+  <div style={{ display: "flex", alignItems: "center", gap: "10px", fontSize: "20px", fontWeight: "bold" }}>
+    <span>⚡ 3/3</span>
+  </div>
+</div>
+
+    {/* لیست ارتقاها (Stats) */}
+    <div style={{ width: "100%", maxWidth: "300px", marginBottom: "40px" }}>
+      {[
+        { label: "Multi tap", value: "x1", icon: "🔥" },
+        { label: "Energy limit", value: "5000", icon: "🔋" },
+        { label: "Recharging speed", value: "80/m", icon: "🕒" },
+      ].map((stat, index) => (
+        <div key={index} style={{ display: "flex", justifyContent: "space-between", marginBottom: "15px", fontSize: "18px", color: "#ffffffff" }}>
+          <span style={{ fontWeight: "bold" }}>{stat.icon} {stat.label}</span>
+          <span style={{ fontWeight: "bold" }}>{stat.value}</span>
+        </div>
+      ))}
+    </div>
+
+    {/* دکمه‌های شبکه‌ای (Grid Buttons) */}
+    {/* این لایه تمام فضای خالی بالای دکمه‌ها را پر می‌کند تا آن‌ها را به پایین فشار دهد */}
+<div style={{ flex: 1 }} />
+
+<div style={{ 
+      display: "grid", 
+      gridTemplateColumns: "repeat(3, 1fr)", 
+      gap: "10px", 
+      width: "100%",
+      marginBottom: "100px" // این مقدار دکمه‌ها را از لبه پایین و منو فاصله می‌دهد
+    }}>
+      {["Daily", "Task", "Rank", "Squad", "", "State"].map((label, index) => (
+        label ? (
+          <button key={index} style={{
+            padding: "10px",
+            border: "1px solid #9b9b9bc0", 
+            borderRadius: "8px",
+            background: "#36363681",
+            fontSize: "18px",
+            fontWeight: "bold",
+            color: "#ffffffff",
+            backdropFilter: "blur(2px)", 
+            WebkitBackdropFilter: "blur(8px)", // برای پشتیبانی در آیفون و سافاری
+            boxShadow: "0 4px 15px rgba(0,0,0,0.2)" // کمی سایه برای عمق بیشتر
+          }}>
+            {label}
+          </button>
+        ) : <div key={index}></div>
+      ))}
+    </div>
   </div>
 )}
+
             {activeTab === "Mine" && (
   <div style={{ 
         flex: 1, 
@@ -662,7 +826,7 @@ useEffect(() => {
       }}>
         
         <button onClick={() => setIsSaladPage(false)} style={{ position: "absolute", top: "20px", left: "20px", background: "none", border: "none", zIndex: 110 }}>
-          <img src="/back-butt.png" style={{ width: "20px" }} />
+          <img src="/back-butt.png" style={{ width: "7px" }} />
         </button>
 
         {/* ۱. بخش تعداد سالاد */}
@@ -727,12 +891,35 @@ useEffect(() => {
  )}
 
  {floatingNumbers.map(num => (
-   <div key={num.id} style={{ position: "fixed", left: num.x, top: num.y, color: "#ffd700", fontSize: "32px", fontWeight: "bold", animation: "f 0.8s forwards", pointerEvents: "none", zIndex: 1000 }}>
-     +1
-   </div>
- ))}
-      <style>{`@keyframes f { 0%{opacity:1; transform:translateY(0)} 100%{opacity:0; transform:translateY(-100px)} }`}</style>
+    <div key={num.id} style={{ 
+      position: "fixed", 
+      left: num.x, 
+      top: num.y, 
+      color: isNitroActive ? "#ff4444" : "#ffd700", // تغییر رنگ عدد به قرمز در حالت نیترو برای جذابیت
+      fontSize: "32px", 
+      fontWeight: "bold", 
+      animation: "f 0.8s forwards", 
+      pointerEvents: "none", 
+      zIndex: 1000 
+    }}>
+      +{num.value}
     </div>
+  ))}
+  
+  <style>{`
+    @keyframes f { 
+      0% { opacity: 1; transform: translateY(0); } 
+      100% { opacity: 0; transform: translateY(-100px); } 
+    }
+
+    @keyframes floatNitro {
+      0% { transform: translateY(0px) scale(1) rotate(0deg); }
+      50% { transform: translateY(-20px) scale(1.2) rotate(10deg); }
+      100% { transform: translateY(0px) scale(1) rotate(0deg); }
+    }
+  `}</style>
+</div>
+    
   );
 }
 
