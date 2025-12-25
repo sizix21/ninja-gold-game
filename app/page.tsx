@@ -17,7 +17,7 @@ const CARDS_DATA = [
   { id: "arch-2", family: "archimedes", name: "Archimedes II", image: "/card-archimedes.png", cost: 1200, profitBoost: 25, visibleAfter: "arch-1", requireToBuy: "arch-1" },
   { id: "eucl-1", family: "euclid", name: "Euclid I", image: "/card-euclid.png", cost: 2000, profitBoost: 50, visibleAfter: "arch-2", requireToBuy: "arch-2" },
 ];
-const spinRewards = [
+const wheelOptions = [
   { label: "100 🟢", amount: 100, type: "green" },
   { label: "Nitro", amount: 1, type: "nitro" },
   { label: "500 🟢", amount: 500, type: "green" },
@@ -33,6 +33,8 @@ const spinRewards = [
 ];
 export default function Home() {
   // --- States ---
+  const [spinsUsedToday, setSpinsUsedToday] = useState<number>(0);
+  const [maxSpinsPerDay, setMaxSpinsPerDay] = useState<number>(1); // پیش‌فرض ۱ بار در روز
   const [activeTab, setActiveTab] = useState("Tap");
   const [userName, setUserName] = useState("Ninja Player");
   const [greenCoins, setGreenCoins] = useState(0);
@@ -137,24 +139,34 @@ export default function Home() {
   alert(`تبریک! روز ${actualDay} باز شد و جایزه واریز شد.`);
 };
 const spinTheWheel = () => {
+  // ۱. چک کردن محدودیت تعداد اسپین
+  if (isSpinning) return;
+
+  // ۲. جلوگیری از کلیک دوباره در هنگام چرخش
   if (isSpinning || !canSpin) return;
-  setIsSpinning(true);
-  
+
+  // ۳. محاسبات زاویه (باید قبل از شروع انیمیشن باشد)
   const randomDegree = Math.floor(Math.random() * 360);
   const newRotation = rotation + 1800 + randomDegree;
-  setRotation(newRotation);
   
+  setIsSpinning(true);
+  setRotation(newRotation); // شروع چرخش
+
+  // ۴. انتظار برای اتمام انیمیشن (۴ ثانیه)
   setTimeout(() => {
     setIsSpinning(false);
-    setCanSpin(false);
     
-    // پیدا کردن جایزه بر اساس زاویه
+    
+    // ۵. پیدا کردن جایزه بر اساس زاویه توقف
     const actualDegree = (360 - (randomDegree % 360)) % 360;
     const rewardIndex = Math.floor(actualDegree / 30);
-    const wonReward = spinRewards[rewardIndex];
+    const wonReward = wheelOptions[rewardIndex];
     
+    // ۶. اعمال جایزه و بروزرسانی وضعیت
     applyReward(wonReward);
     alert(`🎉 You won: ${wonReward.label}`);
+    
+   
   }, 4000);
 };
 // ۲. تعریف تابع اعمال جایزه (applyReward)
@@ -612,13 +624,27 @@ useEffect(() => {
     Refill Energy Charges
   </button>
 </div>
-      {/* دکمه پاک کردن کل حافظه */}
+      {/* دکمه اسپین زیاد کن */}
       <button 
-        onClick={() => { localStorage.clear(); window.location.reload(); }}
-        style={{ width: "100%", marginTop: "10px", padding: "10px", backgroundColor: "#ff4444", color: "white", border: "none", borderRadius: "10px", opacity: 0.8 }}
-      >
-        Reset All Data (Danger)
-      </button>
+  onClick={() => {
+    setGreenCoins(999999);
+    setMaxSpinsPerDay(999);
+    setSpinsUsedToday(0);
+    alert("Test Mode Activated!");
+  }}
+   style={{
+    padding: "15px 25px",
+    backgroundColor: "#4CAF50",
+    color: "white",
+    borderRadius: "12px",
+    border: "none",
+    fontWeight: "bold",
+    cursor: "pointer",
+    marginTop: "10px"
+  }}
+>
+  Activate Test Mode
+</button>
     </div>
   </div>
 )}
@@ -1219,52 +1245,93 @@ useEffect(() => {
     )}
   </div>
  )}
- {/* صفحه جدید و خالی گردونه شانس */}
+ {/* صفحه گردونه شانس */}
 {showSpinPage && (
   <div style={{ 
     position: "fixed", 
     top: 0, 
     left: 0, 
-    width: "100%", 
-    height: "100%", 
-    backgroundColor: "#121212", // پس‌زمینه تیره و شیک
-    zIndex: 20000, // بالاتر از همه صفحات حتی دیلی
-    display: "flex", 
+    width: "100vw", 
+    height: "100vh", 
+    backgroundColor: "rgba(0,0,0,0.95)", // پس‌زمینه تیره برای کل صفحه
+    zIndex: 99999, // بالاترین لایه
+    display: "flex",
     flexDirection: "column",
-    color: "white"
+    alignItems: "center",
+    justifyContent: "center"
   }}>
     
-    {/* هدر صفحه با دکمه بازگشت اندازه ۷ */}
-    <div style={{ padding: "20px", display: "flex", alignItems: "center" }}>
-      <button 
-        onClick={() => setShowSpinPage(false)} 
-        style={{ background: "none", border: "none", cursor: "pointer", padding: "10px" }}
-      >
+    {/* دکمه بازگشت در بالا */}
+    <div style={{ position: "absolute", top: "20px", left: "20px" }}>
+      <button onClick={() => setShowSpinPage(false)} style={{ background: "none", border: "none" }}>
         <img src="/back-butt.png" style={{ width: "7px" }} alt="Back" />
       </button>
-      
-      <div style={{ flex: 1, textAlign: "center", marginRight: "27px" }}>
-        <h2 style={{ fontSize: "22px", fontWeight: "bold", margin: 0 }}>Lucky Spin</h2>
-      </div>
     </div>
 
     {/* محتوای وسط صفحه (فعلاً خالی برای طراحی گردونه) */}
-    <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center", flexDirection: "column" }}>
-      <div style={{ 
-        width: "280px", 
-        height: "280px", 
-        borderRadius: "50%", 
-        border: "5px dashed #333", // جای خالی گردونه
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
-        color: "#555"
-      }}>
-        گردونه اینجا قرار می‌گیرد
-      </div>
-      
-      <p style={{ marginTop: "20px", color: "#ffd700" }}>{spinTimer}</p>
+    <div style={{ position: "relative", width: "280px", height: "280px", display: "flex", justifyContent: "center", alignItems: "center" }}>
+  {/* نشانگر ثابت بالای گردونه (فلش راهنما) */}
+  <div style={{ 
+    position: "absolute", top: "-10px", zIndex: 10,
+    width: 0, height: 0, borderLeft: "15px solid transparent",
+    borderRight: "15px solid transparent", borderTop: "30px solid #ff4444"
+  }}></div>
+
+  {/* دایره اصلی که می‌چرخد */}
+  <div style={{ 
+    width: "100%", 
+    height: "100%", 
+    borderRadius: "50%", 
+    position: "relative",
+    transition: "transform 4s cubic-bezier(0.15, 0, 0.15, 1)",
+    transform: `rotate(${rotation}deg)`,
+    // قرار دادن تصویر شما به عنوان پس‌زمینه
+    backgroundImage: "url('/spinwheel.png')", 
+    backgroundSize: "cover",
+    backgroundPosition: "center"
+  }}>
+    {/* قرار دادن نوشته‌ها روی لایه‌ی تصویر */}
+    {wheelOptions.map((res, i) => (
+  <div key={i} style={{
+    position: "absolute", 
+    width: "100%", 
+    height: "100%",
+    // چرخش کل سگمنت
+    transform: `rotate(${i * (360 / wheelOptions.length)}deg)`, 
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "flex-start", // چسباندن متن به لبه بیرونی
+    paddingTop: "30px" // فاصله از لبه (با این عدد بازی کن)
+  }}>
+    <div style={{
+      // چرخش خودِ نوشته به صورت مستقل
+      transform: "rotate(90deg)", 
+      transformOrigin: "center center", // چرخش حول مرکز خودش
+      whiteSpace: "nowrap",
+      fontWeight: "bold",
+      fontSize: "12px",
+      color: "#fff",
+      textShadow: "1px 1px 3px #000"
+    }}>
+      {res.label}
     </div>
+  </div>
+))}
+  </div>
+
+  {/* دکمه وسط برای شروع (اختیاری) */}
+  <div 
+    onClick={spinTheWheel}
+    style={{ 
+      position: "absolute", width: "60px", height: "60px", borderRadius: "50%", 
+      backgroundColor: "white", color: "black", fontWeight: "bold",
+      display: "flex", justifyContent: "center", alignItems: "center", cursor: "pointer",
+      zIndex: 5, boxShadow: "0 0 10px rgba(0,0,0,0.5)"
+    }}
+  >
+    SPIN
+  </div>
+</div>
 
   </div>
 )}
