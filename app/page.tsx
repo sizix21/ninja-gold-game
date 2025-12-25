@@ -18,21 +18,24 @@ const CARDS_DATA = [
   { id: "eucl-1", family: "euclid", name: "Euclid I", image: "/card-euclid.png", cost: 2000, profitBoost: 50, visibleAfter: "arch-2", requireToBuy: "arch-2" },
 ];
 const wheelOptions = [
-  { label: "100 🟢", amount: 100, type: "green" },
-  { label: "Nitro", amount: 1, type: "nitro" },
-  { label: "500 🟢", amount: 500, type: "green" },
-  { label: "Speed", amount: 0, type: "speed" },
-  { label: "1000 🟢", amount: 1000, type: "green" },
-  { label: "200 🟢", amount: 200, type: "green" },
-  { label: "Try Again", amount: 0, type: "none" },
-  { label: "50 🟢", amount: 50, type: "green" },
-  { label: "150 🟢", amount: 150, type: "green" },
-  { label: "Bonus", amount: 300, type: "green" },
-  { label: "800 🟢", amount: 800, type: "green" },
-  { label: "Luck x2", amount: 0, type: "none" },
+  { label: "prize1", degree: 72, amount: 72, type: "green" },
+  { label: "prize2", degree: 8, amount: 8, type: "green" },
+  { label: "prize3", degree: 22, amount: 22, type: "green" },
+  { label: "prize4", degree: 28, amount: 28, type: "green" },
+  { label: "prize5", degree: 15, amount: 15, type: "green" },
+  { label: "prize6", degree: 18, amount: 18, type: "green" },
+  { label: "prize7", degree: 47, amount: 47, type: "green" },
+  { label: "prize8", degree: 28, amount: 28, type: "green" },
+  { label: "prize9", degree: 18, amount: 18, type: "green" },
+  { label: "prize10", degree: 39, amount: 39, type: "green" },
+  { label: "prize11", degree: 29, amount: 29, type: "green" },
+  { label: "prize12", degree: 36, amount: 36, type: "green" },
 ];
 export default function Home() {
   // --- States ---
+  const [showLibraryPage, setShowLibraryPage] = useState(false);
+  const [showNinjaCodePage, setShowNinjaCodePage] = useState(false);
+  const [giftCode, setGiftCode] = useState(""); // برای ذخیره کدی که کاربر تایپ می‌کند
   const [spinsUsedToday, setSpinsUsedToday] = useState<number>(0);
   const [maxSpinsPerDay, setMaxSpinsPerDay] = useState<number>(1); // پیش‌فرض ۱ بار در روز
   const [activeTab, setActiveTab] = useState("Tap");
@@ -139,34 +142,34 @@ export default function Home() {
   alert(`تبریک! روز ${actualDay} باز شد و جایزه واریز شد.`);
 };
 const spinTheWheel = () => {
-  // ۱. چک کردن محدودیت تعداد اسپین
   if (isSpinning) return;
 
-  // ۲. جلوگیری از کلیک دوباره در هنگام چرخش
-  if (isSpinning || !canSpin) return;
-
-  // ۳. محاسبات زاویه (باید قبل از شروع انیمیشن باشد)
   const randomDegree = Math.floor(Math.random() * 360);
   const newRotation = rotation + 1800 + randomDegree;
   
   setIsSpinning(true);
-  setRotation(newRotation); // شروع چرخش
+  setRotation(newRotation);
 
-  // ۴. انتظار برای اتمام انیمیشن (۴ ثانیه)
   setTimeout(() => {
     setIsSpinning(false);
     
+    // محاسبه زاویه واقعی توقف (بین 0 تا 359)
+    const stopDegree = (360 - (randomDegree % 360)) % 360;
     
-    // ۵. پیدا کردن جایزه بر اساس زاویه توقف
-    const actualDegree = (360 - (randomDegree % 360)) % 360;
-    const rewardIndex = Math.floor(actualDegree / 30);
-    const wonReward = wheelOptions[rewardIndex];
+    // پیدا کردن جایزه بر اساس بازه درجات
+    let currentLimit = 0;
+    let wonReward = wheelOptions[0]; // پیش‌فرض
+
+    for (let i = 0; i < wheelOptions.length; i++) {
+      currentLimit += wheelOptions[i].degree;
+      if (stopDegree < currentLimit) {
+        wonReward = wheelOptions[i];
+        break;
+      }
+    }
     
-    // ۶. اعمال جایزه و بروزرسانی وضعیت
     applyReward(wonReward);
-    alert(`🎉 You won: ${wonReward.label}`);
-    
-   
+    alert(`🎉 شما برنده شدید: ${wonReward.label}`);
   }, 4000);
 };
 // ۲. تعریف تابع اعمال جایزه (applyReward)
@@ -846,26 +849,17 @@ useEffect(() => {
   </div>
 
   {/* دکمه Daily Ninja Code */}
-  <div 
-  onClick={() => {
-    if (!showSpinPage) {
-      setShowSpinPage(true); // باز کردن صفحه اسپین
-    }
-  }} 
-    style={{ 
-      width: "85%", padding: "12px", borderRadius: "12px",
-      background: "#36363681",
-      border: "1px solid #9b9b9bc0",
-      backdropFilter: "blur(8px)", WebkitBackdropFilter: "blur(8px)",
-      textAlign: "center", cursor: "pointer"
-    }}
-  >
-   <div style={{ fontSize: "18px", fontWeight: "bold" }}>Spin Wheel</div>
-  <div style={{ fontSize: "13px", color: canSpin ? "#4CAF50" : "#ffd700" }}>
-    {spinTimer}
-  </div>
-  </div>
-
+<div 
+  onClick={() => setShowNinjaCodePage(true)} // تغییر به صفحه نینجا کد
+  style={{
+    width: "85%", padding: "12px", borderRadius: "12px",
+    background: "#36363681", border: "1px solid #9b9b9bc0",
+    textAlign: "center", cursor: "pointer"
+  }}
+>
+  <div style={{ fontSize: "18px", fontWeight: "bold" }}>Daily Ninja Code</div>
+  <div style={{ fontSize: "13px", color: "#ffd700" }}>Enter Code to Claim Reward</div>
+</div>
 </div>
 
       {/* شبکه کادوها با مرز (Border) مشخص */}
@@ -1099,12 +1093,7 @@ useEffect(() => {
   </div>
 )}
 
-           {/* Other Tabs placeholder */}
- {(activeTab === "Fight" || activeTab === "Library") && (
-   <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
-     <h2 style={{ color: "#555" }}>صفحه {activeTab} (بزودی)</h2>
-   </div>
- )}
+ 
  </motion.div>
 
  {/* Footer Navigation (Fixed) */}
@@ -1114,7 +1103,7 @@ useEffect(() => {
   alignItems: "center",
   width: "100%",
   gap: "20px", 
-  zIndex: 30, 
+  zIndex: 9999, 
   paddingBottom: "15px",
   position: "absolute",
   bottom: 0,
@@ -1134,7 +1123,17 @@ useEffect(() => {
     return (
       <button 
         key={label} 
-        onClick={() => { setActiveTab(label); playSwitchSound(); }} 
+       onClick={() => {
+  setActiveTab(label);
+  playSwitchSound();
+  
+  // اضافه کردن این شرط برای باز شدن صفحه لایبرری
+  if (label === "Library") {
+    setShowLibraryPage(true);
+  } else {
+    setShowLibraryPage(false);
+  }
+}} 
         style={{ 
           background: "none", 
           border: "none", 
@@ -1263,9 +1262,17 @@ useEffect(() => {
     
     {/* دکمه بازگشت در بالا */}
     <div style={{ position: "absolute", top: "20px", left: "20px" }}>
-      <button onClick={() => setShowSpinPage(false)} style={{ background: "none", border: "none" }}>
-        <img src="/back-butt.png" style={{ width: "7px" }} alt="Back" />
-      </button>
+      <button 
+  onClick={() => {
+    // ۱. اول مقدار چرخش را صفر کن
+    setRotation(0); 
+    // ۲. حالا صفحه را ببند
+    setShowSpinPage(false); 
+  }} 
+  style={{ background: "none", border: "none" }}
+>
+  <img src="/back-butt.png" style={{ width: "7px" }} alt="Back" />
+</button>
     </div>
 
     {/* محتوای وسط صفحه (فعلاً خالی برای طراحی گردونه) */}
@@ -1285,38 +1292,12 @@ useEffect(() => {
     position: "relative",
     transition: "transform 4s cubic-bezier(0.15, 0, 0.15, 1)",
     transform: `rotate(${rotation}deg)`,
-    // قرار دادن تصویر شما به عنوان پس‌زمینه
+    //  تصویر 'گردونه
     backgroundImage: "url('/spinwheel.png')", 
     backgroundSize: "cover",
     backgroundPosition: "center"
   }}>
-    {/* قرار دادن نوشته‌ها روی لایه‌ی تصویر */}
-    {wheelOptions.map((res, i) => (
-  <div key={i} style={{
-    position: "absolute", 
-    width: "100%", 
-    height: "100%",
-    // چرخش کل سگمنت
-    transform: `rotate(${i * (360 / wheelOptions.length)}deg)`, 
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "flex-start", // چسباندن متن به لبه بیرونی
-    paddingTop: "30px" // فاصله از لبه (با این عدد بازی کن)
-  }}>
-    <div style={{
-      // چرخش خودِ نوشته به صورت مستقل
-      transform: "rotate(90deg)", 
-      transformOrigin: "center center", // چرخش حول مرکز خودش
-      whiteSpace: "nowrap",
-      fontWeight: "bold",
-      fontSize: "12px",
-      color: "#fff",
-      textShadow: "1px 1px 3px #000"
-    }}>
-      {res.label}
-    </div>
-  </div>
-))}
+   
   </div>
 
   {/* دکمه وسط برای شروع (اختیاری) */}
@@ -1332,35 +1313,55 @@ useEffect(() => {
     SPIN
   </div>
 </div>
-
   </div>
 )}
-{/* صفحه جدید و خالی نینجا کد */}
-{showCodePage && (
-  <div style={{ 
-    position: "fixed", top: 0, left: 0, width: "100%", height: "100%", 
-    backgroundColor: "#0d0d0d", // تم کمی متفاوت برای تمایز
-    zIndex: 20001, 
-    display: "flex", flexDirection: "column", color: "white"
+{/* صفحه نینجا کد */}
+{showNinjaCodePage && (
+  <div style={{
+    position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+    backgroundColor: "#121212", zIndex: 30000, display: "flex",
+    flexDirection: "column", alignItems: "center", justifyContent: "center"
   }}>
-    <div style={{ padding: "20px", display: "flex", alignItems: "center" }}>
-      <button 
-        onClick={() => setShowCodePage(false)} 
-        style={{ background: "none", border: "none", cursor: "pointer", padding: "10px" }}
-      >
+    {/* دکمه بازگشت */}
+    <div style={{ position: "absolute", top: "20px", left: "20px" }}>
+      <button onClick={() => setShowNinjaCodePage(false)} style={{ background: "none", border: "none" }}>
         <img src="/back-butt.png" style={{ width: "7px" }} alt="Back" />
       </button>
-      <div style={{ flex: 1, textAlign: "center", marginRight: "27px" }}>
-        <h2 style={{ fontSize: "22px", fontWeight: "bold", margin: 0 }}>Ninja Code</h2>
-      </div>
     </div>
 
-    <div style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
-      <p style={{ opacity: 0.5 }}>بخش وارد کردن کد (بزودی)</p>
-    </div>
+    <h2 style={{ color: "white", marginBottom: "20px" }}>Enter Ninja Code</h2>
+    
+    <input 
+      type="text" 
+      value={giftCode}
+      onChange={(e) => setGiftCode(e.target.value.toUpperCase())}
+      placeholder="CODE HERE..."
+      style={{
+        padding: "15px", borderRadius: "10px", border: "none",
+        width: "70%", textAlign: "center", fontSize: "18px", marginBottom: "20px"
+      }}
+    />
+
+    <button 
+      onClick={() => {
+        if (giftCode === "NINJA2025") {
+          setGreenCoins(prev => prev + 10000);
+          alert("🎉 10,000 Coins added!");
+          setShowNinjaCodePage(false);
+          setGiftCode("");
+        } else {
+          alert("❌ Invalid Code!");
+        }
+      }}
+      style={{
+        padding: "15px 40px", backgroundColor: "#ffd700",
+        borderRadius: "10px", border: "none", fontWeight: "bold"
+      }}
+    >
+      REDEEM
+    </button>
   </div>
 )}
-
  {floatingNumbers.map(num => (
     <div key={num.id} style={{ 
       position: "fixed", 
@@ -1389,6 +1390,120 @@ useEffect(() => {
       100% { transform: translateY(0px) scale(1) rotate(0deg); }
     }
   `}</style>
+  {showLibraryPage && (
+  <div style={{
+    position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+    backgroundImage: "url('/closet-back.jpg')", // تصویر پس‌زمینه از فایل شما
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    zIndex: 100, // لایه‌ای بالاتر از محتوای اصلی اما پایین‌تر از فوتر
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "flex-start", // شروع از بالا
+    paddingBottom: "80px", // فضای خالی برای فوتر
+    boxSizing: "border-box", // padding به width/height اضافه نشود
+    overflowY: "auto" // اسکرول برای محتوای بیشتر
+  }}>
+
+    {/* Header با دکمه SHOP و دکمه Back */}
+    <div style={{ 
+      width: "100%", 
+      display: "flex", 
+      justifyContent: "flex-end", 
+      alignItems: "center", 
+      padding: "20px", 
+      boxSizing: "border-box" 
+    }}>
+      
+
+      {/* دکمه SHOP در بالا سمت راست */}
+      <button 
+        onClick={() => alert("Shop will open soon!")} // فانکشن موقتی
+        style={{
+          backgroundColor: "#ffc107", // رنگ طلایی/زرد
+          color: "white",
+          padding: "10px 20px",
+          borderRadius: "8px",
+          border: "none",
+          fontWeight: "bold",
+          cursor: "pointer",
+          fontSize: "16px"
+        }}
+      >
+        SHOP
+      </button>
+    </div>
+
+    {/* عنوان صفحه */}
+    <h2 style={{ color: "white", marginBottom: "30px", fontSize: "24px" }}>My NFTs</h2>
+
+    {/* بخش بالایی: ۳ ستون */}
+    <div style={{ 
+      display: "grid", 
+      gridTemplateColumns: "repeat(3, 1fr)", // ۳ ستون مساوی
+      gap: "10px", 
+      width: "90%", 
+      maxWidth: "600px", // برای صفحه های بزرگتر
+      marginBottom: "30px" 
+    }}>
+      {/* کادر خالی NFT (مثال) */}
+      {[...Array(3)].map((_, index) => (
+        <div 
+          key={index} 
+          style={{ 
+            width: "100%", 
+            paddingTop: "100%", // نسبت ابعاد ۱:۱ برای کادر
+            backgroundColor: "rgba(255,255,255,0.1)", 
+            borderRadius: "10px", 
+            border: "1px dashed rgba(255,255,255,0.3)",
+            display: "flex", // برای وسط چین کردن آینده
+            justifyContent: "center",
+            alignItems: "center",
+            color: "rgba(255,255,255,0.5)",
+            fontSize: "12px",
+            position: "relative"
+          }}
+        >
+          {/* اگر تصویر NFT داشتی، اینجا قرار می‌گیرد */}
+          <span style={{ position: "absolute" }}>NFT {index + 1}</span>
+        </div>
+      ))}
+    </div>
+
+    {/* بخش پایینی: ۴ ستون */}
+    <div style={{ 
+      display: "grid", 
+      gridTemplateColumns: "repeat(4, 1fr)", // ۴ ستون مساوی
+      gap: "8px", 
+      width: "90%", 
+      maxWidth: "600px", 
+      marginBottom: "20px" 
+    }}>
+      {/* کادر خالی NFT (مثال) */}
+      {[...Array(5)].map((_, index) => (
+        <div 
+          key={index} 
+          style={{ 
+            width: "100%", 
+            paddingTop: "100%", // نسبت ابعاد ۱:۱ برای کادر
+            backgroundColor: "rgba(255,255,255,0.1)", 
+            borderRadius: "8px", 
+            border: "1px dashed rgba(255,255,255,0.3)",
+            display: "flex", 
+            justifyContent: "center",
+            alignItems: "center",
+            color: "rgba(255,255,255,0.5)",
+            fontSize: "10px",
+            position: "relative"
+          }}
+        >
+          <span style={{ position: "absolute" }}>NFT {index + 4}</span>
+        </div>
+      ))}
+    </div>
+  </div>
+)}
 </div>
     
   );
