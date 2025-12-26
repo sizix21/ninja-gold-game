@@ -50,7 +50,9 @@ const FightButton = ({ text, color, textColor, fontSize = "22px" }: FightBtnProp
 );
 export default function Home() {
   // --- States ---
-  const [showFightPage, setShowFightPage] = useState(false);
+  const [showSquadPage, setShowSquadPage] = useState(false);
+  const [showTaskPage, setShowTaskPage] = useState(false);// صفحه Task
+  const [showFightPage, setShowFightPage] = useState(false);// Fight صفحه
   const renderSymbol = (type: string) => {
   const baseStyle = { width: 0, height: 0, borderStyle: "solid" };
   switch (type) {
@@ -821,6 +823,12 @@ useEffect(() => {
         if (label === "Daily") {
           setShowDailyPage(true);
         }
+        if (label === "Task") {
+          setShowTaskPage(true);
+        }
+        if (label === "Squad") {
+          setShowSquadPage(true);
+        }
       }}
            style={{
             padding: "10px",
@@ -847,10 +855,10 @@ useEffect(() => {
 {showDailyPage && (
   <div style={{ 
     position: "fixed", top: 0, left: 0, width: "100%", height: "100%", 
-    backgroundImage: "url('/daily-back.jpg')", 
+    backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5)), url('/daily-back.jpg')",  
     backgroundSize: "cover",
     backgroundPosition: "center",
-    zIndex: 10000, 
+    zIndex: 990, 
     display: "flex", 
     flexDirection: "column",
     color: "white" 
@@ -1170,7 +1178,8 @@ useEffect(() => {
        onClick={() => {
   setActiveTab(label);
   playSwitchSound();
-
+        setShowTaskPage(false);
+        setShowSquadPage(false);
   // مدیریت نمایش صفحه Fight
   if (label === "Fight") {
     setShowFightPage(true);
@@ -1707,6 +1716,176 @@ useEffect(() => {
       <FightButton text="SHOW MY FIGHTS" color="#9b59b6" textColor="#2ecc71" />
       <FightButton text="MAKE A LEAGUE" color="#ecf0f1" textColor="#34495e" />
     </div>
+  </div>
+)}
+{showTaskPage && (
+  <div style={{
+    position: "fixed", 
+    top: 0, 
+    left: 0, 
+    width: "100%", 
+    height: "100%",
+    // تنظیم پس‌زمینه اختصاصی تسک
+    backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.5)), url('/task-back.jpg')", 
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    zIndex: 500, 
+    display: "flex", 
+    flexDirection: "column", 
+    alignItems: "center",
+    padding: "20px",
+    boxSizing: "border-box"
+  }}>
+    
+    {/* نوار بالایی: دکمه بازگشت و عنوان */}
+    <div style={{ 
+      width: "100%", 
+      display: "flex", 
+      alignItems: "center", 
+      justifyContent: "space-between",
+      marginBottom: "10px" 
+    }}>
+      <button 
+        onClick={() => setShowTaskPage(false)} 
+        style={{ background: "none", border: "none", cursor: "pointer" }}
+      >
+        <img src="/back-butt.png" style={{ width: "7px" }} alt="Back" />
+      </button>
+      
+      <h1 style={{ 
+        color: "white", 
+        fontSize: "26px", 
+        fontWeight: "900", 
+        margin: 0, 
+        flex: 1, 
+        textAlign: "center", 
+        marginRight: "30px",
+        textShadow: "0 0 10px rgba(0,0,0,0.5)" 
+      }}>
+        TASKS
+      </h1>
+    </div>
+
+    {/* بخش نمایش سکه‌های قرمز */}
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+      background: "rgba(0, 0, 0, 0.6)",
+      padding: "5px 15px",
+      borderRadius: "20px",
+      border: "1px solid rgba(255, 0, 0, 0.3)",
+      marginBottom: "30px"
+    }}>
+      <img src="/currency-r.png" style={{ width: "20px", height: "20px" }} alt="Red Coin" />
+      <span style={{ 
+        color: "#ffffffff", 
+        fontSize: "20px", 
+        fontWeight: "bold",
+        textShadow: "0 0 5px rgba(255, 0, 0, 0.5)" 
+      }}>
+        {redCoins.toLocaleString()} {/* مقدار سکه‌های قرمز */}
+      </span>
+    </div>
+
+    {/* لیست تسک‌ها */}
+    <div style={{ 
+      width: "100%", 
+      display: "flex", 
+      flexDirection: "column", 
+      gap: "12px",
+      overflowY: "auto",
+      paddingBottom: "20px"
+    }}>
+      {/* اینجا بعداً تسک‌ها را رندر می‌کنیم */}
+      <p style={{ color: "rgba(255,255,255,0.4)", textAlign: "center", marginTop: "50px" }}>
+        New tasks are coming soon...
+      </p>
+    </div>
+
+  </div>
+)}
+{showSquadPage && (
+  <div style={{
+    position: "fixed", 
+    top: 0, 
+    left: 0, 
+    width: "100%", 
+    height: "100%",
+    backgroundImage: "url('/squad-back.jpg')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    zIndex: 520, // کمتر از فوتر برای دیده شدن آن
+    display: "flex", 
+    flexDirection: "column", 
+    alignItems: "center",
+    padding: "20px 20px 140px 20px",
+    boxSizing: "border-box",
+    overflowY: "auto"
+  }}>
+    
+    {/* نوار بالایی: دکمه بازگشت و عنوان */}
+    <div style={{ 
+      width: "100%", 
+      display: "flex", 
+      alignItems: "center", 
+      justifyContent: "space-between",
+      marginBottom: "10px" 
+    }}>
+      <button 
+        onClick={() => setShowSquadPage(false)} 
+        style={{ background: "none", border: "none", cursor: "pointer" }}
+      >
+        <img src="/back-butt.png" style={{ width: "7px" }} alt="Back" />
+      </button>
+      
+      <h1 style={{ 
+        color: "white", 
+        fontSize: "26px", 
+        fontWeight: "900", 
+        margin: 0, 
+        flex: 1, 
+        textAlign: "center", 
+        marginRight: "30px",
+        textShadow: "2px 2px 10px rgba(0,0,0,0.8)" 
+      }}>
+        SQUAD
+      </h1>
+    </div>
+
+    {/* نمایش سکه‌های نارنجی */}
+    <div style={{
+      display: "flex",
+      alignItems: "center",
+      gap: "8px",
+      background: "rgba(0, 0, 0, 0.7)",
+      padding: "8px 20px",
+      borderRadius: "25px",
+      border: "1px solid rgba(255, 165, 0, 0.4)", // حاشیه نارنجی ملایم
+      marginBottom: "30px",
+      backdropFilter: "blur(5px)"
+    }}>
+      <img src="/currency-t.png" style={{ width: "22px", height: "22px" }} alt="Orange Coin" />
+      <span style={{ 
+        color: "#ffa500", // رنگ نارنجی
+        fontSize: "22px", 
+        fontWeight: "bold",
+        textShadow: "0 0 8px rgba(255, 165, 0, 0.6)" 
+      }}>
+        {orangeCoins?.toLocaleString() || 0} {/* نام متغیر سکه نارنجی را چک کن */}
+      </span>
+    </div>
+
+    {/* محتوای صفحه اسکواد */}
+    <div style={{ width: "100%", maxWidth: "400px", textAlign: "center" }}>
+       <p style={{ color: "white", fontSize: "18px", fontWeight: "bold" }}>
+         Join a Squad to play together!
+       </p>
+       <p style={{ color: "rgba(255,255,255,0.5)", marginTop: "20px" }}>
+         Squad system is coming soon...
+       </p>
+    </div>
+
   </div>
 )}
 </div>
