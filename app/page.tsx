@@ -33,6 +33,13 @@ const wheelOptions = [
 ];
 export default function Home() {
   // --- States ---
+  const circlePositions = [
+  { id: 1, top: "50%", left: "50%" }, // وسط
+  { id: 2, top: "50%", left: "80%" }, // راست
+  { id: 3, top: "50%", left: "20%" }, // چپ
+  { id: 4, top: "20%", left: "50%" }, // بالا
+  { id: 5, top: "80%", left: "50%" }, // پایین
+];
   const [showLibraryPage, setShowLibraryPage] = useState(false);
   const [showNinjaCodePage, setShowNinjaCodePage] = useState(false);
   const [giftCode, setGiftCode] = useState(""); // برای ذخیره کدی که کاربر تایپ می‌کند
@@ -1319,9 +1326,46 @@ useEffect(() => {
 {showNinjaCodePage && (
   <div style={{
     position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-    backgroundColor: "#121212", zIndex: 30000, display: "flex",
-    flexDirection: "column", alignItems: "center", justifyContent: "center"
+    backgroundImage: "url('/ninjacode-back.jpg')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    zIndex: 20000, 
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    justifyContent: "space-between", // این خط باعث می‌شود محتوا پخش شود و دکمه به پایین برود
+    padding: "40px 20px 60px 20px", // پدینگ پایین را بیشتر دادیم تا دکمه خیلی به لبه نچسبد
+    boxSizing: "border-box"
   }}>
+    {/* انیمیشن حلقه‌های قرمز */}
+{circlePositions.map((pos, index) => (
+  <motion.div
+    key={pos.id}
+    initial={{ opacity: 0, scale: 0 }}
+    animate={{ 
+      opacity: [0, 1, 0], 
+      scale: [0.5, 1.2, 0.8] 
+    }}
+    transition={{ 
+      duration: 0.8, 
+      delay: index * 0.6, // فاصله زمانی بین هر حلقه
+      ease: "easeInOut" 
+    }}
+    style={{
+      position: "fixed",
+      top: pos.top,
+      left: pos.left,
+      transform: "translate(-50%, -50%)",
+      width: "60px",
+      height: "60px",
+      borderRadius: "50%",
+      border: "4px solid #ff0000", // حلقه قرمز
+      boxShadow: "0 0 15px #ff0000",
+      zIndex: 20001,
+      pointerEvents: "none" // که مانع کلیک نشود
+    }}
+  />
+))}
     {/* دکمه بازگشت */}
     <div style={{ position: "absolute", top: "20px", left: "20px" }}>
       <button onClick={() => setShowNinjaCodePage(false)} style={{ background: "none", border: "none" }}>
@@ -1329,37 +1373,34 @@ useEffect(() => {
       </button>
     </div>
 
-    <h2 style={{ color: "white", marginBottom: "20px" }}>Enter Ninja Code</h2>
     
-    <input 
-      type="text" 
-      value={giftCode}
-      onChange={(e) => setGiftCode(e.target.value.toUpperCase())}
-      placeholder="CODE HERE..."
-      style={{
-        padding: "15px", borderRadius: "10px", border: "none",
-        width: "70%", textAlign: "center", fontSize: "18px", marginBottom: "20px"
-      }}
-    />
-
+{/* دکمه در پایین صفحه */}
     <button 
-      onClick={() => {
-        if (giftCode === "NINJA2025") {
-          setGreenCoins(prev => prev + 10000);
-          alert("🎉 10,000 Coins added!");
-          setShowNinjaCodePage(false);
-          setGiftCode("");
-        } else {
-          alert("❌ Invalid Code!");
-        }
-      }}
-      style={{
-        padding: "15px 40px", backgroundColor: "#ffd700",
-        borderRadius: "10px", border: "none", fontWeight: "bold"
-      }}
-    >
-      REDEEM
-    </button>
+  onClick={() => {
+    // منطق کلیک شما
+  }}
+  style={{
+    position: "absolute", // دکمه را از جریان عادی خارج کن
+    bottom: "40px",      // فاصله دقیق از پایین صفحه
+    left: "50%",         // انتقال به وسط
+    transform: "translateX(-50%)", // اصلاح مرکزیت دکمه
+    width: "85%",
+    padding: "12px",
+    borderRadius: "12px",
+    background: "#36363681",
+    border: "1px solid #9b9b9bc0",
+    backdropFilter: "blur(8px)",
+    WebkitBackdropFilter: "blur(8px)",
+    color: "white",
+    cursor: "pointer",
+    textAlign: "center"
+  }}
+>
+  <div style={{ fontSize: "18px", fontWeight: "bold" }}>Code Library</div>
+  <div style={{ fontSize: "13px", color: "#ffd700", fontWeight: "normal" }}>
+    Enter Code to Claim Reward
+  </div>
+</button>
   </div>
 )}
  {floatingNumbers.map(num => (
