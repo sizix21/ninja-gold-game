@@ -31,15 +31,51 @@ const wheelOptions = [
   { label: "prize11", degree: 29, amount: 29, type: "green" },
   { label: "prize12", degree: 36, amount: 36, type: "green" },
 ];
+interface FightBtnProps {
+  text: string;
+  color: string;
+  textColor: string;
+  fontSize?: string;
+}
+
+const FightButton = ({ text, color, textColor, fontSize = "22px" }: FightBtnProps) => (
+  <button style={{
+    width: "100%", padding: "15px 10px", backgroundColor: color, color: textColor,
+    borderRadius: "15px", border: "none", fontWeight: "900", fontSize: fontSize,
+    textAlign: "center", boxShadow: "0 5px 0 rgba(0,0,0,0.3)", cursor: "pointer",
+    textTransform: "uppercase", marginBottom: "8px"
+  }}>
+    {text}
+  </button>
+);
 export default function Home() {
   // --- States ---
+  const [showFightPage, setShowFightPage] = useState(false);
+  const renderSymbol = (type: string) => {
+  const baseStyle = { width: 0, height: 0, borderStyle: "solid" };
+  switch (type) {
+    case "circle":
+      return <div style={{ width: "24px", height: "24px", borderRadius: "50%", backgroundColor: "#ff0000", boxShadow: "0 0 10px #ff0000" }} />;
+    case "right":
+      return <div style={{ ...baseStyle, borderWidth: "12px 0 12px 20px", borderColor: "transparent transparent transparent #ff0000", filter: "drop-shadow(0 0 5px #ff0000)" }} />;
+    case "left":
+      return <div style={{ ...baseStyle, borderWidth: "12px 20px 12px 0", borderColor: "transparent #ff0000 transparent transparent", filter: "drop-shadow(0 0 5px #ff0000)" }} />;
+    case "up":
+      return <div style={{ ...baseStyle, borderWidth: "0 12px 20px 12px", borderColor: "transparent transparent #ff0000 transparent", filter: "drop-shadow(0 0 5px #ff0000)" }} />;
+    case "down":
+      return <div style={{ ...baseStyle, borderWidth: "20px 12px 0 12px", borderColor: "#ff0000 transparent transparent transparent", filter: "drop-shadow(0 0 5px #ff0000)" }} />;
+    default:
+      return null;
+  }
+};
   const circlePositions = [
   { id: 1, top: "50vh", left: "50vw" }, // وسط دقیق گوشی
   { id: 2, top: "50vh", left: "80vw" }, // راست
   { id: 3, top: "50vh", left: "20vw" }, // چپ
-  { id: 4, top: "20vh", left: "50vw" }, // بالا
-  { id: 5, top: "80vh", left: "50vw" }, // پایین
+  { id: 4, top: "30vh", left: "50vw" }, // بالا
+  { id: 5, top: "70vh", left: "50vw" }, // پایین
 ];
+  const [showCodeListPage, setShowCodeListPage] = useState(false);//صفخه کدها
   const [showLibraryPage, setShowLibraryPage] = useState(false);
   const [showNinjaCodePage, setShowNinjaCodePage] = useState(false);
   const [giftCode, setGiftCode] = useState(""); // برای ذخیره کدی که کاربر تایپ می‌کند
@@ -1117,6 +1153,7 @@ useEffect(() => {
   left: 0,
   background: "linear-gradient(to top, rgba(0,0,0,0.8), transparent)", // اضافه شدن سایه برای خوانایی بهتر
   paddingTop: "20px"
+  
  }}>
   {TABS.map((label) => {
     const isActive = activeTab === label;
@@ -1133,14 +1170,21 @@ useEffect(() => {
        onClick={() => {
   setActiveTab(label);
   playSwitchSound();
-  
-  // اضافه کردن این شرط برای باز شدن صفحه لایبرری
+
+  // مدیریت نمایش صفحه Fight
+  if (label === "Fight") {
+    setShowFightPage(true);
+  } else {
+    setShowFightPage(false);
+  }
+
+  // مدیریت نمایش صفحه Library (کدی که از قبل داشتی)
   if (label === "Library") {
     setShowLibraryPage(true);
   } else {
     setShowLibraryPage(false);
   }
-}} 
+}}
         style={{ 
           background: "none", 
           border: "none", 
@@ -1253,14 +1297,17 @@ useEffect(() => {
  )}
  {/* صفحه گردونه شانس */}
 {showSpinPage && (
-  <div style={{ 
-    position: "fixed", 
-    top: 0, 
-    left: 0, 
-    width: "100vw", 
-    height: "100vh", 
-    backgroundColor: "rgba(0,0,0,0.95)", // پس‌زمینه تیره برای کل صفحه
-    zIndex: 99999, // بالاترین لایه
+  <div style={{
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    // تغییر تصویر پس‌زمینه به فایل جدید
+    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.3), rgba(0, 0, 0, 0.2)), url('/spin-back.jpg')`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    zIndex: 20000,
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
@@ -1288,9 +1335,21 @@ useEffect(() => {
   <div style={{ 
     position: "absolute", top: "-10px", zIndex: 10,
     width: 0, height: 0, borderLeft: "15px solid transparent",
-    borderRight: "15px solid transparent", borderTop: "30px solid #ff4444"
-  }}></div>
+    borderRight: "15px solid transparent", borderTop: "30px solid #e98f28ff"
 
+    
+  }}></div>
+  {/* نور نئون آبی زیرین */}
+<div style={{
+    position: "absolute",
+    width: "280px", // کمی کوچکتر یا مساوی قطر گردونه
+    height: "280px",
+    borderRadius: "20%",
+    backgroundColor: "rgba(0, 183, 255, 0.6)", // آبی نئونی نیمه‌شفاف
+    filter: "blur(80px)", // پخش شدن نور
+    boxShadow: "0 0 5px 5px rgba(0, 150, 255, 0.6)", // هاله بیرونی
+    zIndex: 1 // زیر گردونه قرار بگیرد
+  }} />
   {/* دایره اصلی که می‌چرخد */}
   <div style={{ 
     width: "100%", 
@@ -1302,6 +1361,7 @@ useEffect(() => {
     //  تصویر 'گردونه
     backgroundImage: "url('/spinwheel.png')", 
     backgroundSize: "cover",
+    zIndex: 2,
     backgroundPosition: "center"
   }}>
    
@@ -1338,6 +1398,39 @@ useEffect(() => {
     boxSizing: "border-box"
   }}>
     {/* انیمیشن حلقه‌های قرمز */}
+   {/* نوار راهنمای کد با ظهور سریع و محو شدن هماهنگ */}
+<div style={{
+  position: "absolute",
+  top: "100px",
+  width: "100%",
+  display: "flex",
+  justifyContent: "center",
+  gap: "15px",
+  zIndex: 20100
+}}>
+  {["circle", "right", "left", "up", "down"].map((symbolType, index) => (
+    <motion.div
+      key={index}
+      initial={{ opacity: 0, y: -10 }}
+      animate={{ 
+        // 0: شروع، 1: ظاهر شده، 1: ماندگار، 0: محو نهایی
+        opacity: [0, 1, 1, 0], 
+      }}
+      transition={{ 
+        // بازه‌های زمانی (بین 0 تا 1): ظهور سریع در 5% اول زمان کل
+        times: [0, 0.05, 0.85, 1], 
+        duration: 4, // کل زمان انیمیشن
+        delay: index * 0.65, // فاصله بین هر نماد (کمتر شد تا سریع‌تر بیایند)
+        ease: "easeOut"
+      }}
+      style={{
+        filter: "drop-shadow(0 0 8px rgba(255, 0, 0, 0.8))"
+      }}
+    >
+      {renderSymbol(symbolType)}
+    </motion.div>
+  ))}
+</div>
 {circlePositions.map((pos, index) => (
   <motion.div
     key={pos.id}
@@ -1378,14 +1471,12 @@ useEffect(() => {
     
 {/* دکمه در پایین صفحه */}
     <button 
-  onClick={() => {
-    // منطق کلیک شما
-  }}
+  onClick={() => setShowCodeListPage(true)} // باز کردن صفحه لیست کدها
   style={{
-    position: "absolute", // دکمه را از جریان عادی خارج کن
-    bottom: "40px",      // فاصله دقیق از پایین صفحه
-    left: "50%",         // انتقال به وسط
-    transform: "translateX(-50%)", // اصلاح مرکزیت دکمه
+    position: "absolute",
+    bottom: "40px",
+    left: "50%",
+    transform: "translateX(-50%)",
     width: "85%",
     padding: "12px",
     borderRadius: "12px",
@@ -1544,6 +1635,77 @@ useEffect(() => {
           <span style={{ position: "absolute" }}>NFT {index + 4}</span>
         </div>
       ))}
+    </div>
+  </div>
+)}
+{showCodeListPage && (
+  <div style={{
+    position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+    backgroundImage: "url('/codelibrary-back.jpg')", // تصویر زمینه جدید
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    zIndex: 21000, // بالاتر از همه صفحات قبلی
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+    padding: "20px"
+  }}>
+    {/* دکمه بازگشت */}
+    <div style={{ width: "100%", display: "flex", justifyContent: "flex-start" }}>
+      <button 
+        onClick={() => setShowCodeListPage(false)} 
+        style={{ background: "none", border: "none", cursor: "pointer" }}
+      >
+        <img src="/back-butt.png" style={{ width: "7px" }} alt="Back" />
+      </button>
+    </div>
+
+    {/* محتوا (فعلاً خالی برای کدهای آینده) */}
+    <div style={{ marginTop: "50px", textAlign: "center" }}>
+      <h2 style={{ color: "white", textShadow: "0 0 10px rgba(0,0,0,0.5)" }}>
+        CODE ARCHIVE
+      </h2>
+      <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "14px" }}>
+        Your discovered codes will appear here...
+      </p>
+    </div>
+  </div>
+)}
+{showFightPage && (
+  <div style={{
+    position: "fixed", 
+    top: 0, 
+    left: 0, 
+    width: "100%", 
+    height: "100%",
+    
+    // کدهای مربوط به پس‌زمینه تکرار شونده
+    backgroundImage: "url('/endles-1.jpg')",
+    backgroundRepeat: "repeat", // تکرار در هر دو جهت X و Y
+    backgroundSize: "50px", // اندازه هر بلوک تصویر (بسته به سلیقه تغییر بده)
+    backgroundColor: "#16181d", // رنگ رزرو اگر تصویر لود نشد
+    
+    zIndex: 9000, 
+    display: "flex", 
+    flexDirection: "column", 
+    alignItems: "center",
+    padding: "20px 20px 140px 20px",
+    overflowY: "auto", 
+    boxSizing: "border-box"
+  }}>
+    
+    {/* محتوای دکمه‌ها */}
+    <div style={{ width: "100%", maxWidth: "400px", display: "flex", flexDirection: "column" }}>
+      <FightButton text="INVITE A FRIEND TO FIGHT" color="#4a6fa5" textColor="#f0db4f" />
+      <FightButton text="RANDOM FIGHT" color="#2ecc71" textColor="#e74c3c" />
+      <FightButton text="MAKE A FIGHT" color="#f1c40f" textColor="#e84393" />
+      <FightButton text="DAILY LEAGUES" color="#e67e22" textColor="#2d3436" />
+      <FightButton text="CHAMPION" color="#e74c3c" textColor="white" fontSize="45px" />
+      
+      <div style={{ height: "40px" }} />
+      
+      <FightButton text="SHOW MY FIGHTS" color="#9b59b6" textColor="#2ecc71" />
+      <FightButton text="MAKE A LEAGUE" color="#ecf0f1" textColor="#34495e" />
     </div>
   </div>
 )}
