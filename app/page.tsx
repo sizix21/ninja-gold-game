@@ -50,6 +50,7 @@ const FightButton = ({ text, color, textColor, fontSize = "22px" }: FightBtnProp
 );
 export default function Home() {
   // --- States ---
+  const [showRankPage, setShowRankPage] = useState(false);
   const [showSquadPage, setShowSquadPage] = useState(false);
   const [showTaskPage, setShowTaskPage] = useState(false);// صفحه Task
   const [showFightPage, setShowFightPage] = useState(false);// Fight صفحه
@@ -829,6 +830,9 @@ useEffect(() => {
         if (label === "Squad") {
           setShowSquadPage(true);
         }
+        if (label === "Rank") {
+        setShowRankPage(true);
+        }
       }}
            style={{
             padding: "10px",
@@ -1180,6 +1184,7 @@ useEffect(() => {
   playSwitchSound();
         setShowTaskPage(false);
         setShowSquadPage(false);
+        setShowRankPage(false);
   // مدیریت نمایش صفحه Fight
   if (label === "Fight") {
     setShowFightPage(true);
@@ -1884,6 +1889,60 @@ useEffect(() => {
        <p style={{ color: "rgba(255,255,255,0.5)", marginTop: "20px" }}>
          Squad system is coming soon...
        </p>
+    </div>
+
+  </div>
+)}
+{showRankPage && (
+  <div style={{
+    position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+    backgroundImage: "url('/rank-back.jpg')",
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    zIndex: 500, 
+    display: "flex", flexDirection: "column", alignItems: "center",
+    padding: "20px 20px 140px 20px",
+    boxSizing: "border-box", overflowY: "auto"
+  }}>
+    
+    {/* هدر صفحه */}
+    <div style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+      <button onClick={() => setShowRankPage(false)} style={{ background: "none", border: "none", cursor: "pointer" }}>
+        <img src="/back-butt.png" style={{ width: "7px" }} alt="Back" />
+      </button>
+      <h1 style={{ color: "white", fontSize: "26px", fontWeight: "900", margin: 0, flex: 1, textAlign: "center", marginRight: "30px", textShadow: "2px 2px 10px rgba(0,0,0,0.8)" }}>
+        LEADERBOARD
+      </h1>
+    </div>
+
+    {/* کادر رتبه کاربر (نمونه) */}
+    <div style={{
+      width: "100%", maxWidth: "400px", background: "rgba(255, 255, 255, 0.1)",
+      backdropFilter: "blur(10px)", borderRadius: "15px", padding: "15px",
+      border: "1px solid rgba(255, 255, 255, 0.2)", marginBottom: "20px",
+      display: "flex", justifyContent: "space-between", alignItems: "center"
+    }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <span style={{ color: "#ffd700", fontWeight: "bold", fontSize: "20px" }}>#128</span>
+        <span style={{ color: "white" }}>Your Rank</span>
+      </div>
+      <span style={{ color: "white", fontWeight: "bold" }}>{(0).toLocaleString()} 🪙</span>
+    </div>
+
+    {/* لیست برترین‌ها (بصورت فرضی) */}
+    <div style={{ width: "100%", maxWidth: "400px", display: "flex", flexDirection: "column", gap: "10px" }}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <div key={i} style={{
+          width: "100%", background: "rgba(0, 0, 0, 0.5)", padding: "12px",
+          borderRadius: "12px", display: "flex", justifyContent: "space-between", alignItems: "center"
+        }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "15px" }}>
+            <span style={{ color: i <= 3 ? "#ffd700" : "#888", fontWeight: "bold" }}>{i}</span>
+            <span style={{ color: "white" }}>Player_{i}42</span>
+          </div>
+          <span style={{ color: "#4db8ff" }}>1.{6-i}M</span>
+        </div>
+      ))}
     </div>
 
   </div>
