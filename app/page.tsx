@@ -34,11 +34,11 @@ const wheelOptions = [
 export default function Home() {
   // --- States ---
   const circlePositions = [
-  { id: 1, top: "50%", left: "50%" }, // وسط
-  { id: 2, top: "50%", left: "80%" }, // راست
-  { id: 3, top: "50%", left: "20%" }, // چپ
-  { id: 4, top: "20%", left: "50%" }, // بالا
-  { id: 5, top: "80%", left: "50%" }, // پایین
+  { id: 1, top: "50vh", left: "50vw" }, // وسط دقیق گوشی
+  { id: 2, top: "50vh", left: "80vw" }, // راست
+  { id: 3, top: "50vh", left: "20vw" }, // چپ
+  { id: 4, top: "20vh", left: "50vw" }, // بالا
+  { id: 5, top: "80vh", left: "50vw" }, // پایین
 ];
   const [showLibraryPage, setShowLibraryPage] = useState(false);
   const [showNinjaCodePage, setShowNinjaCodePage] = useState(false);
@@ -1349,20 +1349,22 @@ useEffect(() => {
     transition={{ 
       duration: 0.8, 
       delay: index * 0.6, // فاصله زمانی بین هر حلقه
-      ease: "easeInOut" 
+      ease: "easeOut" 
     }}
     style={{
-      position: "fixed",
+      position: "fixed", // تغییر به fixed برای اطمینان از عدم وابستگی به بقیه المان‌ها
       top: pos.top,
       left: pos.left,
-      transform: "translate(-50%, -50%)",
-      width: "60px",
-      height: "60px",
+      // این خط حیاتی است: دقیقاً مرکز دایره را روی مختصات می‌گذارد
+      x: "-50%", 
+      y: "-50%",
+      width: "70px",
+      height: "70px",
       borderRadius: "50%",
-      border: "4px solid #ff0000", // حلقه قرمز
-      boxShadow: "0 0 15px #ff0000",
-      zIndex: 20001,
-      pointerEvents: "none" // که مانع کلیک نشود
+      border: "3px solid #ff0000",
+      boxShadow: "0 0 20px rgba(255, 0, 0, 0.7)",
+      zIndex: 20005,
+      pointerEvents: "none"
     }}
   />
 ))}
