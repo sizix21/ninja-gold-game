@@ -1,4 +1,11 @@
 "use client";
+import { TonConnectButton } from '@tonconnect/ui-react';
+
+// داخل بخش مربوط به نمایش Library
+<div style={{ marginTop: "20px" }}>
+  <TonConnectButton />
+</div>
+
 
 import { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -41,7 +48,7 @@ interface FightBtnProps {
 const FightButton = ({ text, color, textColor, fontSize }: { text: string, color: string, textColor: string, fontSize?: string }) => (
   <button style={{
     width: "100%",
-    padding: "15px 10px",
+    padding: "10px 10px",
     marginBottom: "12px",
     textShadow: "2px 2px 4px rgba(0, 0, 0, 0.33)",
     // تبدیل رنگ ورودی به حالتی که کمی شفاف باشد برای افکت شیشه‌ای
@@ -1475,7 +1482,7 @@ useEffect(() => {
         // بازه‌های زمانی (بین 0 تا 1): ظهور سریع در 5% اول زمان کل
         times: [0, 0.05, 0.85, 1], 
         duration: 4, // کل زمان انیمیشن
-        delay: index * 0.65, // فاصله بین هر نماد (کمتر شد تا سریع‌تر بیایند)
+        delay: 1+index * 0.65, // فاصله بین هر نماد (کمتر شد تا سریع‌تر بیایند)
         ease: "easeOut"
       }}
       style={{
@@ -1496,7 +1503,7 @@ useEffect(() => {
     }}
     transition={{ 
       duration: 0.8, 
-      delay: index * 0.6, // فاصله زمانی بین هر حلقه
+      delay: 1+index * 0.6, // فاصله زمانی بین هر حلقه
       ease: "easeOut" 
     }}
     style={{
@@ -1529,15 +1536,15 @@ useEffect(() => {
   onClick={() => setShowCodeListPage(true)} // باز کردن صفحه لیست کدها
   style={{
     position: "absolute",
-    bottom: "40px",
+    bottom: "30px",
     left: "50%",
     transform: "translateX(-50%)",
-    width: "85%",
+    width: "50%",
     padding: "12px",
     borderRadius: "12px",
-    background: "#36363681",
+    background: "#2928289f",
     border: "1px solid #9b9b9bc0",
-    backdropFilter: "blur(8px)",
+    backdropFilter: "blur(2px)",
     WebkitBackdropFilter: "blur(8px)",
     color: "white",
     cursor: "pointer",
@@ -1545,10 +1552,7 @@ useEffect(() => {
   }}
 >
   <div style={{ fontSize: "18px", fontWeight: "bold" }}>Code Library</div>
-  <div style={{ fontSize: "13px", color: "#ffd700", fontWeight: "normal" }}>
-    Enter Code to Claim Reward
-  </div>
-</button>
+  </button>
   </div>
 )}
  {floatingNumbers.map(num => (
@@ -1580,52 +1584,70 @@ useEffect(() => {
     }
   `}</style>
   {showLibraryPage && (
-  <div style={{
+<div style={{
     position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
-    backgroundImage: "url('/closet-back.jpg')", // تصویر پس‌زمینه از فایل شما
+    backgroundImage: "url('/closet-back.jpg')", // بک‌گراند خودت را بگذار
     backgroundSize: "cover",
-    backgroundPosition: "center",
-    zIndex: 100, // لایه‌ای بالاتر از محتوای اصلی اما پایین‌تر از فوتر
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "flex-start", // شروع از بالا
-    paddingBottom: "80px", // فضای خالی برای فوتر
-    boxSizing: "border-box", // padding به width/height اضافه نشود
-    overflowY: "auto" // اسکرول برای محتوای بیشتر
+    zIndex: 500,
+    display: "flex", flexDirection: "column", alignItems: "center",
+    padding: "20px"
   }}>
 
-    {/* Header با دکمه SHOP و دکمه Back */}
-    <div style={{ 
-      width: "100%", 
-      display: "flex", 
-      justifyContent: "flex-end", 
-      alignItems: "center", 
-      padding: "20px", 
-      boxSizing: "border-box" 
-    }}>
-      
+    
+    {/* Header دو ردیفه */}
+<div style={{
+  width: "100%",
+  display: "flex",
+  flexDirection: "column", // المان‌ها را زیر هم می‌چیند
+  alignItems: "center",
+  marginBottom: "30px",
+  gap: "20px" // فاصله بین ردیف عنوان و ردیف دکمه‌ها
+}}>
+      {/* نوشته لایبرری (وسط و بولد) */}
+      <h1 style={{
+        flex: 1,
+        textAlign: "center",
+        color: "white",
+        fontSize: "24px",
+        fontWeight: "900", // کاملاً بولد
+        margin: 0 ,
+        textShadow: "0 2px 10px rgba(0,0,0,0.5)"
+      }}>
+        LIBRARY
+      </h1>
 
-      {/* دکمه SHOP در بالا سمت راست */}
-      <button 
-        onClick={() => alert("Shop will open soon!")} // فانکشن موقتی
-        style={{
-          backgroundColor: "#ffc107", // رنگ طلایی/زرد
-          color: "white",
-          padding: "10px 20px",
-          borderRadius: "8px",
-          border: "none",
-          fontWeight: "bold",
-          cursor: "pointer",
-          fontSize: "16px"
-        }}
-      >
-        SHOP
-      </button>
+      {/* ردیف دوم: دکمه‌های والت و شاپ در یک خط */}
+  <div style={{
+    width: "100%",
+    display: "flex",
+    justifyContent: "space-between", // یکی چپ، یکی راست
+    alignItems: "center",
+    padding: "0 10px"
+  }}>
+    
+    {/* دکمه والت سمت چپ */}
+    <div style={{ transform: "scale(0.9)" }}> {/* کمی کوچک‌تر برای هماهنگی */}
+      <TonConnectButton />
     </div>
 
-    {/* عنوان صفحه */}
-    <h2 style={{ color: "white", marginBottom: "30px", fontSize: "24px" }}>My NFTs</h2>
+    {/* دکمه شاپ سمت راست */}
+    <button 
+      onClick={() => alert("Shop will open soon!")}
+      style={{
+        backgroundColor: "#ffc107",
+        color: "black",
+        padding: "10px 22px",
+        borderRadius: "14px",
+        fontWeight: "bold",
+        border: "none",
+        fontSize: "14px",
+        boxShadow: "0 4px 10px rgba(255, 193, 7, 0.4)"
+      }}
+    >
+      SHOP
+    </button>
+      </div>
+    </div>
 
     {/* بخش بالایی: ۳ ستون */}
     <div style={{ 
@@ -1655,7 +1677,18 @@ useEffect(() => {
           }}
         >
           {/* اگر تصویر NFT داشتی، اینجا قرار می‌گیرد */}
-          <span style={{ position: "absolute" }}>NFT {index + 1}</span>
+          <span style={{ 
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)", // این خط جادو می‌کند و متن را دقیقاً وسط می‌برد
+  color: "rgba(255,255,255,0.7)",
+  fontSize: "12px",
+  fontWeight: "bold",
+  whiteSpace: "nowrap" // جلوگیری از شکستن خط
+}}>
+  NFT {index + 1}
+</span>
         </div>
       ))}
     </div>
@@ -1687,7 +1720,18 @@ useEffect(() => {
             position: "relative"
           }}
         >
-          <span style={{ position: "absolute" }}>NFT {index + 4}</span>
+          <span style={{ 
+  position: "absolute",
+  top: "50%",
+  left: "50%",
+  transform: "translate(-50%, -50%)", // این خط جادو می‌کند و متن را دقیقاً وسط می‌برد
+  color: "rgba(255,255,255,0.7)",
+  fontSize: "12px",
+  fontWeight: "bold",
+  whiteSpace: "nowrap" // جلوگیری از شکستن خط
+}}>
+  NFT {index + 1}
+</span>
         </div>
       ))}
     </div>
@@ -1734,8 +1778,8 @@ useEffect(() => {
     width: "100%", 
     height: "100%",
     
-    // کدهای مربوط به پس‌زمینه تکرار شونده
-    backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.6)), url('/fight-back.jpg')`,
+    // کدهای مربوط به پس‌زمینه ه
+    backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.4)), url('/fight-back.jpg')`,
     backgroundSize: "cover",
     backgroundPosition: "center",
     backgroundColor: "#16181d", // رنگ رزرو اگر تصویر لود نشد
@@ -1760,14 +1804,14 @@ useEffect(() => {
        }}>
       <FightButton text="INVITE A FRIEND TO FIGHT" color="#4a6fa5" textColor="#f0db4f" />
       <FightButton text="RANDOM FIGHT" color="#2ecc71" textColor="#e26557ff" fontSize="20px" />
-      <FightButton text="MAKE A FIGHT" color="#f1c40f" textColor="#eb1f81ff" fontSize="25px" />
+      <FightButton text="MAKE A FIGHT" color="#f1c40f" textColor="#e7549bff" fontSize="25px" />
       <FightButton text="DAILY LEAGUES" color="#e67e22" textColor="#82989eff" fontSize="20px"/>
       <FightButton text="CHAMPION" color="#e74c3c" textColor="white" fontSize="45px" />
       
       <div style={{ height: "40px" }} />
       
       <FightButton text="SHOW MY FIGHTS" color="#9b59b6" textColor="#2ecc71" />
-      <FightButton text="MAKE A LEAGUE" color="#17ac84ff" textColor="#77d4e0ff" fontSize="30px"/>
+      <FightButton text="MAKE A LEAGUE" color="#ffffff" textColor="#77d4e0ff"/>
     </div>
   </div>
 )}
