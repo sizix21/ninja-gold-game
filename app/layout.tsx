@@ -1,3 +1,5 @@
+'use client';
+import { TonConnectUIProvider } from '@tonconnect/ui-react';
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -12,12 +14,12 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
-
+/*
 export const metadata: Metadata = {
   title: "Ninja Potato",
   description: "Ninja Potato Telegram Game",
 };
-
+*/
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -33,7 +35,10 @@ export default function RootLayout({
         />
       </head>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
-        {children}
+        {/* اضافه کردن پرووایدر والت دور تا دور فرزندان */}
+        <TonConnectUIProvider manifestUrl="https://ton-connect.github.io/demo-dapp-with-react-ui/tonconnect-manifest.json">
+  {children}
+</TonConnectUIProvider>
       </body>
     </html>
   );
