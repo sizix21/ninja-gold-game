@@ -38,18 +38,51 @@ interface FightBtnProps {
   fontSize?: string;
 }
 
-const FightButton = ({ text, color, textColor, fontSize = "22px" }: FightBtnProps) => (
+const FightButton = ({ text, color, textColor, fontSize }: { text: string, color: string, textColor: string, fontSize?: string }) => (
   <button style={{
-    width: "100%", padding: "15px 10px", backgroundColor: color, color: textColor,
-    borderRadius: "15px", border: "none", fontWeight: "900", fontSize: fontSize,
-    textAlign: "center", boxShadow: "0 5px 0 rgba(0,0,0,0.3)", cursor: "pointer",
-    textTransform: "uppercase", marginBottom: "8px"
+    width: "100%",
+    padding: "15px 10px",
+    marginBottom: "12px",
+    textShadow: "2px 2px 4px rgba(0, 0, 0, 0.33)",
+    // تبدیل رنگ ورودی به حالتی که کمی شفاف باشد برای افکت شیشه‌ای
+    backgroundColor: `${color}90`,
+    // افکت مات شدن پشت دکمه
+    backdropFilter: "blur(10px)",
+    WebkitBackdropFilter: "blur(10px)",
+    // بوردر شیشه‌ای و درخشان
+    border: `1px solid ${color}88`,
+    borderRadius: "15px",
+    // تنظیمات متن
+    color: textColor,
+    fontSize: fontSize || "16px",
+    fontWeight: "bold",
+    textTransform: "uppercase",
+    cursor: "pointer",
+    // سایه برای عمق دادن به حالت شیشه‌ای
+    boxShadow: "0 4px 15px rgba(0,0,0,0.2)",
+    // افکت‌های بصری
+    transition: "all 0.3s ease",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    textAlign: "center"
   }}>
     {text}
   </button>
 );
 export default function Home() {
   // --- States ---
+  // مربوط به صفحه استیت
+const statBoxStyle: React.CSSProperties = {
+  background: "rgba(255, 255, 255, 0.05)",
+  padding: "20px",
+  borderRadius: "15px",
+  display: "flex",
+  flexDirection: "column", 
+  alignItems: "center",
+  border: "1px solid rgba(255, 255, 255, 0.1)"
+};
+  const [showStatePage, setShowStatePage] = useState(false);
   const [showRankPage, setShowRankPage] = useState(false);
   const [showSquadPage, setShowSquadPage] = useState(false);
   const [showTaskPage, setShowTaskPage] = useState(false);// صفحه Task
@@ -700,6 +733,11 @@ useEffect(() => {
 
 {activeTab === "Boost" && (
   <div style={{ 
+    position: "fixed",
+    top: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
     flex: 1, 
     display: "flex", 
     flexDirection: "column", 
@@ -710,16 +748,15 @@ useEffect(() => {
     backgroundSize: "cover",
     backgroundPosition: "center",
     overflowY: "auto",
-    paddingBottom: "100px",
-    width: "100%",
-    height: "100vh"
+    paddingBottom: "100px"
+    
   }}>
     {/* دکمه بازگشت  */}
 <button 
   onClick={() => setActiveTab("Tap")} // یا هر تبی که می‌خواهی به آن برگردد
   style={{ 
     position: "absolute", 
-    top: "20px", 
+    top: "21px", 
     left: "20px", 
     background: "none", 
     border: "none", 
@@ -832,6 +869,9 @@ useEffect(() => {
         }
         if (label === "Rank") {
         setShowRankPage(true);
+        }
+        if (label === "State") {
+        setShowStatePage(true);
         }
       }}
            style={{
@@ -1185,6 +1225,7 @@ useEffect(() => {
         setShowTaskPage(false);
         setShowSquadPage(false);
         setShowRankPage(false);
+        setShowStatePage(false);
   // مدیریت نمایش صفحه Fight
   if (label === "Fight") {
     setShowFightPage(true);
@@ -1694,9 +1735,9 @@ useEffect(() => {
     height: "100%",
     
     // کدهای مربوط به پس‌زمینه تکرار شونده
-    backgroundImage: "url('/endles-1.jpg')",
-    backgroundRepeat: "repeat", // تکرار در هر دو جهت X و Y
-    backgroundSize: "50px", // اندازه هر بلوک تصویر (بسته به سلیقه تغییر بده)
+    backgroundImage: `linear-gradient(to bottom, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.6)), url('/fight-back.jpg')`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
     backgroundColor: "#16181d", // رنگ رزرو اگر تصویر لود نشد
     
     zIndex: 9000, 
@@ -1709,17 +1750,24 @@ useEffect(() => {
   }}>
     
     {/* محتوای دکمه‌ها */}
-    <div style={{ width: "100%", maxWidth: "400px", display: "flex", flexDirection: "column" }}>
+    <div style={{
+       width: "90%", 
+       maxWidth: "400px", 
+       display: "flex", 
+       flexDirection: "column",
+       marginTop: "50px"
+       
+       }}>
       <FightButton text="INVITE A FRIEND TO FIGHT" color="#4a6fa5" textColor="#f0db4f" />
-      <FightButton text="RANDOM FIGHT" color="#2ecc71" textColor="#e74c3c" />
-      <FightButton text="MAKE A FIGHT" color="#f1c40f" textColor="#e84393" />
-      <FightButton text="DAILY LEAGUES" color="#e67e22" textColor="#2d3436" />
+      <FightButton text="RANDOM FIGHT" color="#2ecc71" textColor="#e26557ff" fontSize="20px" />
+      <FightButton text="MAKE A FIGHT" color="#f1c40f" textColor="#eb1f81ff" fontSize="25px" />
+      <FightButton text="DAILY LEAGUES" color="#e67e22" textColor="#82989eff" fontSize="20px"/>
       <FightButton text="CHAMPION" color="#e74c3c" textColor="white" fontSize="45px" />
       
       <div style={{ height: "40px" }} />
       
       <FightButton text="SHOW MY FIGHTS" color="#9b59b6" textColor="#2ecc71" />
-      <FightButton text="MAKE A LEAGUE" color="#ecf0f1" textColor="#34495e" />
+      <FightButton text="MAKE A LEAGUE" color="#17ac84ff" textColor="#77d4e0ff" fontSize="30px"/>
     </div>
   </div>
 )}
@@ -1947,6 +1995,49 @@ useEffect(() => {
 
   </div>
 )}
+{showStatePage && (
+  <div style={{
+    position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
+    backgroundColor: "#1a1c23", // پس‌زمینه تیره
+    zIndex: 1003, 
+    display: "flex", flexDirection: "column", alignItems: "center",
+    padding: "20px 20px 140px 20px",
+    boxSizing: "border-box", overflowY: "auto"
+  }}>
+    
+    {/* هدر */}
+    <div style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "20px" }}>
+      <button onClick={() => setShowStatePage(false)} style={{ background: "none", border: "none", cursor: "pointer" }}>
+        <img src="/back-butt.png" style={{ width: "7px" }} alt="Back" />
+      </button>
+      <h1 style={{ color: "white", fontSize: "26px", fontWeight: "900", margin: 0, flex: 1, textAlign: "center", marginRight: "30px" }}>
+        STATE
+      </h1>
+    </div>
+
+    {/* کارت‌های اطلاعاتی نمونه */}
+    <div style={{ width: "100%", maxWidth: "400px", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "15px" }}>
+      <div style={statBoxStyle}>
+        <span style={{ color: "#888", fontSize: "14px" }}>Total Taps</span>
+        <span style={{ color: "white", fontSize: "20px", fontWeight: "bold" }}>1.2M</span>
+      </div>
+      <div style={statBoxStyle}>
+        <span style={{ color: "#888", fontSize: "14px" }}>Fights Won</span>
+        <span style={{ color: "#2ecc71", fontSize: "20px", fontWeight: "bold" }}>42</span>
+      </div>
+      <div style={statBoxStyle}>
+        <span style={{ color: "#888", fontSize: "14px" }}>Friends Invited</span>
+        <span style={{ color: "#f1c40f", fontSize: "20px", fontWeight: "bold" }}>12</span>
+      </div>
+      <div style={statBoxStyle}>
+        <span style={{ color: "#888", fontSize: "14px" }}>Daily Streak</span>
+        <span style={{ color: "#e74c3c", fontSize: "20px", fontWeight: "bold" }}>5 Days</span>
+      </div>
+    </div>
+  </div>
+)}
+
+
 </div>
     
   );
