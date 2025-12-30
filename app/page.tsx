@@ -535,11 +535,12 @@ useEffect(() => {
           {/* Main Container with Swipe */}
           <motion.div 
             key={activeTab}
+            drag="x"
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0.1}
             dragMomentum={false} 
             onDragEnd={(e, info) => {
-              const threshold = 40; 
+              const threshold = 60; 
               if (info.offset.x < -threshold) handleSwipe("left");
               if (info.offset.x > threshold) handleSwipe("right");
             }}
@@ -548,7 +549,7 @@ useEffect(() => {
               display: "flex", 
               flexDirection: "column", 
               width: "100%",
-              touchAction: "pan-y" 
+              touchAction: "none" 
             }}
           >
 {/* Tap Tab تپ*/}
