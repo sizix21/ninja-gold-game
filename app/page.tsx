@@ -327,14 +327,14 @@ useEffect(() => {
       alert("در حال حاضر یک سالاد در حال پخت است!");
       return;
     }
-    if (greenCoins >= 1000 && redCoins >= 500 && orangeCoins >= 100) {
-      setGreenCoins(prev => prev - 1000);
+      if (Number(greenCoins) >= 1000 && Number(redCoins) >= 500 && Number(orangeCoins) >= 100) {      setGreenCoins(prev => prev - 1000);
       setRedCoins(prev => prev - 500);
       setOrangeCoins(prev => prev - 100);
       setIsMakingSalad(true);
       setSaladStartTime(Date.now());
     } else {
       alert("سکه کافی ندارید!");
+      return;
     }
   };
 useEffect(() => {
@@ -1736,7 +1736,7 @@ useEffect(() => {
         <div style={{ marginTop: "40px", display: "flex", flexDirection: "column", alignItems: "center" }}>
   <img 
     src="/salad-token.png"
-    onClick={() => setIsMakingSalad(true)} 
+    onClick={handleStartSalad} 
     style={{  width: "120px", cursor: "pointer", filter: "drop-shadow(0px 8px 10px rgba(0,0,0,0.4))", transform: isMakingSalad ? "scale(1)" : "scale(1.1)",  transition: "0.3s"  }}
   />
 
