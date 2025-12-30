@@ -550,7 +550,7 @@ useEffect(() => {
               display: "flex", 
               flexDirection: "column", 
               width: "100%",
-              touchAction: "none",
+              touchAction: "pan-y",
               x: 0
             }}
           >
