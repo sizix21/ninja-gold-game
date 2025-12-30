@@ -537,7 +537,7 @@ useEffect(() => {
             key={activeTab}
             drag="x"
             dragConstraints={{ left: 0, right: 0 }}
-            dragElastic={0.1}
+            dragElastic={0}
             dragMomentum={false} 
             onDragEnd={(e, info) => {
               const threshold = 60; 
