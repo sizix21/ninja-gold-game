@@ -82,7 +82,7 @@ const FightButton = ({ text, color, textColor, fontSize }: { text: string, color
 );
 export default function Home() {
   // --- States ---
-  // مقادیر ممکن: 'home', 'library', 'fight', 'shop'
+const [activeStatsSection, setActiveStatsSection] = useState<string | null>(null);  // مقادیر ممکن: 'home', 'library', 'fight', 'shop'
   const [activePage, setActivePage] = useState('home');
 
   const [isMakingSalad, setIsMakingSalad] = useState(false);
@@ -1042,7 +1042,7 @@ useEffect(() => {
     <div style={{ flex: 1 }} />
     {/* دکمه‌های شبکه‌ای (منوهای فرعی) */}
     <div style={{  display: "grid",  gridTemplateColumns: "repeat(3, 1fr)",  gap: "10px",  width: "90%", maxWidth: "400px", marginBottom: "20px"   }}>
-      {["Daily", "Task", "Rank", "Squad", "State"].map((label, index) => (
+      {["Daily", "Task", "Rank", "Squad", "Stats"].map((label, index) => (
         <button
           key={index} 
           onClick={() => setActiveTab(label)} 
@@ -1067,7 +1067,6 @@ useEffect(() => {
         <img src="/back-butt.png" style={{ width: "7px" }} />
       </button>
       <div style={{ flex: 1, textAlign: "center" }}>
-        <div style={{ fontSize: "12px", fontWeight: "bold", opacity: 0.7, letterSpacing: "1px" }}>NINJA POTATO</div>
         <h2 style={{ margin: 0, fontSize: "24px", fontWeight: "900", textShadow: "0 2px 10px rgba(0,0,0,0.5)" }}>Daily Rewards</h2>
       </div>
       <div style={{ width: "30px" }}></div> 
@@ -1081,10 +1080,7 @@ useEffect(() => {
         {/* دکمه Spin Wheel */}
         <div 
           onClick={() => setActiveTab("Spin")} // هماهنگ با سیستم تب‌ها
-          style={{   width: "90%", padding: "10px", borderRadius: "15px",  background: "rgba(54, 54, 54, 0.7)",  border: canSpin ? "1px solid #4CAF50" : "1px solid rgba(255,255,255,0.2)",
-            backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)",
-            textAlign: "center", cursor: "pointer"
-          }}
+          style={{   width: "90%", padding: "10px", borderRadius: "15px",   background: "rgba(54, 54, 54, 0.7)",   border: "1px solid rgba(255,255,255,0.2)",  backdropFilter: "blur(2px)",  textAlign: "center", cursor: "pointer"  }}
         >
           <div style={{ fontSize: "18px", fontWeight: "bold" }}>🎡 Spin Wheel</div>
           <div style={{ fontSize: "13px", color: canSpin ? "#4CAF50" : "#ffd700", fontWeight: "bold", marginTop: "4px" }}>
@@ -1095,7 +1091,7 @@ useEffect(() => {
         {/* دکمه Daily Ninja Code */}
         <div 
           onClick={() => setActiveTab("NinjaCode")} 
-          style={{   width: "90%", padding: "10px", borderRadius: "15px",   background: "rgba(54, 54, 54, 0.7)",   border: "1px solid rgba(255,255,255,0.2)",  backdropFilter: "blur(10px)",  textAlign: "center", cursor: "pointer"  }}
+          style={{   width: "90%", padding: "10px", borderRadius: "15px",   background: "rgba(54, 54, 54, 0.7)",   border: "1px solid rgba(255,255,255,0.2)",  backdropFilter: "blur(2px)",  textAlign: "center", cursor: "pointer"  }}
         >
           <div style={{ fontSize: "18px", fontWeight: "bold" }}>㊙️ Daily Ninja Code</div>
           <div style={{ fontSize: "13px", color: "#ffd700", marginTop: "4px" }}>Enter Code to Claim Reward</div>
@@ -1107,7 +1103,7 @@ useEffect(() => {
         display: "grid", 
         gridTemplateColumns: "repeat(4, 1fr)", // تغییر به ۴ ستون برای نمایش بهتر در موبایل
         gap: "15px", 
-        paddingBottom: "100px" 
+        padding: "0 25px" 
       }}>
         {[...Array(14)].map((_, i) => {
           const dayNumber = i + 1;
@@ -1158,18 +1154,11 @@ useEffect(() => {
       </button>
     </div>
         <h1 style={{ 
-  position: "absolute",
-  top: "40px",
-  left: 0,
-  right: 0,
-  color: "white", 
-  fontSize: "24px",
-  fontWeight: "900", 
-  textAlign: "center", 
+  position: "absolute", top: "40px", left: 0,
+  right: 0, color: "white", fontSize: "24px",
+  fontWeight: "900",  textAlign: "center", 
   textShadow: "0 4px 15px rgba(0,0,0,0.8)",
-  letterSpacing: "2px",
-  zIndex: 10,
-  pointerEvents: "none"
+  letterSpacing: "2px", zIndex: 10, pointerEvents: "none"
 }}>
   SPIN WHEEL
 </h1>
@@ -1252,17 +1241,26 @@ useEffect(() => {
     ))}
 
     {/* محتوای وسط (عنوان صفحه) */}
+         <h1 style={{ 
+  position: "absolute", top: "40px", left: 0,
+  right: 0, color: "white", fontSize: "24px",
+  fontWeight: "900",  textAlign: "center", 
+  textShadow: "0 4px 15px rgba(0,0,0,0.8)",
+  letterSpacing: "2px", zIndex: 10, pointerEvents: "none"
+}}>
+  NINJA CODE
+</h1>
+
     <div style={{ marginTop: "100px", textAlign: "center", zIndex: 10 }}>
-        <h2 style={{ color: "white", fontSize: "22px", fontWeight: "900", textShadow: "0 0 15px red" }}>NINJA SENSE</h2>
-        <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "12px" }}>Follow the pattern to unlock</p>
+        <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "12px", textShadow: "0 0 15px red" }}>FOLLOW THE PATTERNS FOR MORE LETHAL STRIKES</p>
     </div>
 
     {/* دکمه Code Library در پایین صفحه */}
     <button 
       onClick={() => setActiveTab("CodeList")} // تغییر به سیستم جدید
-      style={{ width: "60%", padding: "15px", borderRadius: "15px", background: "rgba(41, 40, 40, 0.8)",  border: "1px solid rgba(255,255,255,0.2)", backdropFilter: "blur(10px)",  WebkitBackdropFilter: "blur(10px)",  color: "white", cursor: "pointer",  textAlign: "center",  boxShadow: "0 4px 15px rgba(0,0,0,0.3)", zIndex: 20100 }}
+      style={{ width: "60%", padding: "15px", borderRadius: "15px", background: "rgba(41, 40, 40, 0.8)",  border: "1px solid rgba(255,255,255,0.2)", backdropFilter: "blur(2px)",  WebkitBackdropFilter: "blur(10px)",  color: "white", cursor: "pointer",  textAlign: "center",  boxShadow: "0 4px 15px rgba(0,0,0,0.3)", zIndex: 20100 }}
     >
-      <div style={{ fontSize: "16px", fontWeight: "bold" }}>📜 Code Library</div>
+      <div style={{ fontSize: "16px", fontWeight: "bold" }}>Code Library</div>
     </button>
   </div>
 )} {/* پایان نینجا کد */}
@@ -1295,48 +1293,30 @@ useEffect(() => {
 {/* Task Page - Unified System */}
 {activeTab === "Task" && (
   <div style={{
-    position: "fixed", 
-    top: 0, 
-    left: 0, 
-    width: "100%", 
-    height: "100%",
+    position: "fixed", top: 0, left: 0, width: "100%", height: "100%",
     backgroundImage: "linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.6)), url('/task-back.jpg')", 
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    zIndex: 2010, 
-    display: "flex", 
-    flexDirection: "column", 
-    alignItems: "center",
-    padding: "20px 20px 140px 20px", // پدینگ پایین برای نرفتن زیر منو
+    backgroundSize: "cover", backgroundPosition: "center", zIndex: 2010, 
+    display: "flex", flexDirection: "column", alignItems: "center",
+    padding: "20px 20px 100px 50px", // پدینگ پایین برای نرفتن زیر منو
     boxSizing: "border-box"
   }}>
     
     {/* نوار بالایی: دکمه بازگشت و عنوان */}
     <div style={{ 
-      width: "100%", 
-      display: "flex", 
-      alignItems: "center", 
-      justifyContent: "space-between",
-      marginBottom: "20px",
-      marginTop: "10px"
+      width: "100%", display: "flex", alignItems: "center", 
+      justifyContent: "space-between", marginBottom: "20px",  marginTop: "10px"
     }}>
       <button 
-        onClick={() => setActiveTab("Boost")} // بازگشت به منوی بوست
+        onClick={() => setActiveTab("Boost")} 
         style={{ background: "none", border: "none", cursor: "pointer", padding: "10px" }}
       >
         <img src="/back-butt.png" style={{ width: "7px" }} alt="Back" />
       </button>
       
       <h1 style={{ 
-        color: "white", 
-        fontSize: "24px", 
-        fontWeight: "900", 
-        margin: 0, 
-        flex: 1, 
-        textAlign: "center", 
-        marginRight: "30px",
-        textShadow: "0 2px 10px rgba(0,0,0,0.8)",
-        letterSpacing: "1px"
+        color: "white",  fontSize: "24px", fontWeight: "900", 
+        margin: 0,  flex: 1, textAlign: "center", marginRight: "30px",
+        textShadow: "0 2px 10px rgba(0,0,0,0.8)",  letterSpacing: "1px"
       }}>
         TASKS
       </h1>
@@ -1344,22 +1324,16 @@ useEffect(() => {
 
     {/* بخش نمایش سکه‌های قرمز (Red Coins) */}
     <div style={{
-      display: "flex",
-      alignItems: "center",
-      gap: "10px",
+      display: "flex", alignItems: "center", gap: "10px",
       background: "rgba(0, 0, 0, 0.75)",
-      padding: "10px 25px",
-      borderRadius: "25px",
+      padding: "5px 25px", borderRadius: "25px",
       border: "1px solid rgba(255, 0, 0, 0.4)",
-      marginBottom: "30px",
-      backdropFilter: "blur(10px)",
+      marginBottom: "15px", backdropFilter: "blur(10px)",
       boxShadow: "0 4px 15px rgba(255, 0, 0, 0.2)"
     }}>
       <img src="/currency-r.png" style={{ width: "22px", height: "22px" }} alt="Red Coin" />
       <span style={{ 
-        color: "#ffffff", 
-        fontSize: "22px", 
-        fontWeight: "900",
+        color: "#ffffff", fontSize: "18px",  fontWeight: "900",
         textShadow: "0 0 8px rgba(255, 0, 0, 0.6)" 
       }}>
         {redCoins?.toLocaleString() || 0}
@@ -1369,29 +1343,90 @@ useEffect(() => {
     {/* لیست تسک‌ها */}
     <div style={{ 
       width: "100%", 
-      maxWidth: "400px",
+      maxWidth: "700px",
       display: "flex", 
       flexDirection: "column", 
       gap: "12px",
       overflowY: "auto",
       paddingBottom: "20px"
     }}>
-      {/* محفظه خالی برای تسک‌های آینده */}
-      <div style={{
-        background: "rgba(255, 255, 255, 0.05)",
-        borderRadius: "20px",
-        padding: "40px 20px",
-        border: "1px solid rgba(255, 255, 255, 0.1)",
-        textAlign: "center",
-        backdropFilter: "blur(5px)"
-      }}>
-        <div style={{ fontSize: "40px", marginBottom: "10px" }}>📜</div>
-        <p style={{ color: "white", fontSize: "16px", fontWeight: "bold", margin: "0" }}>
-          New Tasks Loading...
-        </p>
-        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "13px", marginTop: "10px" }}>
-          Complete daily challenges to earn more Red Coins!
-        </p>
+      {/* محفظه تسک ها*/}
+      <div style={{ 
+       padding: "20px", 
+       paddingTop: "10px",
+       border: "1px solid rgba(255, 255, 255, 0.15)", 
+       display: "flex", 
+       flexDirection: "column", 
+       gap: "12px",
+       height: "100%",
+       overflowY: "auto", // برای اینکه لیست ۳۰ تایی اسکرول شود
+       paddingBottom: "10px",
+       backdropFilter: "blur(5px)"
+       }}>
+        {/* ساخت ۳۰ تسک به صورت داینامیک */}
+    {Array.from({ length: 30 }).map((_, index) => {
+      // انتخاب رندوم شبکه اجتماعی و قیمت
+      const platforms = [
+        { name: "Telegram", icon: "✈️", color: "#24A1DE" },
+        { name: "YouTube", icon: "📺", color: "#FF0000" },
+        { name: "Instagram", icon: "📸", color: "#E1306C" },
+        { name: "X (Twitter)", icon: "X", color: "#000000" },
+        { name: "TikTok", icon: "🎵", color: "#00f2ea" }
+      ];
+      const platform = platforms[index % platforms.length];
+      const reward = Math.floor(Math.random() * (35000 - 10000 + 1)) + 10000;
+
+      return (
+        <div 
+          key={index}
+          style={{
+            width: "100%",
+            background: "rgba(255, 0, 0, 0.08)",
+            backdropFilter: "blur(10px)",
+            borderRadius: "15px",
+            padding: "6px 10px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            border: "1px solid rgba(255, 255, 255, 0.1)",
+            cursor: "pointer"
+          }}
+        >
+          {/* سمت چپ: آیکون و نام کانال */}
+          <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+            <div style={{ 
+              fontSize: "24px", 
+              width: "40px", 
+              height: "40px", 
+              display: "flex", 
+              alignItems: "center", 
+              justifyContent: "center",
+              background: "rgba(0,0,0,0.2)",
+              borderRadius: "10px"
+            }}>
+              {platform.icon}
+            </div>
+            <div style={{ display: "flex", flexDirection: "column" }}>
+              <span style={{ color: "white", fontWeight: "bold", fontSize: "14px" }}>
+                Join {platform.name} Channel
+              </span>
+              <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "11px" }}>
+                @{platform.name.toLowerCase()}_page_{index + 1}
+              </span>
+            </div>
+          </div>
+
+          {/* سمت راست: میزان دستمزد */}
+          <div style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+            <span style={{ color: "#ffffffff", fontWeight: "900", fontSize: "14px" }}>
+              +{reward.toLocaleString()}
+            </span>
+            <img src="/currency-r.png" style={{ width: "18px" }} alt="Red Coin" />
+          </div>
+        </div>
+      );
+    })}
+        
       </div>
     </div>
 
@@ -1400,31 +1435,17 @@ useEffect(() => {
 {/* صفحه اسکواد */}
 {activeTab === "Squad" && (
   <div style={{
-    position: "fixed", 
-    top: 0, 
-    left: 0, 
-    width: "100%", 
-    height: "100%",
+    position: "fixed",  top: 0,  left: 0, width: "100%", height: "100%",
     backgroundImage: "linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.6)), url('/squad-back.jpg')",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    zIndex: 2000, 
-    display: "flex", 
-    flexDirection: "column", 
-    alignItems: "center",
-    padding: "20px 20px 140px 20px",
-    boxSizing: "border-box",
-    overflowY: "auto"
+    backgroundSize: "cover", backgroundPosition: "center", zIndex: 2000, 
+    display: "flex", flexDirection: "column", alignItems: "center",
+    padding: "20px 20px 140px 20px", boxSizing: "border-box", overflowY: "auto"
   }}>
     
     {/* نوار بالایی: دکمه بازگشت و عنوان */}
     <div style={{ 
-      width: "100%", 
-      display: "flex", 
-      alignItems: "center", 
-      justifyContent: "space-between",
-      marginBottom: "20px",
-      marginTop: "10px"
+      width: "100%", display: "flex", alignItems: "center", 
+      justifyContent: "space-between",  marginBottom: "20px",  marginTop: "10px"
     }}>
       <button 
         onClick={() => setActiveTab("Boost")} // بازگشت به منوی بوست
@@ -1434,15 +1455,9 @@ useEffect(() => {
       </button>
       
       <h1 style={{ 
-        color: "white", 
-        fontSize: "24px", 
-        fontWeight: "900", 
-        margin: 0, 
-        flex: 1, 
-        textAlign: "center", 
-        marginRight: "30px",
-        textShadow: "2px 2px 10px rgba(0,0,0,0.8)",
-        letterSpacing: "1px"
+        color: "white",  fontSize: "24px", fontWeight: "900", 
+        margin: 0,  flex: 1, textAlign: "center", marginRight: "30px",
+        textShadow: "2px 2px 10px rgba(0,0,0,0.8)", letterSpacing: "1px"
       }}>
         SQUAD
       </h1>
@@ -1450,51 +1465,109 @@ useEffect(() => {
 
     {/* نمایش سکه‌های نارنجی */}
     <div style={{
-      display: "flex",
-      alignItems: "center",
-      gap: "10px",
-      background: "rgba(0, 0, 0, 0.75)",
-      padding: "10px 25px",
-      borderRadius: "25px",
-      border: "1px solid rgba(255, 165, 0, 0.5)", 
-      marginBottom: "40px",
-      backdropFilter: "blur(10px)",
+      display: "flex", alignItems: "center", gap: "10px",
+      background: "rgba(0, 0, 0, 0.75)", padding: "5px 20px",
+      borderRadius: "25px", border: "1px solid rgba(255, 165, 0, 0.5)", 
+      marginBottom: "20px", backdropFilter: "blur(10px)",
       boxShadow: "0 4px 15px rgba(255, 165, 0, 0.2)"
     }}>
       <img src="/currency-t.png" style={{ width: "24px", height: "24px" }} alt="Orange Coin" />
       <span style={{ 
-        color: "#ffa500", 
-        fontSize: "24px", 
-        fontWeight: "900",
+        color: "#ffa500", fontSize: "24px", fontWeight: "900",
         textShadow: "0 0 10px rgba(255, 165, 0, 0.5)" 
       }}>
         {orangeCoins?.toLocaleString() || 0}
       </span>
     </div>
 
-    {/* محتوای صفحه اسکواد */}
-    <div style={{ 
-      width: "100%", 
-      maxWidth: "400px", 
-      textAlign: "center",
-      background: "rgba(255,255,255,0.05)",
-      padding: "30px 20px",
-      borderRadius: "20px",
-      border: "1px solid rgba(255,255,255,0.1)",
-      backdropFilter: "blur(5px)"
+    {/* بخش جوایز دعوت - عریض شده */}
+<div style={{ 
+  width: "100%", // عرض کامل
+  background: "rgba(255, 255, 255, 0.05)", 
+  backdropFilter: "blur(15px)", 
+  WebkitBackdropFilter: "blur(15px)",
+  borderRadius: "20px", 
+  padding: "20px 15px", // پدینگ داخلی کمتر برای فضای بیشتر
+  border: "1px solid rgba(255, 255, 255, 0.1)", 
+  marginBottom: "20px" 
+}}>
+  {/* ردیف‌های جوایز */}
+  {[
+    { friends: "1 Friend", reward: "10,000" },
+    { friends: "2 Friends", reward: "30,000" },
+    { friends: "3 Friends", reward: "50,000" }
+  ].map((item, i) => (
+    <div key={i} style={{ 
+      display: "flex", 
+      justifyContent: "space-between", 
+      marginBottom: "12px", 
+      alignItems: "center",
+      borderBottom: i !== 2 ? "1px solid rgba(255,255,255,0.05)" : "none", // خط جداکننده نازک
+      paddingBottom: "8px"
     }}>
-       <p style={{ color: "white", fontSize: "18px", fontWeight: "bold", margin: "0 0 10px 0" }}>
-         Join a Squad to play together!
-       </p>
-       <div style={{ width: "40px", height: "2px", background: "#ffa500", margin: "15px auto" }} />
-       <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "14px", lineHeight: "1.6" }}>
-         The Squad system is currently under development.<br/>
-         Stay tuned for epic team battles!
-       </p>
+      <span style={{ fontSize: "14px", fontWeight: "500" }}>Invite {item.friends}</span>
+      <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+        <span style={{ fontWeight: "bold", color: "#f3ba2f" }}>{item.reward}</span>
+        <img src="/orange-coin.png" style={{ width: "16px" }} alt="coin" />
+      </div>
+    </div>
+  ))}
+  
+  <button style={{ 
+    width: "100%", padding: "12px", borderRadius: "12px", border: "none", 
+    background: "#f3ba2f", color: "black", fontWeight: "900", fontSize: "15px", 
+    marginTop: "10px", boxShadow: "0 4px 15px rgba(243, 186, 47, 0.3)"
+  }}>
+    Invite More Friends
+  </button>
+</div>
+
+    {/* لیست دوستان */}
+    <div style={{ marginBottom: "20px" }}>
+      <h3 style={{ opacity: 0.7, fontSize: "14px", marginBottom: "10px" }}>Your Friends:</h3>
+      <div style={{ display: "flex", flexDirection: "column", gap: "5px" }}>
+        {[
+          { name: "Ali", score: "4200" },
+          { name: "Morteza", score: "2800" },
+          { name: "Yasmin", score: "1502" }
+        ].map((friend, i) => (
+          <div key={i} style={{ 
+            background: "rgba(255, 255, 255, 0.03)", padding: "12px 20px", 
+            borderRadius: "12px", display: "flex", justifyContent: "space-between" 
+          }}>
+            <span>{friend.name}</span>
+            <div style={{ display: "flex", alignItems: "center", gap: "5px" }}>
+              <span>{friend.score}</span>
+              <img src="/orange-coin.png" style={{ width: "14px" }} alt="coin" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+
+    {/* بخش دریافت سود (1%) */}
+    <div style={{ marginTop: "auto" }}>
+      <p style={{ textAlign: "center", fontSize: "12px", opacity: 0.6, marginBottom: "10px" }}>1% of friends try:</p>
+      <button 
+        onClick={() => {
+          const totalReward = 42 + 28 + 15; // مجموع 1 درصدها
+          setOrangeCoins(prev => prev + totalReward);
+          alert(`Success! ${totalReward} coins added to your balance.`);
+        }}
+        style={{ 
+          width: "100%", padding: "18px", borderRadius: "18px", border: "1px solid #f3ba2f", 
+          background: "rgba(243, 186, 47, 0.1)", color: "#f3ba2f", fontWeight: "900", 
+          display: "flex", justifyContent: "center", alignItems: "center", gap: "10px", cursor: "pointer"
+        }}
+      >
+        <span>Claim 85</span>
+        <img src="/orange-coin.png" style={{ width: "20px" }} alt="coin" />
+      </button>
     </div>
 
   </div>
-)} {/* پایان اسکواد */}
+)} 
+{/* پایان اسکواد */}
 {/* صفحه رنکینگ */}
 {activeTab === "Rank" && (
   <div style={{
@@ -1608,98 +1681,144 @@ useEffect(() => {
   </div>
 )} {/* پایان رنکینگ */}
 {/* صفحه استیت (State) - Unified System */}
-{activeTab === "State" && (
-  <div style={{
-    position: "fixed", 
-    top: 0, 
-    left: 0, 
-    width: "100%", 
-    height: "100%",
-    backgroundColor: "#16181d", 
-    zIndex: 2000, 
-    display: "flex", 
-    flexDirection: "column", 
-    alignItems: "center",
-    padding: "20px 20px 140px 20px",
-    boxSizing: "border-box", 
-    overflowY: "auto"
-  }}>
-    
-    {/* هدر صفحه استیت */}
+{activeTab === "Stats" && (
+ 
+ <div style={{ 
+  display: "flex",
+  flexDirection: "column",
+  color: "white",
+  // تغییرات برای فول‌اسکرین شدن:
+  width: "100vw", // ۱۰۰ درصد عرض پنجره
+  height: "100vh", // ۱۰۰ درصد ارتفاع پنجره
+  position: "fixed", // ثابت شدن در کل صفحه
+  top: 0,
+  left: 0,
+  zIndex: 100, // آمدن روی تمام المان‌های دیگر
+  
+  paddingLeft: "20px",
+  paddingRight: "20px",
+  paddingTop: "20px", 
+  paddingBottom: "120px",
+  overflowY: "auto",
+  
+  // لایه تیره و تصویر پس‌زمینه
+  backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('/states-back.jpg')`,
+  backgroundSize: "cover", 
+  backgroundPosition: "center",
+  backgroundRepeat: "no-repeat"
+}}>
+        {/* نوار بالایی: دکمه بازگشت و عنوان */}
     <div style={{ 
-      width: "100%", 
-      display: "flex", 
-      alignItems: "center", 
-      justifyContent: "space-between", 
-      marginBottom: "30px",
-      marginTop: "10px"
+      width: "100%", display: "flex", alignItems: "center", 
+      justifyContent: "center", position: "relative",  marginBottom: "30px"
     }}>
       <button 
-        onClick={() => setActiveTab("Boost")} // بازگشت به صفحه بوست
-        style={{ background: "none", border: "none", cursor: "pointer", padding: "10px" }}
+        onClick={() => setActiveTab("Boost")} 
+        style={{ 
+          background: "none", border: "none", cursor: "pointer", 
+          position: "absolute", left: "0px",  padding: "10px"
+        }}
       >
         <img src="/back-butt.png" style={{ width: "7px" }} alt="Back" />
       </button>
-      <h1 style={{ color: "white", fontSize: "24px", fontWeight: "900", margin: 0, flex: 1, textAlign: "center", marginRight: "30px", letterSpacing: "1px" }}>
+      
+      <h1 style={{ 
+        fontSize: "22px", fontWeight: "900",  margin: 0, 
+        textShadow: "0 2px 10px rgba(0,0,0,0.5)" 
+      }}>
         STATISTICS
       </h1>
     </div>
 
-    {/* کارت‌های اطلاعاتی */}
+    {/* ۱. منوی سازندگان */}
     <div style={{ 
-      width: "100%", 
-      maxWidth: "400px", 
-      display: "grid", 
-      gridTemplateColumns: "1fr 1fr", 
-      gap: "15px" 
-    }}>
-      {[
-        { label: "Total Taps", value: "1.2M", color: "#ffffff" },
-        { label: "Fights Won", value: "42", color: "#2ecc71" },
-        { label: "Friends Invited", value: "12", color: "#f1c40f" },
-        { label: "Daily Streak", value: "5 Days", color: "#e74c3c" }
-      ].map((stat, index) => (
-        <div 
-          key={index}
-          style={{
-            backgroundColor: "rgba(255, 255, 255, 0.05)",
-            padding: "20px 15px",
-            borderRadius: "15px",
-            border: "1px solid rgba(255, 255, 255, 0.1)",
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            gap: "5px"
-          }}
-        >
-          <span style={{ color: "#888", fontSize: "12px", fontWeight: "bold", textAlign: "center" }}>{stat.label}</span>
-          <span style={{ color: stat.color, fontSize: "20px", fontWeight: "900" }}>{stat.value}</span>
+  background: "rgba(255, 255, 255, 0.05)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", borderRadius: "15px", 
+  border: "1px solid rgba(255, 255, 255, 0.1)", overflow: "hidden", marginBottom: "10px"
+}}>
+      <div 
+        onClick={() => setActiveStatsSection(activeStatsSection === "creators" ? null : "creators")}
+        style={{ padding: "14px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+      >
+        <span style={{ fontWeight: "bold", fontSize: "16px" }}>🛠 Creators</span>
+        <span style={{ fontSize: "12px", opacity: 0.5 }}>{activeStatsSection === "creators" ? "▲" : "▼"}</span>
+      </div>
+      {activeStatsSection === "creators" && (
+        <div style={{ padding: "20px", borderTop: "1px solid rgba(255,255,255,0.1)", backgroundColor: "rgba(0,0,0,0.2)", fontSize: "14px", lineHeight: "1.6" }}>
+          This project is developed by <b>Ninja Team</b>. We are dedicated to building the best TWA experience.
+          <br/><br/>
+          <i style={{ opacity: 0.7 }}>متن جایگزین برای بخش سازندگان در اینجا قرار می‌گیرد.</i>
         </div>
-      ))}
+      )}
     </div>
 
-    {/* بخش اضافی برای جزئیات بیشتر (اختیاری) */}
-    <div style={{
-      width: "100%",
-      maxWidth: "400px",
-      marginTop: "20px",
-      backgroundColor: "rgba(255, 255, 255, 0.03)",
-      borderRadius: "15px",
-      padding: "15px",
-      border: "1px solid rgba(255, 255, 255, 0.05)"
-    }}>
-       <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "10px" }}>
-          <span style={{ color: "#aaa", fontSize: "14px" }}>Account Age</span>
-          <span style={{ color: "white", fontSize: "14px", fontWeight: "bold" }}>14 Days</span>
-       </div>
-       <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <span style={{ color: "#aaa", fontSize: "14px" }}>Ninja Rank</span>
-          <span style={{ color: "#ffd700", fontSize: "14px", fontWeight: "bold" }}>Gold Warrior</span>
-       </div>
+    {/* ۲. منوی آمار عددی */}
+    <div style={{ 
+  background: "rgba(255, 255, 255, 0.05)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", borderRadius: "15px", 
+  border: "1px solid rgba(255, 255, 255, 0.1)", overflow: "hidden", marginBottom: "10px"
+}}>
+      <div 
+        onClick={() => setActiveStatsSection(activeStatsSection === "data" ? null : "data")}
+        style={{ padding: "14px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+      >
+        <span style={{ fontWeight: "bold", fontSize: "16px" }}>📊 Game Stats</span>
+        <span style={{ fontSize: "12px", opacity: 0.5 }}>{activeStatsSection === "data" ? "▲" : "▼"}</span>
+      </div>
+      {activeStatsSection === "data" && (
+        <div style={{ padding: "15px", borderTop: "1px solid rgba(255,255,255,0.1)", display: "grid", gridTemplateColumns: "1fr 1fr", gap: "12px", backgroundColor: "rgba(0,0,0,0.2)" }}>
+          {[
+            { label: "Total Share", value: "45.2B" },
+            { label: "Total Touches", value: "892M" },
+            { label: "Total Players", value: "1.2M" },
+            { label: "Daily Users", value: "150K" }
+          ].map((stat, i) => (
+            <div key={i} style={{ background: "rgba(255,255,255,0.03)", padding: "12px", borderRadius: "12px", border: "1px solid rgba(255,255,255,0.05)", textAlign: "center" }}>
+              <div style={{ fontSize: "10px", opacity: 0.5, marginBottom: "4px", textTransform: "uppercase" }}>{stat.label}</div>
+              <div style={{ fontSize: "18px", fontWeight: "900", color: "#0098ea" }}>{stat.value}</div>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
 
+    {/* ۳. منوی رودمپ */}
+    <div style={{ 
+  background: "rgba(255, 255, 255, 0.05)", backdropFilter: "blur(10px)", WebkitBackdropFilter: "blur(10px)", borderRadius: "15px", 
+  border: "1px solid rgba(255, 255, 255, 0.1)", overflow: "hidden", marginBottom: "10px"
+}}>
+      <div 
+        onClick={() => setActiveStatsSection(activeStatsSection === "roadmap" ? null : "roadmap")}
+        style={{ padding: "14px", cursor: "pointer", display: "flex", justifyContent: "space-between", alignItems: "center" }}
+      >
+        <span style={{ fontWeight: "bold", fontSize: "16px" }}>🗺 Roadmap</span>
+        <span style={{ fontSize: "12px", opacity: 0.5 }}>{activeStatsSection === "roadmap" ? "▲" : "▼"}</span>
+      </div>
+      {activeStatsSection === "roadmap" && (
+        <div style={{ padding: "20px", borderTop: "1px solid rgba(255,255,255,0.1)", backgroundColor: "rgba(0,0,0,0.2)" }}>
+           <div style={{ display: "flex", flexDirection: "column", gap: "20px" }}>
+              {[
+                { phase: "Phase 1", title: "Global Launch", status: "Completed", color: "#0098ea" },
+                { phase: "Phase 2", title: "Staking & Farming", status: "Ongoing", color: "#f3ba2f" },
+                { phase: "Phase 3", title: "CEX Listing", status: "Planned", color: "#888" }
+              ].map((step, idx) => (
+                <div key={idx} style={{ display: "flex", gap: "15px" }}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                    <div style={{ width: "12px", height: "12px", borderRadius: "50%", background: step.color, border: "2px solid white" }} />
+                    {idx !== 2 && <div style={{ width: "2px", flex: 1, background: "rgba(255,255,255,0.1)", margin: "4px 0" }} />}
+                  </div>
+                  <div style={{ paddingBottom: "10px" }}>
+                    <div style={{ fontSize: "12px", color: step.color, fontWeight: "bold" }}>{step.phase}</div>
+                    <div style={{ fontSize: "15px", fontWeight: "bold" }}>{step.title}</div>
+                    <div style={{ fontSize: "11px", opacity: 0.5 }}>{step.status}</div>
+                  </div>
+                </div>
+              ))}
+           </div>
+        </div>
+      )}
+    </div>
   </div>
-)} {/* پایان استیت */}
+)}
+ {/* پایان استیت */}
      
         
           </motion.div>
