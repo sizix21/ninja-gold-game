@@ -768,7 +768,8 @@ useEffect(() => {
        maxWidth: "400px", 
        display: "flex", 
        flexDirection: "column",
-       marginTop: "50px"
+       marginTop: "50px",
+       pointerEvents: "none"
        
        }}>
       <FightButton text="INVITE A FRIEND TO FIGHT" color="#4a6fa5" textColor="#f0db4f" />
@@ -1156,7 +1157,22 @@ useEffect(() => {
         <img src="/back-butt.png" style={{ width: "7px" }} alt="Back" />
       </button>
     </div>
-
+        <h1 style={{ 
+  position: "absolute",
+  top: "40px",
+  left: 0,
+  right: 0,
+  color: "white", 
+  fontSize: "24px",
+  fontWeight: "900", 
+  textAlign: "center", 
+  textShadow: "0 4px 15px rgba(0,0,0,0.8)",
+  letterSpacing: "2px",
+  zIndex: 10,
+  pointerEvents: "none"
+}}>
+  SPIN WHEEL
+</h1>
     {/* محتوای گردونه */}
     <div style={{ position: "relative", width: "280px", height: "280px", display: "flex", justifyContent: "center", alignItems: "center" }}>
       
