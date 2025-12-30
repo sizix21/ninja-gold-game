@@ -549,7 +549,8 @@ useEffect(() => {
               display: "flex", 
               flexDirection: "column", 
               width: "100%",
-              touchAction: "none" 
+              touchAction: "none",
+              x: 0
             }}
           >
 {/* Tap Tab تپ*/}
