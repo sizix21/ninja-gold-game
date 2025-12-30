@@ -539,6 +539,7 @@ useEffect(() => {
             dragConstraints={{ left: 0, right: 0 }}
             dragElastic={0}
             dragMomentum={false} 
+            dragDirectionLock
             onDragEnd={(e, info) => {
               const threshold = 60; 
               if (info.offset.x < -threshold) handleSwipe("left");
